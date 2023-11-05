@@ -9,9 +9,9 @@
     <h2 class="text-center text-primary">
         <i class="fab fa-facebook-messenger"></i>&nbsp;Messenger
     </h2>
-
+    <div data-username="@userName" id="current-user-username" hidden></div>
     <div class="row">
-        <div class="col-md-12" id="chat">
+        <div class="row" id="chat">
             @if (Model != null)
             {
                 @foreach (var message in Model.OrderBy(m => m.TimeSent))
@@ -23,7 +23,7 @@
                         timePosition = "time-right text-light";
                         textAlign = "text-right text-white";
                         contcolor = "bg-primary";
-                        offset = "col-md-6 offset-md-6";
+                        offset = "col-md-6 offset-md-6 row";
                     }
                     else
                     {
@@ -34,9 +34,7 @@
                         offset = "";
                     }
 
-                   <partial name="_MessagePartialView" model="@message"/>
-
-                    <div class="row">
+                    <div class="row pt-1">
                         <div class="@offset">
                             <div class="@containterClass @contcolor">
                                 <p class="sender @textAlign">@message.Username</p>
@@ -48,22 +46,22 @@
                 }
             }
         </div>
-        <div class="col-md-12">
-            <form asp-action="Create"
-                  data-ajax-begin="clearInputField" data-ajax-complete=""
-                  data-ajax-failure="alert('Fail')" data-ajax-success="sendMessage"
-                  data-ajax="true" data-ajax-method="POST">
-                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+        <div class="row pt-4 pb-4">
+            <div class="col-9">
                 <div class="form-group">
                     <input name="Text" class="form-control" id="messageText" />
                 </div>
+            </div>
+            <div class="col-3">
                 <div class="form-group">
-                    <input type="submit" value="Send" id="submitButton" class="btn btn-outline-primary btn-block" />
+                    <input value="Send" id="submitButton" class="btn text-white btn-outline-primary btn-block btn-dark" />
                 </div>
-                <input type="hidden" value="@userName" name="username" />
-            </form>
+            </div>
+            <input type="hidden" value="@userName" name="username" id="username" />
         </div>
     </div>
+    <ul id="messagesList">
+    </ul>
 </div>
 @if (User.Identity.IsAuthenticated)
 {
@@ -74,21 +72,6 @@
 }
 
 @section scripts{
-    <script src="~/signalr/signalr.min.js"></script>
-    <script src="~/lib/jquery/dist/jquery.unobtrusive-ajax.min.js"></script>
+    <script src="~/js/signalr/dist/browser/signalr.js"></script>
     <script src="~/js/chat.js"></script>
-    <script src="~/js/signalrReqHandler.js"></script>
 }
-
-@*<script>
-    $('#add-element-form').submit(function (event) {
-        // Prevent the form from submitting and navigating to a new page
-        event.preventDefault();
-
-        // Send an AJAX request to the controller to add the element
-        $.post($(this).attr('action'), $(this).serialize(), function (result) {
-            // Replace the content of the elements list container with the updated partial view
-            $('#elements-list-container').html(result);
-        });
-    });
-</script>*@

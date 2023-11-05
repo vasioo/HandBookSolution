@@ -45,13 +45,13 @@ namespace Messenger
             app.UseAuthorization();
 
 
-            app.MapHub<ChatHub>("Messages/Index");
+            
 
             app.MapControllerRoute(
                 name: "default",
                 pattern: "{controller=Messages}/{action=Index}/{id?}");
             app.MapRazorPages();
-
+            app.MapHub<ChatHub>("/chatHub");
             app.Run();
         }
     }

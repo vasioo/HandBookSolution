@@ -8,25 +8,97 @@
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/HandBook.Web.styles.css" asp-append-version="true" />
 </head>
+<style>
+    .sidebar {
+        position: fixed;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        padding: 58px 0 0; /* Height of navbar */
+        box-shadow: 0 2px 5px 0 rgb(0 0 0 / 5%), 0 2px 10px 0 rgb(0 0 0 / 5%);
+        width: 240px;
+        z-index: 600;
+    }
+
+        .sidebar .active {
+            border-radius: 5px;
+            box-shadow: 0 2px 5px 0 rgb(0 0 0 / 16%), 0 2px 10px 0 rgb(0 0 0 / 12%);
+        }
+
+    .sidebar-sticky {
+        position: relative;
+        top: 0;
+        height: calc(100vh - 48px);
+        padding-top: 0.5rem;
+        overflow-x: hidden;
+        overflow-y: auto; /* Scrollable contents if viewport is shorter than content. */
+    }
+
+    nav {
+        background-color: #EDE6D6;
+    }
+
+    body {
+        background-color: #F5F5F4;
+    }
+
+
+    #signingUp {
+        //TODO: make the button for signing up
+    }
+
+    #navbarAttributes a {
+        font-size: 24px;
+        color: black;
+    }
+
+    .list-group.icon {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .list-group.label {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .list-group-item {
+        display: flex;
+        align-items: center;
+    }
+
+        .list-group-item .icon {
+            margin-right: 5px;
+        }
+
+    .active {
+        /* Define the styling for the active link */
+        font-weight: bold;
+        color: blue /* Change the color to your desired highlight color */
+    }
+
+</style>
 <body>
     <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
-            <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">HandBook.Web</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-                        </li>
-                    </ul>
-                    <partial name="_LoginPartial" />
+        <nav class="collapse d-lg-block sidebar collapse bg-white">
+            <div class="position-sticky" id="navbarAttributes">
+                <div class="list-group list-group-flush mx-3 mt-4">
+                    <a class="list-group-item list-group-item-action py-2 ripple" asp-area="" asp-controller="Home" asp-action="Index">
+                        <span class="icon"><i class="fas fa-home"></i></span>
+                        <span class="label">Home</span>
+                    </a>
+                    <a class="list-group-item list-group-item-action py-2 ripple" asp-area="" asp-controller="Home" asp-action="Notifications">
+                        <span class="icon"><i class="fa-solid fa-bell"></i></span>
+                        <span class="label">Notifications</span>
+                    </a>
+                    <a class="list-group-item list-group-item-action py-2 ripple" href="http://localhost:5090">
+                        <span class="icon"><i class="fa-solid fa-comments"></i></span>
+                        <span class="label">Messenger</span>
+                    </a>
+                    <a class="list-group-item list-group-item-action py-2 ripple" asp-area="Identity" asp-page="/Account/Register">
+                        <span class="icon"><i class="fa-solid fa-user-lock"></i></span>
+                        <span class="label">Sign up</span>
+                    </a>
                 </div>
             </div>
         </nav>
