@@ -18,8 +18,19 @@ namespace Messenger
                 options.UseSqlServer(connectionString));
             builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
-            builder.Services.AddDefaultIdentity<AppUser>(options => options.SignIn.RequireConfirmedAccount = true)
-                .AddEntityFrameworkStores<MessengerDbContext>();
+            builder.Services.AddDefaultIdentity<AppUser>(
+                options =>
+                {
+                    options.SignIn.RequireConfirmedAccount = false;
+                    options.Password.RequireDigit = false;
+                    options.Password.RequireLowercase = false;
+                    options.Password.RequireNonAlphanumeric = false;
+                    options.Password.RequireUppercase = false;
+                })
+                   .AddRoles<IdentityRole>()
+                   .AddEntityFrameworkStores<MessengerDbContext>()
+                   .AddDefaultTokenProviders()
+                   .AddDefaultUI();
             builder.Services.AddControllersWithViews();
             builder.Services.AddSignalR();
             var app = builder.Build();

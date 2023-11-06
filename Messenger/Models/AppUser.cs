@@ -6,9 +6,9 @@ namespace Messenger.Models
     {
         public AppUser()
         {
-            Messages = new HashSet<Message>();
+            Messages = new List<Messages>();
         }
 
-        public virtual ICollection<Message> Messages { get; set; }
+        public virtual ICollection<Messages> Messages { get; set; }
     }
 }

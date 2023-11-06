@@ -12,25 +12,29 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Messenger.Data.Migrations
 {
     [DbContext(typeof(MessengerDbContext))]
-    [Migration("20230515195312_fixNotif")]
-    partial class fixNotif
+    [Migration("20231106193625_newnewafacewdwdvx")]
+    partial class newnewafacewdwdvx
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "6.0.10")
+                .HasAnnotation("ProductVersion", "6.0.23")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder, 1L, 1);
 
-            modelBuilder.Entity("Messenger.Models.Message", b =>
+            modelBuilder.Entity("Messenger.Models.Messages", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+
+                    b.Property<string>("ReceiverId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Text")
                         .IsRequired()
@@ -51,7 +55,7 @@ namespace Messenger.Data.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Message");
+                    b.ToTable("Messages");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -269,7 +273,7 @@ namespace Messenger.Data.Migrations
                     b.HasDiscriminator().HasValue("AppUser");
                 });
 
-            modelBuilder.Entity("Messenger.Models.Message", b =>
+            modelBuilder.Entity("Messenger.Models.Messages", b =>
                 {
                     b.HasOne("Messenger.Models.AppUser", "Sender")
                         .WithMany("Messages")

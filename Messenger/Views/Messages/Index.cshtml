@@ -1,45 +1,73 @@
-﻿@model IEnumerable<Messenger.Models.Message>
+﻿@model IEnumerable<Messenger.Models.Messages>
 
 @{
     ViewData["Title"] = "Home Page";
     var userName = User.Identity.Name;
 }
 
-<div class="jumbotron bg-light">
-    <h2 class="text-center text-primary">
-        <i class="fab fa-facebook-messenger"></i>&nbsp;Messenger
-    </h2>
+<style>
+    .message-container {
+        border-radius:  10px;
+        padding:6px 10px;
+        margin: 6px 10px;
+    }
+
+    .message-sender {
+        background-color: #e5e5e5;
+        border: 1.5px solid #ccc;
+    }
+
+    .message-receiver {
+        background-color: lightgray;
+        border: 1px solid gray;
+    }
+
+    #mainChatContainer{
+        margin: 0px 20px !important;
+        padding: 0px 20px !important;
+    }
+
+    #chat{
+        margin: 0px 0px !important;
+        padding: 0px 0px !important;
+    }
+</style>
+
+<div class="bg-light vh-100 row align-items-end" id="content">
     <div data-username="@userName" id="current-user-username" hidden></div>
-    <div class="row">
+    <div data-targetusername="" id="target-user-username" hidden></div>
+    <div class="row" id="mainChatContainer">
         <div class="row" id="chat">
             @if (Model != null)
             {
                 @foreach (var message in Model.OrderBy(m => m.TimeSent))
                 {
-                    string containterClass, timePosition, textAlign, contcolor, offset = "";
+                    string containterClass, timePosition, textAlign, contcolor="", offset = "", additionalRowSetting = "";
                     if (userName == message.Username)
                     {
-                        containterClass = "container darker";
+                        containterClass = "message-sender";
                         timePosition = "time-right text-light";
-                        textAlign = "text-right text-white";
+                        textAlign = "text-right text-white mb-1 mt-1";
                         contcolor = "bg-primary";
-                        offset = "col-md-6 offset-md-6 row";
+                        offset = "col-md-7 row";
+                        additionalRowSetting = "d-flex justify-content-end";
                     }
                     else
                     {
-                        containterClass = "container";
+                        containterClass = "message-receiver";
                         timePosition = "time-left";
-                        textAlign = "text-left";
-                        contcolor = "bg-light";
-                        offset = "";
+                        textAlign = "text-left mb-1 mt-1";
+                        offset = "col-md-7 row";
                     }
 
-                    <div class="row pt-1">
-                        <div class="@offset">
-                            <div class="@containterClass @contcolor">
-                                <p class="sender @textAlign">@message.Username</p>
-                                <p class="@textAlign">@message.Text</p>
-                                <span class="@timePosition">@message.TimeSent.ToString("M/dd/yyyy hh:MM tt")</span>
+                    <div class="row @additionalRowSetting">
+                        <div class="@offset @additionalRowSetting">
+                            <div class="col-auto">
+                                <div class="message-container @containterClass @contcolor @message.Username">
+                                    <p class="sender @textAlign" hidden>@message.Username</p>
+                                    <p class="@textAlign">@message.Text</p>
+                                    <span class="@timePosition" hidden>@message.TimeSent.ToString("M/dd/yyyy hh:MM tt")</span>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -47,21 +75,20 @@
             }
         </div>
         <div class="row pt-4 pb-4">
-            <div class="col-9">
+            <div class="col-9  p-0 m-0">
                 <div class="form-group">
-                    <input name="Text" class="form-control" id="messageText" />
+                    <input name="Text" class="form-control" id="messageText" placeholder="Message..." />
                 </div>
             </div>
-            <div class="col-3">
+            <div class="col-3  p-0 m-0">
                 <div class="form-group">
-                    <input value="Send" id="submitButton" class="btn text-white btn-outline-primary btn-block btn-dark" />
+                    <input value="Send" id="submitButton" class="btn text-white btn-outline-primary btn-block w-100 btn-dark" />
                 </div>
             </div>
             <input type="hidden" value="@userName" name="username" id="username" />
+            <input type="hidden" value="4ea68000-5d23-47f3-918a-75707be31cd4" name="targetusername" id="targetusername" />
         </div>
     </div>
-    <ul id="messagesList">
-    </ul>
 </div>
 @if (User.Identity.IsAuthenticated)
 {

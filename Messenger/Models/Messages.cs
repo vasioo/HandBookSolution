@@ -2,7 +2,7 @@
 
 namespace Messenger.Models
 {
-    public class Message
+    public class Messages
     {
         public int Id { get; set; }
 
@@ -15,10 +15,12 @@ namespace Messenger.Models
         public DateTime TimeSent { get; set; }
 
         public string UserId { get; set; }
+        
+        public string ReceiverId { get; set; }
 
         public virtual AppUser Sender { get; set; }
 
-        public Message()
+        public Messages()
         {
             TimeSent = DateTime.Now;
         }

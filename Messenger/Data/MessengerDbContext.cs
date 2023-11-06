@@ -15,7 +15,7 @@ namespace Messenger.Data
         {
 
             base.OnModelCreating(builder);
-            builder.Entity<Message>()
+            builder.Entity<Messages>()
                 .HasOne<AppUser>(au => au.Sender)
                 .WithMany(d => d.Messages)
                 .HasForeignKey(d => d.UserId);
@@ -28,6 +28,6 @@ namespace Messenger.Data
 
         }
 
-        public DbSet<Message> Message{ get; set; }
+        public DbSet<Messages> Messages{ get; set; }
     }
 }

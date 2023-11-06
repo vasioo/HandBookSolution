@@ -23,21 +23,21 @@ namespace Messenger.Hubs
             _userManager = userManager;
         }
 
-        public async Task SendMessage(string user,string message)
+        public async Task SendMessage(string user,string message,string targetUser)
         {
             await Clients.All.SendAsync("receiveMessage",user, message);
             AppUser appuser = await _userManager.FindByNameAsync(user);
-            var chatMessage = new Message
+            var chatMessage = new Messages
             {
                 UserId = appuser.Id,
                 Text = message,
                 TimeSent = DateTime.Now,
-                Username= user,
+                Username = user,
+                ReceiverId = targetUser
             };
 
-            await _context.Message.AddAsync(chatMessage);
+            await _context.Messages.AddAsync(chatMessage);
             await _context.SaveChangesAsync();
-            Console.Read();
         }
     }
 }

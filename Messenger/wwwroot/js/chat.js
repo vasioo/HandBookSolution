@@ -13,25 +13,31 @@ connection.on("ReceiveMessage", function (user, message) {
     var timePosition = "";
     var textAlign = "";
     var offset = "";
+    var additionalRowSetting = "";
+    var contcolor = "";
     if (user == currUsername) {
-        containterClass = "container darker bg-primary";
+        containterClass = "message-sender";
         timePosition = "time-right text-light";
-        textAlign = "text-right text-white";
-        offset = "col-md-6 offset-md-6 row";
+        textAlign = "text-right text-white mb-1 mt-1";
+        contcolor = "bg-primary";
+        offset = "col-md-7 row";
+        additionalRowSetting = "d-flex justify-content-end";
     }
     else {
-        containterClass = "container bg-light";
+        containterClass = "message-receiver";
         timePosition = "time-left";
-        textAlign = "text-left";
-        offset = "";
+        textAlign = "text-left mb-1 mt-1";
+        offset = "col-md-7 row";
     }
     var li =
-        '<div class="row pt-1">' +
-        '   <div class="' + offset + '" >' +
-        '       <div class="' + containterClass + '">' +
-        '           <p class="sender ' + textAlign + '">' + user + '</p>' +
-        '           <p class=" '+ textAlign + '">' + message + '</p>' +
-        '       </div>' +
+        '<div class="row '+additionalRowSetting+'">' +
+        '   <div class="' + offset + ' ' + additionalRowSetting + '" >' +
+        '       <div class="col-auto">'+
+        '           <div class="message-container ' + containterClass + ' ' + contcolor + '">' +
+        '               <p class="sender ' + textAlign + '" hidden>' + user + '</p>' +
+        '               <p class=" '+ textAlign + '">' + message + '</p>' +
+        '           </div>' +
+        '       </div >' +
         '   </div >' +
         '</div > ';
      document.getElementById("chat").innerHTML += li;
@@ -47,9 +53,15 @@ connection.start().then(function () {
 
 document.getElementById("submitButton").addEventListener("click", function (event) {
     var user = document.getElementById("username").value;
+    var targetUser = document.getElementById("targetusername").value;
     var message = document.getElementById("messageText").value;
-    connection.invoke("SendMessage", user, message).catch(function (err) {
+    document.getElementById("messageText").value = "";
+    connection.invoke("SendMessage", user, message,targetUser).catch(function (err) {
         return console.error(err.toString());
     });
     event.preventDefault();
+});
+
+$(document).ready(function () {
+    $('html, body').animate({ scrollTop: $('#content').height() }, 0);
 });

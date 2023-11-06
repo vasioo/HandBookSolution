@@ -31,17 +31,17 @@ namespace Messenger.Controllers
             {
                 ViewBag.CurrentUserName = currentUser.UserName;
             }
-            var messages = await _context.Message.ToListAsync();
+            var messages = await _context.Messages.ToListAsync();
             return View(messages);
         }
 
         [HttpPost]
-        public async Task Create(Message message)
+        public async Task Create(Messages message)
         {
             message.Username = User.Identity.Name;
             var sender = await _userManager.GetUserAsync(User);
             message.UserId = sender.Id;
-            await _context.Message.AddAsync(message);
+            await _context.Messages.AddAsync(message);
             await _context.SaveChangesAsync();
         }
 
