@@ -33,7 +33,7 @@ namespace Messenger.Hubs
                 Text = message,
                 TimeSent = DateTime.Now,
                 Username = user,
-                ReceiverId = targetUser
+                ReceiverId = targetUser,
             };
 
             await _context.Messages.AddAsync(chatMessage);

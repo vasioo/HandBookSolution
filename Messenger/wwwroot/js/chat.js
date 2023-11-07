@@ -54,12 +54,17 @@ connection.start().then(function () {
 document.getElementById("submitButton").addEventListener("click", function (event) {
     var user = document.getElementById("username").value;
     var targetUser = document.getElementById("targetusername").value;
-    var message = document.getElementById("messageText").value;
+    var message = document.getElementById("messageText");
+    if (!message.value || message.value.trim() === '') {
+        message.focus();
+    }
+    else {
+        connection.invoke("SendMessage", user, message, targetUser).catch(function (err) {
+            return console.error(err.toString());
+        });
+        event.preventDefault();
+    }
     document.getElementById("messageText").value = "";
-    connection.invoke("SendMessage", user, message,targetUser).catch(function (err) {
-        return console.error(err.toString());
-    });
-    event.preventDefault();
 });
 
 $(document).ready(function () {

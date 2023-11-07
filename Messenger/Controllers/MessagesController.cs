@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using ServiceStack;
 using System.Diagnostics;
 
 namespace Messenger.Controllers
@@ -24,15 +25,106 @@ namespace Messenger.Controllers
             _userManager = userManager;
         }
 
+        public List<string> GetUsersSentMessagesTo(string userId)
+        {
+            var receiverIds = _context.Messages
+                .Where(m => m.UserId == userId)
+                .Select(m => m.ReceiverId)
+                .Distinct()
+                .ToList();
+
+            var users = _context.Users
+                .Where(u => receiverIds.Contains(u.Id))
+                .Select(u => u.UserName)
+                .ToList();
+
+            return users;
+        }
+
+        public List<Messages> GetUnreadMessagesForUser(string userId)
+        {
+            var unreadMessages = _context.Messages
+                .Where(m => m.ReceiverId == userId && !m.IsRead)
+                .ToList();
+
+            return unreadMessages;
+        }
+
         public async Task<IActionResult> Index()
         {
-            var currentUser = await _userManager.GetUserAsync(User);
+            List<UserMassageDTO> userMsgDTOList = new List<UserMassageDTO>();
+            var sender = await _userManager.GetUserAsync(User);
+            var neededUsers = GetUsersSentMessagesTo(sender.Id);
+
+            foreach (var item in neededUsers)
+            {
+                UserMassageDTO userMsgDto = new UserMassageDTO();
+
+                userMsgDto.UserData = item;
+
+                var specUserNeeded = _context.Users.Where(u => u.UserName == item).FirstOrDefault();
+
+                if (specUserNeeded != null)
+                {
+                    var messages = GetUnreadMessagesForUser(specUserNeeded.Id);
+
+                    if (messages.Count == 1)
+                    {
+                        userMsgDto.Message = messages.FirstOrDefault().Text;
+                    }
+                    else if (messages.Count > 0)
+                    {
+                        int neededCountNumber = messages.Count();
+                        if (neededCountNumber > 4)
+                        {
+                            userMsgDto.Message = $"4+ unopened messages";
+                        }
+                        else
+                        {
+                            userMsgDto.Message = $"{messages.Count()} unopened messages";
+                        }
+                    }
+                    else
+                    {
+                        var lastMessage = _context.Messages
+               .Where(m => (m.UserId == sender.Id && m.ReceiverId == specUserNeeded.Id) || (m.UserId == specUserNeeded.Id && m.ReceiverId == sender.Id))
+               .OrderByDescending(m => m.TimeSent)
+               .FirstOrDefault();
+
+                        userMsgDto.Message = lastMessage.Text;
+
+                    }
+                }
+                userMsgDTOList.Add(userMsgDto);
+            }
+
+            return View(userMsgDTOList);
+        }
+
+        public async Task<IActionResult> Chat(string userName)
+        {
             if (User.Identity.IsAuthenticated)
             {
+                var currentUser = await _userManager.GetUserAsync(User);
+                var specUserNeeded = _context.Users.Where(u => u.UserName == userName).FirstOrDefault();
                 ViewBag.CurrentUserName = currentUser.UserName;
+
+                var otherUserId = specUserNeeded.Id;
+                var messages = await _context.Messages
+                    .Where(m => (m.UserId == currentUser.Id && m.ReceiverId == otherUserId) || (m.UserId == otherUserId && m.ReceiverId == currentUser.Id))
+                    .OrderBy(m => m.TimeSent)
+                    .ToListAsync();
+
+                foreach (var message in messages)
+                {
+                    message.IsRead = true;
+                }
+
+                await _context.SaveChangesAsync();
+
+                return View(messages);
             }
-            var messages = await _context.Messages.ToListAsync();
-            return View(messages);
+            return View(Index);
         }
 
         [HttpPost]

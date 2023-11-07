@@ -20,6 +20,8 @@ namespace Messenger.Models
 
         public virtual AppUser Sender { get; set; }
 
+        public bool IsRead { get; set; } = false;
+
         public Messages()
         {
             TimeSent = DateTime.Now;
