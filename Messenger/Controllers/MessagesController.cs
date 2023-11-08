@@ -41,12 +41,11 @@ namespace Messenger.Controllers
             return users;
         }
 
-        public List<Messages> GetUnreadMessagesForUser(string userId)
+        public List<Messages> GetUnreadMessagesForUser(string userId,string targetUserId)
         {
             var unreadMessages = _context.Messages
-                .Where(m => m.ReceiverId == userId && !m.IsRead)
+                .Where(m => m.ReceiverId == userId && m.UserId == targetUserId && !m.IsRead)
                 .ToList();
-
             return unreadMessages;
         }
 
@@ -66,7 +65,7 @@ namespace Messenger.Controllers
 
                 if (specUserNeeded != null)
                 {
-                    var messages = GetUnreadMessagesForUser(specUserNeeded.Id);
+                    var messages = GetUnreadMessagesForUser(sender.Id,specUserNeeded.Id);
 
                     if (messages.Count == 1)
                     {
@@ -115,10 +114,6 @@ namespace Messenger.Controllers
                     .OrderBy(m => m.TimeSent)
                     .ToListAsync();
 
-                foreach (var message in messages)
-                {
-                    message.IsRead = true;
-                }
 
                 await _context.SaveChangesAsync();
 

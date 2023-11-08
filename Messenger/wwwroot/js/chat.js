@@ -7,7 +7,7 @@ document.getElementById("submitButton").disabled = true;
 var currUserDiv = document.getElementById("current-user-username");
 var currUsername = currUserDiv.getAttribute("data-username");
 
-connection.on("ReceiveMessage", function (user, message) {
+connection.on("ReceiveMessage", async function (user, message,shouldRead) {
 
     var containterClass = "";
     var timePosition = "";
@@ -40,7 +40,13 @@ connection.on("ReceiveMessage", function (user, message) {
         '       </div >' +
         '   </div >' +
         '</div > ';
-     document.getElementById("chat").innerHTML += li;
+    document.getElementById("chat").innerHTML += li;
+    var targetUser = document.getElementById("targetusername").value;
+    if (shouldRead) {
+        await connection.invoke("MarkAsRead", user, targetUser).catch(function (err) {
+            return console.error(err.toString());
+        });
+    }
 });
 
 
@@ -59,7 +65,7 @@ document.getElementById("submitButton").addEventListener("click", function (even
         message.focus();
     }
     else {
-        connection.invoke("SendMessage", user, message, targetUser).catch(function (err) {
+        connection.invoke("SendMessage", user, message.value, targetUser).catch(function (err) {
             return console.error(err.toString());
         });
         event.preventDefault();
