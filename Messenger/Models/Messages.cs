@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Messenger.Models
 {
@@ -14,11 +15,9 @@ namespace Messenger.Models
 
         public DateTime TimeSent { get; set; }
 
-        public string UserId { get; set; }
+        public string SenderMessageId { get; set; }
         
-        public string ReceiverId { get; set; }
-
-        public virtual AppUser Sender { get; set; }
+        public string MessageReceiverId { get; set; }
 
         public bool IsRead { get; set; } = false;
 

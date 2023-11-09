@@ -1,0 +1,29 @@
+﻿@using HandBook.Models;
+@model Post
+<form method="post" enctype="multipart/form-data">
+    @*<div class="form-group">
+        <label asp-for="@Model.CreatorUserName"></label>
+        <input asp-for="@Model.CreatorUserName" class="form-control" required placeholder="What should the program return: ">
+        <span asp-validation-for="@Model.CreatorUserName" class="small text-danger"></span>
+    </div>*@
+
+   @* <div class="form-group">
+        <label asp-for="@Model.AmountOfLikes"></label>
+        <input asp-for="@Model.AmountOfLikes" class="form-control" required placeholder="What should the program return: ">
+        <span asp-validation-for="@Model.AmountOfLikes" class="small text-danger"></span>
+    </div>*@
+
+    <div class="form-group">
+        <label asp-for="@Model.image"></label>
+        <div class="custom-file">
+            <input asp-for="@Model.image" type="file" class="custom-file-input" accept=".jpg,.jpeg,.png,.gif" required>
+        </div>
+        <span asp-validation-for="@Model.image" class="small text-danger"></span>
+    </div>
+
+
+    <div class="text-center">
+        <input id="confirmationButton" class="btn btn-primary mt-3" type="submit" value="Save" />
+    </div>
+    @ViewBag.message
+</form>

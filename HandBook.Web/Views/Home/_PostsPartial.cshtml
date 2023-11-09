@@ -1,0 +1,84 @@
+﻿@using HandBook.Models;
+@model Post
+
+<style>
+    #likeButton {
+        background-color: transparent;
+        border: none;
+        color: #555;
+        font-size: 16px;
+        line-height: 1;
+        padding: 0;
+        transition: color 0.2s ease-in-out;
+    }
+
+        #likeButton.liked {
+            color: #ff385c;
+        }
+
+        #likeButton i {
+            margin-right: 4px;
+        }
+
+        #likeButton span {
+            margin-left: 4px;
+        }
+
+    .image-container {
+        width: 450px;
+        height: 200px;
+        border: 1px solid #ccc;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .fit-image {
+        max-width: 100%;
+        max-height: 100%;
+    }
+</style>
+
+<div class="card" style="width: 470px; height: 500px;">
+    <div class="card-header">
+        <h5 class="card-title">&#64;@Model.CreatorUserName</h5>
+    </div>
+    <div class="card-body">
+        <div class="image-container">
+            @{
+                var base64Image = Convert.ToBase64String(Model.image);
+                ViewBag.ImageData = base64Image;
+
+                <img src="data:image;base64,@ViewBag.ImageData" alt="Image" class="fit-image">
+            }
+        </div>
+
+        <br />
+        <br />
+        <i class="fa fa-heart-o heart-icon-bottom"></i>
+        <p class="card-text">Saved: @Model.Saved</p>
+        <i class="fa fa-heart-o heart-icon-bottom"></i>
+        <p class="card-text">Time: @Model.Time.ToShortDateString()</p>
+        <div class="text-end">
+            <button id="likeButton" onclick="like(this,@Model.Id)" data-count="@Model.AmountOfLikes">
+                @if (Model.IsLiked)
+                {
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-heart-fill" viewBox="0 0 16 16">
+                        <path fill-rule="evenodd" d="M8 1.314C12.438-3.248 23.534 4.735 8 15-7.534 4.736 3.562-3.248 8 1.314z" />
+                    </svg>
+                }
+                else
+                {
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-heart" viewBox="0 0 16 16">
+                        <path fill-rule="evenodd" d="M8 1.314C12.438-3.248 23.534 4.735 8 15-7.534 4.736 3.562-3.248 8 1.314z" />
+                    </svg>
+                }
+            </button>
+            <br>
+            <span class="likeCount" data-item-id="@Model.Id">@Model.AmountOfLikes</span>
+        </div>
+    </div>
+</div>
+
+
+<script src="https://kit.fontawesome.com/your-api-key.js" crossorigin="anonymous"></script>

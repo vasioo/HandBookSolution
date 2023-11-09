@@ -1,0 +1,14 @@
+﻿@using HandBook.Models;
+@model IEnumerable<Notification>
+
+@{
+    ViewData["Title"] = "Notifications";
+}
+
+<div class="col-md-12 col-lg-6 justify-content-center">
+    @foreach (var item in Model)
+    {
+        <partial name="_NotificationsPartial" model="@item" />
+    }
+
+</div>

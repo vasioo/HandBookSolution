@@ -1,8 +1,205 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+﻿@using HandBook.Models;
+@model IEnumerable<Post>
+
+@{
+    ViewData["Title"] = "Index";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-</div>
+<style>
+    .container {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        height: 100%;
+    }
+
+    .btn-circle {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        font-size: 24px;
+        position: fixed;
+        right: 20px;
+        bottom: 20px;
+        z-index: 9999;
+    }
+
+    #likeButton {
+        background-color: transparent;
+        border: none;
+        color: #555;
+        font-size: 16px;
+        line-height: 1;
+        padding: 0;
+        transition: color 0.2s ease-in-out;
+    }
+
+        #likeButton.liked {
+            color: #ff385c;
+        }
+
+        #likeButton i {
+            margin-right: 4px;
+        }
+
+        #likeButton span {
+            margin-left: 4px;
+        }
+
+    .image-container {
+        width: 450px;
+        height: 200px;
+        border: 1px solid #ccc;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .fit-image {
+        max-width: 100%;
+        max-height: 100%;
+    }
+</style>
+
+<body>
+    <div class="container">
+        <br />
+        <br />
+        <div class="row">
+            <div class="col-12">
+                @{
+                    var userLikedCards = ViewBag.UserLikedCards as List<int> ?? new List<int>();
+                }
+                @if (ViewBag.SelectedPost != null)
+                {
+                    <h3>Selected Post</h3>
+                    <div id="selectedPost">
+                        <partial name="_PostsPartial" model="@Model.Where(x=>x.Id==ViewBag.SelectedItem.Id)" />
+                    </div>
+                }
+                @if (Model != null)
+                {
+                    @foreach (var item in Model)
+                    {
+                        <div class="card" style="width: 470px; height: 500px;">
+                            <div class="card-header">
+                                <h5 class="card-title">&#64;@item.CreatorUserName</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="image-container">
+                                    @{
+                                        var base64Image = Convert.ToBase64String(item.image);
+                                        ViewBag.ImageData = base64Image;
+
+                                        <img src="data:image;base64,@ViewBag.ImageData" alt="Image" class="fit-image">
+                                    }
+                                </div>
+
+                                <br />
+                                <br />
+
+                                <p class="card-text">Saved: @item.Saved</p>
+                                <i class="fa fa-heart-o heart-icon-bottom"></i>
+                                <p class="card-text">Time: @item.Time.ToShortDateString()</p>
+                                <div class="text-end">
+                                    <button id="likeButton" onclick="like(this,@item.Id)" data-count="@item.AmountOfLikes">
+                                        @if (userLikedCards.Contains(item.Id))
+                                        {
+                                            <i class="fa-solid fa-heart" style="color: #ff0000;"></i>
+                                        }
+                                        else
+                                        {
+
+                                            <i class="fa-regular fa-heart" style="color: #000;"></i>
+                                        }
+                                    </button>
+                                    <br>
+                                    <span class="likeCount" data-item-id="@item.Id">@item.AmountOfLikes</span>
+                                </div>
+                            </div>
+                        </div>
+
+                    }
+                }
+            </div>
+        </div>
+    </div>
+
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col">
+                &nbsp;
+            </div>
+            <div class="col-auto">
+                <a class="btn btn-primary btn-circle" asp-area="" asp-controller="Home" asp-action="AddAPost">
+                    <i class="fas fa-plus"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+
+
+</body>
+
+<script>
+    function likeButtonClick(Id) {
+        $.ajax({
+            type: "POST",
+            url: "/Home/IncrementLikeCount",
+            data: { itemId: Id },
+            success: function (result) {
+                var likeCountElement = $('.likeCount[data-item-id="' + Id + '"]');
+                likeCountElement.text(result);
+            },
+            error: function (result) {
+                alert("Error: " + result.statusText);
+            }
+        });
+
+    }
+
+    function unlikeButtonClick(Id) {
+        $.ajax({
+            type: "POST",
+            url: "/Home/DecrementLikeCount",
+            data: { itemId: Id },
+            success: function (result) {
+                var likeCountElement = $('.likeCount[data-item-id="' + Id + '"]');
+                likeCountElement.text(result);
+            },
+            error: function (result) {
+                alert("Error: " + result.statusText);
+            }
+        });
+    }
+
+    function like(button, Id) {
+        var card = button.closest(".card");
+        var cardId = card.dataset.id;
+        var count = parseInt(button.dataset.count) || 0;
+        var likedCards = JSON.parse(sessionStorage.getItem("likedCards")) || {};
+        if (likedCards[cardId]) {
+            count--;
+            button.dataset.count = count;
+            button.classList.remove("liked");
+            button.innerHTML =
+                `<svg xmlns="http://www.w3.org/2000/svg"width="16" height="16" fill="currentColor" class="bi bi-heart" viewBox="0 0 16 16">
+                                                   <path fill-rule="evenodd" d="M8 1.314C12.438-3.248 23.534 4.735 8 15-7.534 4.736 3.562-3.248 8 1.314z"/>
+                                            </svg>`;
+            unlikeButtonClick(Id);
+            delete likedCards[cardId];
+        } else {
+            count++;
+            button.dataset.count = count;
+            button.classList.add("liked");
+            button.innerHTML = `
+                                      <svg xmlns="http://www.w3.org/2000/svg"width="16" height="16" fill="currentColor" class="bi bi-heart-fill" viewBox="0 0 16 16">
+                                        <path fill-rule="evenodd"d="M8 1.314C12.438-3.248 23.534 4.735 8 15-7.534 4.736 3.562-3.248 8 1.314z"/>
+                                      </svg>`;
+            likeButtonClick(Id);
+            likedCards[cardId] = true;
+        }
+        sessionStorage.setItem("likedCards", JSON.stringify(likedCards));
+    }
+</script>

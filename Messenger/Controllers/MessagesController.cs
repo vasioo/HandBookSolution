@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Hosting;
 using ServiceStack;
 using System.Diagnostics;
 
@@ -27,9 +28,9 @@ namespace Messenger.Controllers
 
         public List<string> GetUsersSentMessagesTo(string userId)
         {
-            var receiverIds = _context.Messages
-                .Where(m => m.UserId == userId)
-                .Select(m => m.ReceiverId)
+            var receiverIds = _context.Messages.OrderByDescending(x=>x.TimeSent)
+                .Where(m => m.SenderMessageId == userId)
+                .Select(m => m.MessageReceiverId)
                 .Distinct()
                 .ToList();
 
@@ -44,13 +45,18 @@ namespace Messenger.Controllers
         public List<Messages> GetUnreadMessagesForUser(string userId,string targetUserId)
         {
             var unreadMessages = _context.Messages
-                .Where(m => m.ReceiverId == userId && m.UserId == targetUserId && !m.IsRead)
+                .Where(m => m.MessageReceiverId == userId && m.SenderMessageId == targetUserId && !m.IsRead)
                 .ToList();
             return unreadMessages;
         }
 
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(int currentPage)
         {
+            if (currentPage<=0)
+            {
+                currentPage = 1;
+            }
+
             List<UserMassageDTO> userMsgDTOList = new List<UserMassageDTO>();
             var sender = await _userManager.GetUserAsync(User);
             var neededUsers = GetUsersSentMessagesTo(sender.Id);
@@ -86,7 +92,7 @@ namespace Messenger.Controllers
                     else
                     {
                         var lastMessage = _context.Messages
-               .Where(m => (m.UserId == sender.Id && m.ReceiverId == specUserNeeded.Id) || (m.UserId == specUserNeeded.Id && m.ReceiverId == sender.Id))
+               .Where(m => (m.SenderMessageId == sender.Id && m.MessageReceiverId == specUserNeeded.Id) || (m.SenderMessageId == specUserNeeded.Id && m.MessageReceiverId == sender.Id))
                .OrderByDescending(m => m.TimeSent)
                .FirstOrDefault();
 
@@ -97,11 +103,15 @@ namespace Messenger.Controllers
                 userMsgDTOList.Add(userMsgDto);
             }
 
-            return View(userMsgDTOList);
+            return View(userMsgDTOList.Take(20).Skip((currentPage-1)*20));
         }
 
-        public async Task<IActionResult> Chat(string userName)
+        public async Task<IActionResult> Chat(int currentPage,string userName)
         {
+            if (currentPage <= 0)
+            {
+                currentPage = 1;
+            }
             if (User.Identity.IsAuthenticated)
             {
                 var currentUser = await _userManager.GetUserAsync(User);
@@ -110,14 +120,14 @@ namespace Messenger.Controllers
 
                 var otherUserId = specUserNeeded.Id;
                 var messages = await _context.Messages
-                    .Where(m => (m.UserId == currentUser.Id && m.ReceiverId == otherUserId) || (m.UserId == otherUserId && m.ReceiverId == currentUser.Id))
+                    .Where(m => (m.SenderMessageId == currentUser.Id && m.MessageReceiverId == otherUserId) || (m.SenderMessageId == otherUserId && m.MessageReceiverId == currentUser.Id))
                     .OrderBy(m => m.TimeSent)
                     .ToListAsync();
 
 
                 await _context.SaveChangesAsync();
 
-                return View(messages);
+                return View( messages);
             }
             return View(Index);
         }
@@ -127,7 +137,7 @@ namespace Messenger.Controllers
         {
             message.Username = User.Identity.Name;
             var sender = await _userManager.GetUserAsync(User);
-            message.UserId = sender.Id;
+            message.SenderMessageId = sender.Id;
             await _context.Messages.AddAsync(message);
             await _context.SaveChangesAsync();
         }

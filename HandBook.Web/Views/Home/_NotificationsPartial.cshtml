@@ -1,0 +1,40 @@
+﻿@using HandBook.Models;
+@model Notification
+
+<div class="card w-60">
+    <div class="card-body">
+        <h5 class="card-title text-center">@Model.CreatorUserName added a new post</h5>
+        <p class="card-text text-left">@Model.Time</p>
+        <button id="myButton" onclick="sendDataToController(@Model.PostId)">View Post</button>
+        <div id="partialContainer"></div>
+    </div>
+</div>
+
+<script>
+
+    function sendDataToController(model) {
+        const url = '@Url.Action("DesiredPost", "Home")';
+
+        fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(model)
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('HTTP status ' + response.status);
+                }
+                return response.text();
+            })
+            .then(html => {
+                document.open();
+                document.write(html);
+                document.close();
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+    }
+</script>

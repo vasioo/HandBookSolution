@@ -31,11 +31,11 @@ namespace Messenger.Hubs
 
             var chatMessage = new Messages
             {
-                UserId = appuser.Id,
+                SenderMessageId = appuser.Id,
                 Text = message,
                 TimeSent = DateTime.Now,
                 Username = user,
-                ReceiverId = targetUser
+                MessageReceiverId = targetUser
             };
 
             await _context.Messages.AddAsync(chatMessage);
@@ -44,7 +44,7 @@ namespace Messenger.Hubs
 
         public async Task MarkAsRead(string user, string targetUser)
         {
-            _context.Messages.Where(m => m.Username == user && m.ReceiverId == targetUser).ForEachAsync(m => m.IsRead = true);
+            _context.Messages.Where(m => m.Username == user && m.MessageReceiverId == targetUser).ForEachAsync(m => m.IsRead = true);
             await _context.SaveChangesAsync();
         }
     }

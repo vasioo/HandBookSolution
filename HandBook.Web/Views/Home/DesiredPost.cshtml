@@ -1,0 +1,24 @@
+﻿@using HandBook.Models;
+@model Post
+
+@{
+    ViewData["Title"] = "DesiredPost";
+}
+<div>
+    <div>
+    <button id="myButton">"<-"</button>
+    </div>
+    <div>
+        @Html.Partial("_PostsPartial",Model);
+        @*<partial name= model="@Model" />*@
+    </div>
+</div>
+<script>
+    var button = document.getElementById('myButton');
+
+    // Add a click event listener to the button
+    button.addEventListener('click', function () {
+        // Change the location to the desired page
+        window.location.href = '@Url.Action("Notifications", "Home")';
+    });
+</script>

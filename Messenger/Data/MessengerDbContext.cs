@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+using System.Reflection.Emit;
 
 namespace Messenger.Data
 {
@@ -15,10 +16,6 @@ namespace Messenger.Data
         {
 
             base.OnModelCreating(builder);
-            builder.Entity<Messages>()
-                .HasOne<AppUser>(au => au.Sender)
-                .WithMany(d => d.Messages)
-                .HasForeignKey(d => d.UserId);
         }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
@@ -28,6 +25,6 @@ namespace Messenger.Data
 
         }
 
-        public DbSet<Messages> Messages{ get; set; }
+        public DbSet<Messages> Messages { get; set; }
     }
 }
