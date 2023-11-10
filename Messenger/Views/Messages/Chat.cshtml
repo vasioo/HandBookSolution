@@ -1,7 +1,7 @@
 ﻿@model IEnumerable<Messenger.Models.Messages>
 
 @{
-    var userName = User.Identity.Name;
+    var userName = User!.Identity!.Name!;
 }
 
 <style>

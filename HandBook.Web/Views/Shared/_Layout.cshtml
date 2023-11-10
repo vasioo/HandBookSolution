@@ -92,10 +92,22 @@
                         <span class="icon"><i class="fa-solid fa-comments"></i></span>
                         <span class="label">Messenger</span>
                     </a>
-                    <a class="list-group-item list-group-item-action py-2 ripple" asp-area="Identity" asp-page="/Account/Register">
-                        <span class="icon"><i class="fa-solid fa-user-lock"></i></span>
-                        <span class="label">Sign up</span>
-                    </a>
+                    @if (!User!.Identity!.IsAuthenticated)
+                    {
+                        <a class="list-group-item list-group-item-action py-2 ripple" asp-area="Identity" asp-page="/Account/Register">
+                            <span class="icon"><i class="fa-solid fa-user-lock"></i></span>
+                            <span class="label">Sign up</span>
+                        </a>
+                    }
+                    else
+                    {
+                        <a class="list-group-item list-group-item-action py-2 ripple" asp-area="Identity" asp-page="/Account/Manage/Index">
+                            <span class="icon">
+                                <i class="fa-solid fa-user-gear"></i>
+                            </span>
+                            <span class="label">Settings</span>
+                        </a>
+                    }
                 </div>
             </div>
         </nav>

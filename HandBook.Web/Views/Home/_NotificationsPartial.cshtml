@@ -3,7 +3,7 @@
 
 <div class="card w-60">
     <div class="card-body">
-        <h5 class="card-title text-center">@Model.CreatorUserName added a new post</h5>
+        <h5 class="card-title text-center">@Model.CreatorUserName @Model.MainText</h5>
         <p class="card-text text-left">@Model.Time</p>
         <button id="myButton" onclick="sendDataToController(@Model.PostId)">View Post</button>
         <div id="partialContainer"></div>

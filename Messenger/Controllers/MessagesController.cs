@@ -75,7 +75,7 @@ namespace Messenger.Controllers
 
                     if (messages.Count == 1)
                     {
-                        userMsgDto.Message = messages.FirstOrDefault().Text;
+                        userMsgDto.Message = messages!.FirstOrDefault()!.Text;
                     }
                     else if (messages.Count > 0)
                     {
@@ -96,7 +96,7 @@ namespace Messenger.Controllers
                .OrderByDescending(m => m.TimeSent)
                .FirstOrDefault();
 
-                        userMsgDto.Message = lastMessage.Text;
+                        userMsgDto.Message = lastMessage!.Text!;
 
                     }
                 }
@@ -112,13 +112,13 @@ namespace Messenger.Controllers
             {
                 currentPage = 1;
             }
-            if (User.Identity.IsAuthenticated)
+            if (User!.Identity!.IsAuthenticated)
             {
                 var currentUser = await _userManager.GetUserAsync(User);
                 var specUserNeeded = _context.Users.Where(u => u.UserName == userName).FirstOrDefault();
                 ViewBag.CurrentUserName = currentUser.UserName;
 
-                var otherUserId = specUserNeeded.Id;
+                var otherUserId = specUserNeeded!.Id;
                 var messages = await _context.Messages
                     .Where(m => (m.SenderMessageId == currentUser.Id && m.MessageReceiverId == otherUserId) || (m.SenderMessageId == otherUserId && m.MessageReceiverId == currentUser.Id))
                     .OrderBy(m => m.TimeSent)
@@ -127,15 +127,15 @@ namespace Messenger.Controllers
 
                 await _context.SaveChangesAsync();
 
-                return View( messages);
+                return View(messages);
             }
-            return View(Index);
+            return View("");
         }
 
         [HttpPost]
         public async Task Create(Messages message)
         {
-            message.Username = User.Identity.Name;
+            message.Username = User!.Identity!.Name!;
             var sender = await _userManager.GetUserAsync(User);
             message.SenderMessageId = sender.Id;
             await _context.Messages.AddAsync(message);

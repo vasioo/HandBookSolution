@@ -40,7 +40,7 @@
         }
 
         #likeButton i {
-            margin-right: 4px;
+          
         }
 
         #likeButton span {
@@ -69,7 +69,11 @@
         <div class="row">
             <div class="col-12">
                 @{
-                    var userLikedCards = ViewBag.UserLikedCards as List<int> ?? new List<int>();
+                    List<int> userLikedCards = ViewBag.UserLikedCards;
+                    if (userLikedCards==null)
+                    {
+                        userLikedCards = new List<int>();
+                    }
                 }
                 @if (ViewBag.SelectedPost != null)
                 {
@@ -106,7 +110,7 @@
                                     <button id="likeButton" onclick="like(this,@item.Id)" data-count="@item.AmountOfLikes">
                                         @if (userLikedCards.Contains(item.Id))
                                         {
-                                            <i class="fa-solid fa-heart" style="color: #ff0000;"></i>
+                                            <i class="fa-solid fa-heart liked" style="color: #ff0000;"></i>
                                         }
                                         else
                                         {
@@ -119,7 +123,7 @@
                                 </div>
                             </div>
                         </div>
-
+                        <br />
                     }
                 }
             </div>
@@ -146,7 +150,7 @@
     function likeButtonClick(Id) {
         $.ajax({
             type: "POST",
-            url: "/Home/IncrementLikeCount",
+            url: "/Home/IncrementOrDecrementLikeCount",
             data: { itemId: Id },
             success: function (result) {
                 var likeCountElement = $('.likeCount[data-item-id="' + Id + '"]');
@@ -157,21 +161,6 @@
             }
         });
 
-    }
-
-    function unlikeButtonClick(Id) {
-        $.ajax({
-            type: "POST",
-            url: "/Home/DecrementLikeCount",
-            data: { itemId: Id },
-            success: function (result) {
-                var likeCountElement = $('.likeCount[data-item-id="' + Id + '"]');
-                likeCountElement.text(result);
-            },
-            error: function (result) {
-                alert("Error: " + result.statusText);
-            }
-        });
     }
 
     function like(button, Id) {
@@ -179,27 +168,25 @@
         var cardId = card.dataset.id;
         var count = parseInt(button.dataset.count) || 0;
         var likedCards = JSON.parse(sessionStorage.getItem("likedCards")) || {};
-        if (likedCards[cardId]) {
+
+        var heartIcon = button.querySelector("i.fa-heart");
+
+
+        if (heartIcon.classList.contains("liked")) {
             count--;
             button.dataset.count = count;
-            button.classList.remove("liked");
-            button.innerHTML =
-                `<svg xmlns="http://www.w3.org/2000/svg"width="16" height="16" fill="currentColor" class="bi bi-heart" viewBox="0 0 16 16">
-                                                   <path fill-rule="evenodd" d="M8 1.314C12.438-3.248 23.534 4.735 8 15-7.534 4.736 3.562-3.248 8 1.314z"/>
-                                            </svg>`;
-            unlikeButtonClick(Id);
+            button.innerHTML = `<i class="fa-regular fa-heart" style="color: #000;"></i>`;
+            likeButtonClick(Id);
             delete likedCards[cardId];
         } else {
             count++;
             button.dataset.count = count;
-            button.classList.add("liked");
-            button.innerHTML = `
-                                      <svg xmlns="http://www.w3.org/2000/svg"width="16" height="16" fill="currentColor" class="bi bi-heart-fill" viewBox="0 0 16 16">
-                                        <path fill-rule="evenodd"d="M8 1.314C12.438-3.248 23.534 4.735 8 15-7.534 4.736 3.562-3.248 8 1.314z"/>
-                                      </svg>`;
+            button.innerHTML = `<i class="fa-solid fa-heart liked" style="color: #ff0000;"></i>`;
             likeButtonClick(Id);
             likedCards[cardId] = true;
         }
+
         sessionStorage.setItem("likedCards", JSON.stringify(likedCards));
     }
+
 </script>

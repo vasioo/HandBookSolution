@@ -44,7 +44,7 @@ namespace Messenger.Hubs
 
         public async Task MarkAsRead(string user, string targetUser)
         {
-            _context.Messages.Where(m => m.Username == user && m.MessageReceiverId == targetUser).ForEachAsync(m => m.IsRead = true);
+            await _context.Messages.Where(m => m.Username == user && m.MessageReceiverId == targetUser).ForEachAsync(m => m.IsRead = true);
             await _context.SaveChangesAsync();
         }
     }

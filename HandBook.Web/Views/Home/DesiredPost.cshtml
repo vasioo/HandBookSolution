@@ -9,7 +9,7 @@
     <button id="myButton">"<-"</button>
     </div>
     <div>
-        @Html.Partial("_PostsPartial",Model);
+        @await Html.PartialAsync("_PostsPartial",Model);
         @*<partial name= model="@Model" />*@
     </div>
 </div>

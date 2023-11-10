@@ -6,11 +6,13 @@ using System.Reflection.Emit;
 
 namespace Messenger.Data
 {
-    public class MessengerDbContext : IdentityDbContext
+    public class MessengerDbContext : IdentityDbContext<AppUser>
     {
-        public MessengerDbContext(DbContextOptions<MessengerDbContext> options)
+        private bool seedDb;
+        public MessengerDbContext(DbContextOptions<MessengerDbContext> options, bool seedDb = true)
             : base(options)
         {
+            this.seedDb = seedDb;
         }
         protected override void OnModelCreating(ModelBuilder builder)
         {

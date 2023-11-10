@@ -1,6 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using HandBook.Data;
 using Messenger.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -9,7 +8,7 @@ using ServiceStack.DataAnnotations;
 
 namespace HandBook.Models
 {
-    public class Post:IPost
+    public class Post
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
@@ -17,7 +16,7 @@ namespace HandBook.Models
         public int Id { get; set; }
 
         [System.ComponentModel.DataAnnotations.Required]
-        public string CreatorUserName { get; set; }
+        public string CreatorUserName { get; set; } = "";
 
         [System.ComponentModel.DataAnnotations.Required]
         public DateTime Time { get; set; }=DateTime.Now;
@@ -36,10 +35,10 @@ namespace HandBook.Models
         //public virtual AppUser Creator { get; set; }
 
         [System.ComponentModel.DataAnnotations.Required]
-        public byte[] image { get; set; }
+        public byte[] image { get; set; } = new byte[0];
 
         [NotMapped]
-        public bool IsLiked { get; set; }
+        public bool IsLiked { get; set; } = false;
 
     }
 }
