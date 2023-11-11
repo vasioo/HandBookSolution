@@ -16,7 +16,7 @@ namespace Messenger.Models
         public DateTime TimeSent { get; set; } = DateTime.UtcNow;
 
         public string SenderMessageId { get; set; } = "";
-        
+
         public string MessageReceiverId { get; set; } = "";
 
         public bool IsRead { get; set; } = false;

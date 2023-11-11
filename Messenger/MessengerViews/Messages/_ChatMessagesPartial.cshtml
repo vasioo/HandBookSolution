@@ -1,0 +1,37 @@
+﻿@model IEnumerable<Messenger.Models.Messages>
+
+@{
+    var userName = User!.Identity!.Name!;
+}
+@foreach (var message in Model)
+{
+    string containterClass, timePosition, textAlign, contcolor = "", offset = "", additionalRowSetting = "";
+    if (userName == message.Username)
+    {
+        containterClass = "message-sender";
+        timePosition = "time-right text-light";
+        textAlign = "text-right text-white mb-1 mt-1";
+        contcolor = "bg-primary";
+        offset = "col-md-7 row";
+        additionalRowSetting = "d-flex justify-content-end";
+    }
+    else
+    {
+        containterClass = "message-receiver";
+        timePosition = "time-left";
+        textAlign = "text-left mb-1 mt-1";
+        offset = "col-md-7 row";
+    }
+
+    <div class="row @additionalRowSetting">
+        <div class="@offset @additionalRowSetting">
+            <div class="col-auto">
+                <div class="message-container @containterClass @contcolor @message.Username">
+                    <p class="sender @textAlign" hidden>@message.Username</p>
+                    <p class="@textAlign">@message.Text</p>
+                    <span class="@timePosition" hidden>@message.TimeSent.ToString("M/dd/yyyy hh:MM tt")</span>
+                </div>
+            </div>
+        </div>
+    </div>
+}

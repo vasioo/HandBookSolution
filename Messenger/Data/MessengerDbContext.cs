@@ -22,11 +22,9 @@ namespace Messenger.Data
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder
-                .UseSqlServer("Server=(localdb)\\mssqllocaldb;Database=aspnet-HandBook-7364a21d-fa2f-416f-a2ea-fd49efd1b593;Trusted_Connection=True;MultipleActiveResultSets=true");
-
+         
         }
 
-        public DbSet<Messages> Messages { get; set; }
+        
     }
 }

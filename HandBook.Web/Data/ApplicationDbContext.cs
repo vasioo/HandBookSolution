@@ -16,6 +16,7 @@ namespace HandBook.Web.Data
         public DbSet<Post> Posts { get; set; }
         public DbSet<Notification> Notifications { get; set; }
         public DbSet<Likes> Likes { get; set; }
+        public DbSet<Messages> Messages { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -28,22 +29,19 @@ namespace HandBook.Web.Data
             .HasKey(l => l.Id);
 
             builder.Entity<Likes>()
-      .HasOne(l => l.AppUser)
-      .WithMany()
-      .HasForeignKey(l => l.UserId);
+               .HasOne(l => l.AppUser)
+               .WithMany()
+               .HasForeignKey(l => l.UserId);
 
             builder.Entity<Likes>()
                 .HasOne(l => l.Post)
                 .WithMany()
                 .HasForeignKey(l => l.PostId);
-
         }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder
-                 .UseSqlServer("Server=(localdb)\\mssqllocaldb;Database=aspnet-HandBook-7364a21d-fa2f-416f-a2ea-fd49efd1b593;Trusted_Connection=True;MultipleActiveResultSets=true");
-
+          
         }
     }
 }

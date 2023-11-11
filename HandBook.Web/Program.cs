@@ -1,6 +1,7 @@
 
 using HandBook.Web.Data;
 using Messenger.Data;
+using Messenger.Hubs;
 using Messenger.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -18,8 +19,6 @@ namespace HandBook.Web
                 .GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
             builder.Services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlServer(connectionString));
-            builder.Services.AddDbContext<MessengerDbContext>(options =>
-                options.UseSqlServer(connectionString));
             builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
             builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
@@ -35,8 +34,7 @@ namespace HandBook.Web
                     .AddRoles<IdentityRole>()
                    .AddEntityFrameworkStores<ApplicationDbContext>();
             builder.Services.AddControllersWithViews();
-
-            // Register DbContext2 with dependency injection
+            builder.Services.AddSignalR();
 
             var app = builder.Build();
 
@@ -63,9 +61,11 @@ namespace HandBook.Web
             app.MapControllerRoute(
                 name: "default",
                 pattern: "{controller=Home}/{action=Index}/{id?}");
-
+            app.MapControllerRoute(
+                name: "default",
+                pattern: "{controller=Messages}/{action=Index}/{id?}");
             app.MapRazorPages();
-
+            app.MapHub<ChatHub>("/chatHub");
             app.Run();
         }
     }
