@@ -32,14 +32,21 @@ namespace HandBook.Web.Controllers
         {
             try
             {
-                var user = await _userManager.GetUserAsync(User);
+                var username = HttpContext.User?.Identity?.Name ?? "";
+                var user = await _userManager.FindByNameAsync(username);
                 var cards = _dbc.Posts.OrderByDescending(x => x.Time);
 
-                var userLikedCards = _dbc.Likes.Where(like => like.UserId == user!.Id);
+                if (user!=null)
+                {
+                    var userLikedCards = _dbc.Likes.Where(like => like.UserId == user!.Id);
+                    if (userLikedCards != null && userLikedCards.Count() > 0)
+                    {
+                        ViewBag.UserLikedCards = userLikedCards.Select(x => x.PostId).ToList();
+                    }
+                }
+            
 
-                ViewBag.UserLikedCards = userLikedCards.Select(x => x.PostId).ToList();
-
-                return View(cards);
+                return View("~/Views/Home/Index.cshtml",cards);
             }
             catch (Exception)
             {
@@ -51,14 +58,14 @@ namespace HandBook.Web.Controllers
         [Authorize]
         public IActionResult Privacy()
         {
-            return View();
+            return View("~/Views/Home/Privacy.cshtml");
         }
 
         [Authorize]
         public async Task<IActionResult> DesiredPost([FromBody] int modelData)
         {
             var item = await _dbc.Posts.Where(x => x.Id == modelData).FirstOrDefaultAsync();
-            return View(item);
+            return View("~/Views/Home/DesiredPost.cshtml", item);
         }
         
         [Authorize]
@@ -66,13 +73,13 @@ namespace HandBook.Web.Controllers
         {
             var cards = await _dbc.Notifications.ToListAsync();
             cards.Reverse();
-            return View(cards);
+            return View("~/Views/Home/Notifications.cshtml", cards);
         }
 
         [Authorize]
         public IActionResult AddAPost()
         {
-            return View();
+            return View("~/Views/Home/AddAPost.cshtml");
         }
 
         [HttpPost]
@@ -88,21 +95,18 @@ namespace HandBook.Web.Controllers
                     tfm.image = memoryStream.ToArray();
                 }
             }
-            var user = await _userManager.GetUserAsync(User);
+            var username = HttpContext.User?.Identity?.Name ?? "";
+            var user = await _userManager.FindByNameAsync(username);
             if (user != null)
             {
-                var item = _dbc.Posts.OrderBy(x => x.Id).Last();
-                tfm.CreatorUserName = user!.UserName!;
-                ntf.CreatorUserName = user!.UserName!;
-                ntf.PostId = item.Id;
-                ntf.CreatorUserName = tfm!.CreatorUserName!;
+                tfm.CreatorUserName = username!;
+                ntf.AppUser = user!;
                 ntf.Time = DateTime.Now;
                 ntf.MainText = "added a new post";
-                await _dbc.AddAsync(ntf);
                 await _dbc.AddAsync(tfm);
+                await _dbc.AddAsync(ntf);
                 await _dbc.SaveChangesAsync();
 
-                Thread.Sleep(1000);
                 return RedirectToAction("Index");
             }
             return Error();
@@ -117,7 +121,8 @@ namespace HandBook.Web.Controllers
             {
                 var item = await _dbc.Posts.FirstOrDefaultAsync(i => i.Id == itemId);
                 int likeCount = item!.AmountOfLikes;
-                var user = await _userManager.GetUserAsync(User);
+                var username = HttpContext.User?.Identity?.Name ?? "";
+                var user = await _userManager.FindByNameAsync(username);
 
                 var existingLike = await _dbc.Likes.FirstOrDefaultAsync(x => x.UserId == user!.Id && x.PostId == itemId);
 
@@ -137,17 +142,16 @@ namespace HandBook.Web.Controllers
                     item.AmountOfLikes++;
                     var like = new Likes
                     {
-                        PostId = item.Id,
-                        UserId = user!.Id,
+                        Post = item,
+                        AppUser = user!,
                         LikedDate = DateTime.Now
                     };
 
                     Notification ntf = new Notification();
-                    ntf.CreatorUserName = user!.UserName!;
-                    ntf.PostId = item.Id;
+                    ntf.AppUser = user!;
+                    ntf.Post = item!;
                     ntf.Time = DateTime.Now;
                     ntf.MainText = "liked your post";
-                    ntf.UserId = user!.Id;
                     await _dbc.AddAsync(ntf);
                     await _dbc.Likes.AddAsync(like);
                 }
@@ -162,6 +166,17 @@ namespace HandBook.Web.Controllers
             }
         }
 
+        [Authorize]
+        public async Task<IActionResult> Account(string username)
+        {
+            var user = await _userManager.FindByNameAsync(username);
+
+            var useraccdto = new UserAccountDTO();
+            useraccdto.UserTemp = user;
+            useraccdto.PostsTemp = _dbc.Posts.Where(x=>x.CreatorUserName== username);
+
+            return View("~/Views/Home/Account.cshtml",useraccdto);
+        }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()

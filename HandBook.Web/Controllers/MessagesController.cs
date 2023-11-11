@@ -1,4 +1,4 @@
-﻿using Messenger.Data;
+﻿using HandBook.Web.Data;
 using Messenger.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -15,17 +15,18 @@ namespace Messenger.Controllers
     {
         private readonly ILogger<MessagesController> _logger;
 
-        public readonly MessengerDbContext _context;
+        public readonly ApplicationDbContext _context;
 
         public readonly UserManager<AppUser> _userManager;
 
-        public MessagesController(MessengerDbContext context, ILogger<MessagesController> logger, UserManager<AppUser> userManager)
+        public MessagesController(ApplicationDbContext context, ILogger<MessagesController> logger, UserManager<AppUser> userManager)
         {
             _context = context;
             _logger = logger;
             _userManager = userManager;
         }
 
+        [Authorize]
         public List<string> GetUsersSentMessagesTo(string userId)
         {
             var receiverIds = _context.Messages.OrderByDescending(x=>x.TimeSent)
@@ -42,6 +43,7 @@ namespace Messenger.Controllers
             return users;
         }
 
+        [Authorize]
         public List<Messages> GetUnreadMessagesForUser(string userId,string targetUserId)
         {
             var unreadMessages = _context.Messages
@@ -50,6 +52,7 @@ namespace Messenger.Controllers
             return unreadMessages;
         }
 
+        [Authorize]
         public async Task<IActionResult> Index(int currentPage)
         {
             if (currentPage<=0)
@@ -58,54 +61,60 @@ namespace Messenger.Controllers
             }
 
             List<UserMassageDTO> userMsgDTOList = new List<UserMassageDTO>();
-            var sender = await _userManager.GetUserAsync(User);
-            var neededUsers = GetUsersSentMessagesTo(sender.Id);
-
-            foreach (var item in neededUsers)
+            var username = HttpContext.User?.Identity?.Name ?? "";
+            var sender = await _userManager.FindByNameAsync(username);
+            if (sender!=null)
             {
-                UserMassageDTO userMsgDto = new UserMassageDTO();
+                var neededUsers = GetUsersSentMessagesTo(sender.Id);
 
-                userMsgDto.UserData = item;
-
-                var specUserNeeded = _context.Users.Where(u => u.UserName == item).FirstOrDefault();
-
-                if (specUserNeeded != null)
+                foreach (var item in neededUsers)
                 {
-                    var messages = GetUnreadMessagesForUser(sender.Id,specUserNeeded.Id);
+                    UserMassageDTO userMsgDto = new UserMassageDTO();
 
-                    if (messages.Count == 1)
+                    userMsgDto.UserData = item;
+
+                    var specUserNeeded = _context.Users.Where(u => u.UserName == item).FirstOrDefault();
+
+                    if (specUserNeeded != null)
                     {
-                        userMsgDto.Message = messages!.FirstOrDefault()!.Text;
-                    }
-                    else if (messages.Count > 0)
-                    {
-                        int neededCountNumber = messages.Count();
-                        if (neededCountNumber > 4)
+                        var messages = GetUnreadMessagesForUser(sender.Id, specUserNeeded.Id);
+
+                        if (messages.Count == 1)
                         {
-                            userMsgDto.Message = $"4+ unopened messages";
+                            userMsgDto.Message = messages!.FirstOrDefault()!.Text;
+                        }
+                        else if (messages.Count > 0)
+                        {
+                            int neededCountNumber = messages.Count();
+                            if (neededCountNumber > 4)
+                            {
+                                userMsgDto.Message = $"4+ unopened messages";
+                            }
+                            else
+                            {
+                                userMsgDto.Message = $"{messages.Count()} unopened messages";
+                            }
                         }
                         else
                         {
-                            userMsgDto.Message = $"{messages.Count()} unopened messages";
+                            var lastMessage = _context.Messages
+                   .Where(m => (m.SenderMessageId == sender.Id && m.MessageReceiverId == specUserNeeded.Id) || (m.SenderMessageId == specUserNeeded.Id && m.MessageReceiverId == sender.Id))
+                   .OrderByDescending(m => m.TimeSent)
+                   .FirstOrDefault();
+
+                            userMsgDto.Message = lastMessage!.Text!;
+
                         }
                     }
-                    else
-                    {
-                        var lastMessage = _context.Messages
-               .Where(m => (m.SenderMessageId == sender.Id && m.MessageReceiverId == specUserNeeded.Id) || (m.SenderMessageId == specUserNeeded.Id && m.MessageReceiverId == sender.Id))
-               .OrderByDescending(m => m.TimeSent)
-               .FirstOrDefault();
-
-                        userMsgDto.Message = lastMessage!.Text!;
-
-                    }
+                    userMsgDTOList.Add(userMsgDto);
                 }
-                userMsgDTOList.Add(userMsgDto);
-            }
 
-            return View(userMsgDTOList.Take(20).Skip((currentPage-1)*20));
+                return View("~/MessengerViews/Messages/Index.cshtml", userMsgDTOList.Take(20).Skip((currentPage - 1) * 20));
+            }
+            return View("~/MessengerViews/Messages/Index.cshtml");
         }
 
+        [Authorize]
         public async Task<IActionResult> Chat(int currentPage,string userName)
         {
             if (currentPage <= 0)
@@ -127,12 +136,13 @@ namespace Messenger.Controllers
 
                 await _context.SaveChangesAsync();
 
-                return View(messages);
+                return View("~/MessengerViews/Messages/Chat.cshtml", messages);
             }
-            return View("");
+            return View("~/MessengerViews/Messages/Index.cshtml");
         }
 
         [HttpPost]
+        [Authorize]
         public async Task Create(Messages message)
         {
             message.Username = User!.Identity!.Name!;
@@ -142,9 +152,10 @@ namespace Messenger.Controllers
             await _context.SaveChangesAsync();
         }
 
+        [Authorize]
         public IActionResult Privacy()
         {
-            return View();
+            return View("~/MessengerViews/Messages/Privacy.cshtml");
         }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]

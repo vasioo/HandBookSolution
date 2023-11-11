@@ -88,7 +88,7 @@
                     {
                         <div class="card" style="width: 470px; height: 500px;">
                             <div class="card-header">
-                                <h5 class="card-title">&#64;@item.CreatorUserName</h5>
+                                <a class="card-title h5" asp-controller="Home" asp-action="Account" asp-route-username="@@item.CreatorUserName">&#64;@item.CreatorUserName</a>
                             </div>
                             <div class="card-body">
                                 <div class="image-container">

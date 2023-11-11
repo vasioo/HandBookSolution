@@ -1,5 +1,5 @@
-﻿using Messenger.Controllers;
-using Messenger.Data;
+﻿using HandBook.Web.Data;
+using Messenger.Controllers;
 using Messenger.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.SignalR;
@@ -9,14 +9,14 @@ namespace Messenger.Hubs
 {
     public class ChatHub : Hub
     {
-        private readonly ILogger<MessagesController> _logger;
+        private readonly ILogger<ApplicationDbContext> _logger;
 
-        public readonly MessengerDbContext _context;
+        public readonly ApplicationDbContext _context;
 
         public readonly UserManager<AppUser> _userManager;
 
 
-        public ChatHub(MessengerDbContext context, ILogger<MessagesController> logger, UserManager<AppUser> userManager)
+        public ChatHub(ApplicationDbContext context, ILogger<ApplicationDbContext> logger, UserManager<AppUser> userManager)
         {
             _context = context;
             _logger = logger;

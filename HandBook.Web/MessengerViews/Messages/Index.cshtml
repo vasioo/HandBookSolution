@@ -1,7 +1,7 @@
 ﻿@model IEnumerable<Messenger.Models.UserMassageDTO>
 
 <div id="item-containter">
-    @if (Model != null)
+    @if (Model != null&&Model.Count()>0)
     {
         @foreach (var item in Model)
         {
@@ -17,9 +17,11 @@
             </a>
         }
     }
-     else
+    else
     {
-
+        <h1 class="row mt-5 pt-5 justify-content-center">
+            No chats have been added!
+        </h1>
     }
     <input type="hidden" id="currentPage" value="1" />
 </div>
