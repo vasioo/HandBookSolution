@@ -1,5 +1,6 @@
 ﻿
 using HandBook.Models;
+using HandBook.Web.Models;
 using Messenger.Models;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
@@ -17,6 +18,7 @@ namespace HandBook.Web.Data
         public DbSet<Notification> Notifications { get; set; }
         public DbSet<Likes> Likes { get; set; }
         public DbSet<Messages> Messages { get; set; }
+        public DbSet<Comment> Comments { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -37,6 +39,11 @@ namespace HandBook.Web.Data
                 .HasOne(l => l.Post)
                 .WithMany()
                 .HasForeignKey(l => l.PostId);
+
+
+            builder.Entity<Comment>()
+            .HasKey(l => l.Id);
+
         }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)

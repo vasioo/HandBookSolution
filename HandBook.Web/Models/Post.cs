@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using HandBook.Web.Models;
 using Messenger.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -25,12 +26,7 @@ namespace HandBook.Models
         //counting the amount of likes and one person can only like once
         public int AmountOfLikes { get; set; } = 0;
 
-        //public List<string> Comments { get; set; }
-
-        [System.ComponentModel.DataAnnotations.Required]
-        //if saved it turns to true
-        //it can be saved in any time
-        public bool Saved { get; set; } = false;
+        public List<Comment> Comments { get; set; }
 
         //public virtual AppUser Creator { get; set; }
 

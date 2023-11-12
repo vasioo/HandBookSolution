@@ -5,7 +5,7 @@ namespace Messenger.Models
 {
     public class Messages
     {
-        public Guid Id { get; set; }
+        public int Id { get; set; }
 
         [Required]
         public string Username { get; set; } = "";
