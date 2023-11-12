@@ -26,8 +26,8 @@ namespace Messenger.Hubs
         public async Task SendMessage(string user, string message, string targetUser)
         {
             AppUser appuser = await _userManager.FindByNameAsync(user);
-            await Clients.User(targetUser).SendAsync("receiveMessage", user, message, false);
-            await Clients.User(appuser.Id).SendAsync("receiveMessage", user, message,true);
+            await Clients.User(targetUser.ToString()).SendAsync("receiveMessage", user, message, false);
+            await Clients.User(appuser.Id.ToString()).SendAsync("receiveMessage", user, message,true);
 
             var chatMessage = new Messages
             {

@@ -85,6 +85,10 @@
                         <span class="icon"><i class="fas fa-home"></i></span>
                         <span class="label">Home</span>
                     </a>
+                    <a class="list-group-item list-group-item-action py-2 ripple" asp-area="" asp-controller="Home" asp-action="SearchUsers">
+                        <span class="icon"><i class="fa-solid fa-magnifying-glass"></i></span>
+                        <span class="label">Users</span>
+                    </a>
                     <a class="list-group-item list-group-item-action py-2 ripple" asp-area="" asp-controller="Home" asp-action="Notifications">
                         <span class="icon"><i class="fa-solid fa-bell"></i></span>
                         <span class="label">Notifications</span>
@@ -93,6 +97,7 @@
                         <span class="icon"><i class="fa-solid fa-comments"></i></span>
                         <span class="label">Messenger</span>
                     </a>
+
                     @if (!User!.Identity!.IsAuthenticated)
                     {
                         <a class="list-group-item list-group-item-action py-2 ripple" asp-area="Identity" asp-page="/Account/Register">
@@ -127,6 +132,7 @@
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://code.jquery.com/ui/1.13.0/jquery-ui.js"></script>
     @await RenderSectionAsync("Scripts", required: false)
     <script type="text/javascript" src="https://kit.fontawesome.com/47edf10d0e.js"></script>

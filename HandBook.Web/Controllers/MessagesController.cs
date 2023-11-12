@@ -44,7 +44,7 @@ namespace Messenger.Controllers
         }
 
         [Authorize]
-        public List<Messages> GetUnreadMessagesForUser(string userId,string targetUserId)
+        public List<Messages> GetUnreadMessagesForUser(string userId, string targetUserId)
         {
             var unreadMessages = _context.Messages
                 .Where(m => m.MessageReceiverId == userId && m.SenderMessageId == targetUserId && !m.IsRead)

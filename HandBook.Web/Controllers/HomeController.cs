@@ -36,7 +36,7 @@ namespace HandBook.Web.Controllers
                 var user = await _userManager.FindByNameAsync(username);
                 var cards = _dbc.Posts.OrderByDescending(x => x.Time);
 
-                if (user!=null)
+                if (user != null)
                 {
                     var userLikedCards = _dbc.Likes.Where(like => like.UserId == user!.Id);
                     if (userLikedCards != null && userLikedCards.Count() > 0)
@@ -44,9 +44,9 @@ namespace HandBook.Web.Controllers
                         ViewBag.UserLikedCards = userLikedCards.Select(x => x.PostId).ToList();
                     }
                 }
-            
 
-                return View("~/Views/Home/Index.cshtml",cards);
+
+                return View("~/Views/Home/Index.cshtml", cards);
             }
             catch (Exception)
             {
@@ -67,7 +67,7 @@ namespace HandBook.Web.Controllers
             var item = await _dbc.Posts.Where(x => x.Id == modelData).FirstOrDefaultAsync();
             return View("~/Views/Home/DesiredPost.cshtml", item);
         }
-        
+
         [Authorize]
         public async Task<IActionResult> Notifications()
         {
@@ -169,19 +169,44 @@ namespace HandBook.Web.Controllers
         [Authorize]
         public async Task<IActionResult> Account(string username)
         {
+            if (username==null||username=="")
+            {
+                return View("~/Views/Home/Index.cshtml");
+            }
             var user = await _userManager.FindByNameAsync(username);
 
             var useraccdto = new UserAccountDTO();
             useraccdto.UserTemp = user;
-            useraccdto.PostsTemp = _dbc.Posts.Where(x=>x.CreatorUserName== username);
+            useraccdto.PostsTemp = _dbc.Posts.Where(x => x.CreatorUserName == username);
 
-            return View("~/Views/Home/Account.cshtml",useraccdto);
+            return View("~/Views/Home/Account.cshtml", useraccdto);
         }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()
         {
             return View(new Models.ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+        }
+
+        public async Task<IActionResult> SearchUsers()
+        {
+            return View("~/Views/Home/SearchUsers.cshtml");
+        }
+
+        public async Task<IActionResult> SearchUsersFilter(string searchString)
+        {
+            ViewData["CurrentFilter"] = searchString;
+
+            var users = _userManager.Users;
+
+            if (!String.IsNullOrEmpty(searchString))
+            {
+                users = users.Where(usr => usr.UserName.Contains(searchString));
+            }
+
+            var userResults = users.Select(u => new { u.UserName }).ToList(); // Adjust the properties you want to return
+
+            return Json(userResults);
         }
     }
 }

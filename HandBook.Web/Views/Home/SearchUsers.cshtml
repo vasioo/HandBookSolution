@@ -1,0 +1,75 @@
+﻿@using Messenger.Models;
+@using Microsoft.AspNetCore.Identity;
+@inject UserManager<AppUser> UserManager
+
+<style>
+    .user-link, .user-link:hover{
+        text-decoration: none;
+        color: darkgray;
+    }
+
+</style>
+<div class="pt-5">
+    <form id="searchForm" method="get">
+        <div class="form-actions no-color">
+            <div class="row">
+                <input class="col-8" type="text" placeholder="Search" name="SearchString" id="searchInput" value="@ViewData["CurrentFilter"]" />
+            </div>
+        </div>
+    </form>
+</div>
+
+<div id="searchResults">
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var searchInput = document.getElementById('searchInput');
+            searchInput.addEventListener('input', function () {
+                var searchString = searchInput.value;
+                searchUsers(searchString);
+            });
+        });
+
+        function searchUsers(query) {
+            var xhr = new XMLHttpRequest();
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === XMLHttpRequest.DONE) {
+                    if (xhr.status === 200) {
+                        var users = JSON.parse(xhr.responseText);
+                        var resultsContainer = document.getElementById('searchResults');
+                        resultsContainer.innerHTML = '';
+                        users.forEach(function (user) {
+                            // var userDiv = document.createElement('div');
+                            // userDiv.textContent = user.userName;
+
+                            var userDiv = document.createElement('div');
+                            userDiv.innerHTML =
+                                '<div class="row">' +
+                                '<div class="col-1">' +
+                                '' +
+                                '</div>' +
+                                '<div class="col p-2">' +
+                                '<a class="user-link" href="/Home/Account?username=' + user.userName + '">' + user.userName + '</a>' +
+                                '</div>' +
+                                '</div>';
+
+                            resultsContainer.appendChild(userDiv);
+                        });
+                    } else {
+
+                    }
+                }
+            };
+
+            if (query === "") {
+                var resultsContainer = document.getElementById('searchResults');
+                resultsContainer.innerHTML = '';
+                return;
+            }
+            xhr.open('GET', '/Home/SearchUsersFilter?searchString=' + query, true);
+            xhr.send();
+        }
+    </script>
+}
