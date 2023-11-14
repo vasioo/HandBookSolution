@@ -11,6 +11,8 @@ namespace HandBook.Web.Models
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
 
+        public string UniqueIdentifier{ get; set; }
+
         public DateTime DateOfCreation { get; set; }
 
         public string CommentContent { get; set; }

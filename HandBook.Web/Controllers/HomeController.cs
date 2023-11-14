@@ -45,6 +45,7 @@ namespace HandBook.Web.Controllers
                     }
                 }
 
+                ViewBag.UserUsername = username;
 
                 return View("~/Views/Home/Index.cshtml", cards);
             }
@@ -111,6 +112,64 @@ namespace HandBook.Web.Controllers
             }
             return Error();
 
+        }
+
+        [HttpPost]
+        [Authorize]
+        public async Task<IActionResult> AddOrRemoveAComment(CommentsDTO commentsDTO )
+        {
+            try
+            {
+                var item = await _dbc.Posts.FirstOrDefaultAsync(i => i.Id == commentsDTO.PostId);
+                var username = HttpContext.User?.Identity?.Name ?? "";
+                var user = await _userManager.FindByNameAsync(username);
+
+                var existingComment = await _dbc.Comments.FirstOrDefaultAsync(x=>x.Id==commentsDTO.Id);
+                Guid randomGuid = Guid.NewGuid();
+
+                string randomGuidString = randomGuid.ToString();
+                if (existingComment!=null)
+                {
+                    var existingNotif = await _dbc.Notifications.FirstOrDefaultAsync(x => x.UserId == user!.Id && x.PostId == commentsDTO.PostId && x.MainText == "commented on your post");
+
+                    _dbc.Comments.Remove(existingComment);
+                    if (existingNotif != null)
+                    {
+                        _dbc.Notifications.Remove(existingNotif);
+                    }
+                }
+                else
+                {
+                   
+                    var comment = new Comment
+                    {
+                        DateOfCreation = DateTime.Now,
+                        Post = item,
+                        AppUser = user,
+                        CommentDeriveFromId = commentsDTO.CommentDeriveFromId,
+                        CommentContent = commentsDTO.CommentContent,
+                        UniqueIdentifier = randomGuidString
+                    };
+
+                    Notification ntf = new Notification();
+                    ntf.AppUser = user!;
+                    ntf.Post = item!;
+                    ntf.Time = DateTime.Now;
+                    ntf.MainText = "commented on your post";
+                    await _dbc.AddAsync(ntf);
+                    await _dbc.Comments.AddAsync(comment);
+                }
+
+                await _dbc.SaveChangesAsync();
+
+                var neededComment = await _dbc.Comments.FirstOrDefaultAsync(x => x.UniqueIdentifier== randomGuidString);
+
+                return Json(neededComment);
+            }
+            catch (Exception)
+            {
+                return Json("Error occurred while processing the like/unlike action.");
+            }
         }
 
         [HttpPost]

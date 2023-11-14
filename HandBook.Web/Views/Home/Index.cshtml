@@ -77,13 +77,25 @@
 
     .custom-date {
     }
+
+    .custom-comment-icon {
+        padding: 10px;
+        display: block;
+        text-decoration: none;
+        color: #333;
+    }
+
+    .textarea[contenteditable]:empty::before {
+        content: "Placeholder still possible";
+        color: gray;
+    }
 </style>
 
 <div class="container">
     <br />
     <br />
     <div class="row">
-        <div class="col-12">
+        <div class="col-12" data-user-username="@ViewBag.UserUsername">
             @{
                 List<int> userLikedCards = ViewBag.UserLikedCards;
                 if (userLikedCards == null)
@@ -95,42 +107,45 @@
             {
                 @foreach (var item in Model)
                 {
-                    DateTime postDate = item.Time;
+                    string GetTimeDisplay(DateTime postDate)
+                    {
+                        TimeSpan timeDifference = DateTime.Now - postDate;
 
-                    TimeSpan timeDifference = DateTime.Now - postDate;
+                        double seconds = Math.Floor(timeDifference.TotalSeconds);
+                        double minutes = Math.Floor(timeDifference.TotalMinutes);
+                        double hours = Math.Floor(timeDifference.TotalHours);
+                        double days = Math.Floor(timeDifference.TotalDays);
 
-                    double seconds = Math.Floor(timeDifference.TotalSeconds);
-                    double minutes = Math.Floor(timeDifference.TotalMinutes);
-                    double hours = Math.Floor(timeDifference.TotalHours);
-                    double days = Math.Floor(timeDifference.TotalDays);
+                        string displayString = "";
 
+                        if (days > 365 || (days > 7 && postDate.Year != DateTime.Now.Year))
+                        {
+                            displayString = postDate.ToString("yyyy-MM-dd HH:mm:ss");
+                        }
+                        else if (days > 7)
+                        {
+                            displayString = postDate.ToString("MMMM d");
+                        }
+                        else if (days >= 1)
+                        {
+                            displayString = days == 1 ? "1 day ago" : $"{(int)days} days ago";
+                        }
+                        else if (hours >= 1)
+                        {
+                            displayString = hours == 1 ? "1 hour ago" : $"{(int)hours} hours ago";
+                        }
+                        else if (minutes >= 1)
+                        {
+                            displayString = minutes == 1 ? "1 minute ago" : $"{(int)minutes} minutes ago";
+                        }
+                        else
+                        {
+                            displayString = seconds == 1 ? "1 second ago" : $"{(int)seconds} seconds ago";
+                        }
 
-                    string displayString = "";
+                        return displayString;
+                    }
 
-                    if (days > 365 || (days > 7 && postDate.Year != DateTime.Now.Year))
-                    {
-                        displayString = postDate.ToString("yyyy-MM-dd HH:mm:ss");
-                    }
-                    else if (days > 7)
-                    {
-                        displayString = postDate.ToString("MMMM d");
-                    }
-                    else if (days >= 1)
-                    {
-                        displayString = days == 1 ? "1 day ago" : $"{(int)days} days ago";
-                    }
-                    else if (hours >= 1)
-                    {
-                        displayString = hours == 1 ? "1 hour ago" : $"{(int)hours} hours ago";
-                    }
-                    else if (minutes >= 1)
-                    {
-                        displayString = minutes == 1 ? "1 minute ago" : $"{(int)minutes} minutes ago";
-                    }
-                    else
-                    {
-                        displayString = seconds == 1 ? "1 second ago" : $"{(int)seconds} seconds ago";
-                    }
                     <div class="card" style="width: 470px">
                         <div class="card-header">
                             <div class="row justify-content-between w-100">
@@ -140,7 +155,7 @@
                                     </a>
                                 </div>
                                 <div class="col-auto p-0">
-                                    <div class="custom-date">@displayString</div>
+                                    <div class="custom-date">@GetTimeDisplay(item.Time)</div>
                                 </div>
                             </div>
                         </div>
@@ -161,10 +176,12 @@
                                 <div class="col-10 pt-3">
                                     <div class="d-flex justify-content-between">
                                         <div>
-                                            <span class="likeCount" data-item-id="@item.Id">@item.AmountOfLikes likes</span>
+                                            <span class="likeCount" data-item-id="@item.Id" style="display: @(item.AmountOfLikes > 0 ? "block" : "none");">
+                                                @item.AmountOfLikes <i class="fa-solid fa-heart liked fa-sm" style="color: #ff0000;"></i>
+                                            </span>
                                         </div>
                                         <div>
-                                            <span class="likeCount" data-item-id="@item.Id">@commentsCount comments</span>
+                                            <span class="commentsCount" data-item-id="@item.Id">@commentsCount comments</span>
                                         </div>
                                     </div>
                                 </div>
@@ -204,6 +221,42 @@
                                     </div>
                                 </div>
                             </div>
+                            <div class="row comment-section" style="display:none" data-post-id="@item.Id">
+                                <div class="col">
+                                    <div class="col">
+                                        <div class="input-group">
+                                            <div class="border col-10 pl-1 pr-1 m-0">
+                                                <textarea class="my-text w-100" style="max-height:400px" placeholder="Write a comment..."></textarea>
+                                            </div>
+                                          
+                                            <div class="input-group-append align-self-end col-2">
+                                                <button class="btn btn-primary submit-btn" type="button"> <i class="fas fa-right-long"></i></button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                @if (item.Comments != null)
+                                {
+                                    @foreach (var comment in item.Comments.Where(com => com.CommentDeriveFromId == 0))
+                                    {
+                                        <div class="main-comment row">
+                                            <div class="row">@comment.AppUser.UserName</div>
+                                            <div class="row">@comment.CommentContent</div>
+                                            <div class="row">
+                                                <div class="col">@GetTimeDisplay(comment.DateOfCreation)</div>
+                                                <div class="col"><a>Like</a></div>
+                                                <div class="col"><a>Reply</a></div>
+                                            </div>
+                                        </div>
+                                        <div class="look-replies">View Replies</div>
+                                    }
+                                }
+                                else
+                                {
+                                    <div class="row justify-content-center mb-3"> No Comments</div>
+                                }
+                            </div>
                         </div>
                     </div>
                     <br />
@@ -227,6 +280,48 @@
 </div>
 
 <script>
+
+    $(document).on('click', '.submit-btn', function () {
+        var $commentContainer = $(this).closest('.comment-container');
+        var $commentTextarea = $commentContainer.find('.my-text');
+
+        var commentContent = $commentTextarea.val();
+        var userUsername = $commentContainer.data('user-username');
+        var postId = $commentContainer.data('data-post-id');
+        
+        var comment = {
+            AppUsername:userUsername ,
+            CommentContent: commentContent,
+            DateOfCreation: new Date().toString(),
+            PostId: postId
+        };
+
+        $.ajax({
+            url: "/Home/AddOrRemoveAComment",
+            method: 'POST',
+            data: { commentsDTO: comment },
+            success: function (response) {
+                var commentHtml = `
+              <div class="main-comment row">
+                <div class="row">${response.appUser.userName}</div>
+                <div class="row">${response.commentContent}</div>
+                <div class="row">
+                  <div class="col">${GetTimeDisplay(response.dateOfCreation)}</div>
+                  <div class="col"><a>Like</a></div>
+                  <div class="col"><a>Reply</a></div>
+                </div>
+              </div>
+              <div class="look-replies">View Replies</div>
+            `;
+
+                $commentContainer.find('.comments-container').append(commentHtml);
+                $commentContainer.find('.my-text').val('');
+            },
+            error: function (error) {
+                console.error('Error submitting comment:', error);
+            }
+        });
+    });
     function likeButtonClick(Id) {
         $.ajax({
             type: "POST",
@@ -234,7 +329,8 @@
             data: { itemId: Id },
             success: function (result) {
                 var likeCountElement = $('.likeCount[data-item-id="' + Id + '"]');
-                likeCountElement.text(result);
+                likeCountElement.html(result + ' <i class="fa-solid fa-heart liked fa-sm" style="color: #ff0000;"></i>');
+                likeCountElement.toggle(result > 0);
             },
             error: function (result) {
                 alert("Error: " + result.statusText);
@@ -242,22 +338,28 @@
         });
     }
 
+
     function toggleComments(itemId, element) {
         const card = element.closest('.card');
-        const cardId = `card-overlay-${itemId}`; // Create a unique ID for the card
+        const cardId = `card-overlay-${itemId}`;
 
-        // Check if an overlay already exists for this card
         const existingOverlay = document.getElementById(cardId);
 
         if (existingOverlay) {
-            // If overlay exists, remove it and enable scrolling
             existingOverlay.remove();
             document.body.style.overflow = '';
+
+            const commentSection = card.querySelector('.comment-section');
+            commentSection.style.display = 'none';
+
+            card.style.zIndex = ''; // Reset the z-index
+
+            document.removeEventListener('click', handleClickOutside);
             return;
         }
 
         const overlay = document.createElement('div');
-        overlay.id = cardId; // Set the ID for the overlay
+        overlay.id = cardId;
 
         function disableScroll() {
             document.body.style.overflow = 'hidden';
@@ -270,33 +372,40 @@
         function handleClickOutside(event) {
             if (event.target === overlay) {
                 enableScroll();
+                card.style.zIndex = '';
                 overlay.remove();
+
+                const commentSection = card.querySelector('.comment-section');
+                commentSection.style.display = 'none';
+
                 document.removeEventListener('click', handleClickOutside);
             }
         }
 
-        if (card) {
-            card.style.zIndex = 1000;
+        card.style.zIndex = 1000;
 
-            overlay.style.position = 'fixed';
-            overlay.style.top = '0';
-            overlay.style.left = '0';
-            overlay.style.width = '100%';
-            overlay.style.height = '100%';
-            overlay.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
+        overlay.style.position = 'fixed';
+        overlay.style.top = '0';
+        overlay.style.left = '0';
+        overlay.style.width = '100%';
+        overlay.style.height = '100%';
+        overlay.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
 
-            const expandedArea = document.createElement('div');
-            expandedArea.style.overflowY = 'scroll';
+        const commentSection = card.querySelector('.comment-section');
 
-            card.appendChild(expandedArea);
-
-            document.body.appendChild(overlay);
-
-            disableScroll();
-
-            document.addEventListener('click', handleClickOutside);
+        if (commentSection.style.display === 'none' || commentSection.style.display === '') {
+            commentSection.style.display = 'block';
+        } else {
+            commentSection.style.display = 'none';
         }
+
+        document.body.appendChild(overlay);
+
+        disableScroll();
+
+        document.addEventListener('click', handleClickOutside);
     }
+
 
     function like(button, Id) {
         var card = button.closest(".card");
@@ -323,5 +432,4 @@
 
         sessionStorage.setItem("likedCards", JSON.stringify(likedCards));
     }
-
 </script>
