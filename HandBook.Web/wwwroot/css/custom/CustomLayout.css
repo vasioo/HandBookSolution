@@ -1,0 +1,66 @@
+﻿#cookie-consent-message {
+    z-index: 1000;
+}
+
+.sidebar {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    padding: 58px 0 0;
+    box-shadow: 0 2px 5px 0 rgb(0 0 0 / 5%), 0 2px 10px 0 rgb(0 0 0 / 5%);
+    width: 240px;
+    z-index: 600;
+}
+
+    .sidebar .active {
+        border-radius: 5px;
+        box-shadow: 0 2px 5px 0 rgb(0 0 0 / 16%), 0 2px 10px 0 rgb(0 0 0 / 12%);
+    }
+
+.sidebar-sticky {
+    position: relative;
+    top: 0;
+    height: calc(100vh - 48px);
+    padding-top: 0.5rem;
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+
+nav {
+    background-color: #EDE6D6;
+}
+
+body {
+    background-color: #F5F5F4;
+}
+
+#navbarAttributes a {
+    font-size: 24px;
+    color: black;
+}
+
+.list-group.icon {
+    display: flex;
+    flex-direction: column;
+}
+
+.list-group.label {
+    display: flex;
+    flex-direction: column;
+}
+
+.list-group-item {
+    display: flex;
+    align-items: center;
+}
+
+    .list-group-item .icon {
+        margin-right: 5px;
+    }
+
+.active {
+    font-weight: bold;
+    color: blue 
+}
+

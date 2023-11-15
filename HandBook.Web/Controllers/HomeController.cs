@@ -102,6 +102,7 @@ namespace HandBook.Web.Controllers
             {
                 tfm.CreatorUserName = username!;
                 ntf.AppUser = user!;
+                ntf.CreatorUserName=user!.UserName!;
                 ntf.Time = DateTime.Now;
                 ntf.MainText = "added a new post";
                 await _dbc.AddAsync(tfm);
@@ -153,6 +154,7 @@ namespace HandBook.Web.Controllers
 
                     Notification ntf = new Notification();
                     ntf.AppUser = user!;
+                    ntf.CreatorUserName = user!.UserName!;
                     ntf.Post = item!;
                     ntf.Time = DateTime.Now;
                     ntf.MainText = "commented on your post";
@@ -208,6 +210,7 @@ namespace HandBook.Web.Controllers
 
                     Notification ntf = new Notification();
                     ntf.AppUser = user!;
+                    ntf.CreatorUserName = user!.UserName!;
                     ntf.Post = item!;
                     ntf.Time = DateTime.Now;
                     ntf.MainText = "liked your post";
@@ -237,6 +240,18 @@ namespace HandBook.Web.Controllers
             var useraccdto = new UserAccountDTO();
             useraccdto.UserTemp = user;
             useraccdto.PostsTemp = _dbc.Posts.Where(x => x.CreatorUserName == username);
+
+            if (user != null)
+            {
+                var userLikedCards = _dbc.Likes.Where(like => like.UserId == user!.Id);
+                if (userLikedCards != null && userLikedCards.Count() > 0)
+                {
+                    ViewBag.UserLikedCards = userLikedCards.Select(x => x.PostId).ToList();
+                }
+            }
+
+            ViewBag.UserUsername = username;
+
 
             return View("~/Views/Home/Account.cshtml", useraccdto);
         }

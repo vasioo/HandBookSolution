@@ -1,29 +1,51 @@
 ﻿@using HandBook.Models;
 @model Post
-<form method="post" enctype="multipart/form-data">
-    @*<div class="form-group">
-        <label asp-for="@Model.CreatorUserName"></label>
-        <input asp-for="@Model.CreatorUserName" class="form-control" required placeholder="What should the program return: ">
-        <span asp-validation-for="@Model.CreatorUserName" class="small text-danger"></span>
-    </div>*@
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div id="imagePreview" class="mt-3">
+                <img id="previewImage" class="img-fluid" alt="Image Preview">
+            </div>
+            <div class="row">
+                <form id="uploadForm" method="post" enctype="multipart/form-data">
+                    <div class="form-group">
+                        <label asp-for="@Model.image" class="form-label">Image</label>
+                        <div class="custom-file">
+                            <input asp-for="@Model.image" id="imageInput" type="file" class="custom-file-input" accept=".jpg,.jpeg,.png,.gif" required>
+                        </div>
+                        <span asp-validation-for="@Model.image" class="small text-danger"></span>
+                    </div>
 
-   @* <div class="form-group">
-        <label asp-for="@Model.AmountOfLikes"></label>
-        <input asp-for="@Model.AmountOfLikes" class="form-control" required placeholder="What should the program return: ">
-        <span asp-validation-for="@Model.AmountOfLikes" class="small text-danger"></span>
-    </div>*@
-
-    <div class="form-group">
-        <label asp-for="@Model.image"></label>
-        <div class="custom-file">
-            <input asp-for="@Model.image" type="file" class="custom-file-input" accept=".jpg,.jpeg,.png,.gif" required>
+                    @*    <!-- Add a field for description -->
+                    <div class="form-group">
+                    <label asp-for="@Model.description" class="form-label">Description</label>
+                    <input asp-for="@Model.description" type="text" class="form-control" />
+                    <span asp-validation-for="@Model.description" class="small text-danger"></span>
+                    </div>
+                    *@
+                    <div class="row mt-4">
+                        <input id="confirmationButton" class="btn btn-dark" type="submit" value="Save" />
+                    </div>
+                    @ViewBag.message
+                </form>
+            </div>
         </div>
-        <span asp-validation-for="@Model.image" class="small text-danger"></span>
     </div>
+</div>
 
+<script>
+    document.getElementById('imageInput').addEventListener('change', function (e) {
+        const previewImage = document.getElementById('previewImage');
+        const fileInput = e.target;
 
-    <div class="text-center">
-        <input id="confirmationButton" class="btn btn-primary mt-3" type="submit" value="Save" />
-    </div>
-    @ViewBag.message
-</form>
+        if (fileInput.files && fileInput.files[0]) {
+            const reader = new FileReader();
+
+            reader.onload = function (e) {
+                previewImage.src = e.target.result;
+            };
+
+            reader.readAsDataURL(fileInput.files[0]);
+        }
+    });
+</script>

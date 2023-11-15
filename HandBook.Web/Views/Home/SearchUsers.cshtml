@@ -3,17 +3,17 @@
 @inject UserManager<AppUser> UserManager
 
 <style>
-    .user-link, .user-link:hover{
+    .user-link, .user-link:hover {
         text-decoration: none;
-        color: darkgray;
+        color: black;
     }
 
 </style>
 <div class="pt-5">
     <form id="searchForm" method="get">
         <div class="form-actions no-color">
-            <div class="row">
-                <input class="col-8" type="text" placeholder="Search" name="SearchString" id="searchInput" value="@ViewData["CurrentFilter"]" />
+            <div class="row justify-content-center">
+                <input class="col-8" type="text" placeholder="Search" name="SearchString" autocomplete="off" id="searchInput" value="@ViewData["CurrentFilter"]" />
             </div>
         </div>
     </form>
@@ -32,6 +32,12 @@
             });
         });
 
+        window.onload = function () {
+            var searchInput = document.getElementById('searchInput');
+            var searchStringBeggining = searchInput.value;
+            searchUsers(searchStringBeggining);
+        };
+
         function searchUsers(query) {
             var xhr = new XMLHttpRequest();
             xhr.onreadystatechange = function () {
@@ -41,17 +47,17 @@
                         var resultsContainer = document.getElementById('searchResults');
                         resultsContainer.innerHTML = '';
                         users.forEach(function (user) {
-                            // var userDiv = document.createElement('div');
-                            // userDiv.textContent = user.userName;
-
                             var userDiv = document.createElement('div');
                             userDiv.innerHTML =
-                                '<div class="row">' +
+                                '<div class="row justify-content-center pt-1">' +
+                                '<div class="col-8 border">' +
+                                '<a class="user-link" href="/Home/Account?username=' + user.userName + '">'+
                                 '<div class="col-1">' +
-                                '' +
                                 '</div>' +
                                 '<div class="col p-2">' +
-                                '<a class="user-link" href="/Home/Account?username=' + user.userName + '">' + user.userName + '</a>' +
+                                user.userName +
+                                '</div>' +
+                                '</a>' +
                                 '</div>' +
                                 '</div>';
 

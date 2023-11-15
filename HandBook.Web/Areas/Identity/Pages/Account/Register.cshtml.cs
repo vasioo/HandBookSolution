@@ -5,11 +5,16 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Configuration;
+using System.Diagnostics.Metrics;
 using System.Linq;
 using System.Text;
 using System.Text.Encodings.Web;
 using System.Threading;
 using System.Threading.Tasks;
+using CloudinaryDotNet;
+using CloudinaryDotNet.Actions;
+using HandBook.Web.Models;
 using Messenger.Models;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
@@ -30,33 +35,43 @@ namespace HandBook.Web.Areas.Identity.Pages.Account
         private readonly IUserEmailStore<AppUser> _emailStore;
         private readonly ILogger<RegisterModel> _logger;
         private readonly IEmailSender _emailSender;
+        public IConfiguration Configuration;
+        private CloudinarySettings _cloudinarySettings;
+        private Cloudinary _cloudinary;
 
         public RegisterModel(
             UserManager<AppUser> userManager,
             IUserStore<AppUser> userStore,
             SignInManager<AppUser> signInManager,
             ILogger<RegisterModel> logger,
-            IEmailSender emailSender)
+            IEmailSender emailSender, IConfiguration configuration)
         {
+            Configuration = configuration;
+            _cloudinarySettings = Configuration.GetSection("CloudinarySettings").Get<CloudinarySettings>() ?? new CloudinarySettings();
             _userManager = userManager;
             _userStore = userStore;
             _emailStore = GetEmailStore();
             _signInManager = signInManager;
             _logger = logger;
             _emailSender = emailSender;
+            CloudinaryDotNet.Account account = new CloudinaryDotNet.Account(
+                _cloudinarySettings.CloudName,
+                _cloudinarySettings.ApiKey,
+                _cloudinarySettings.ApiSecret);
+            _cloudinary = new Cloudinary(account);
         }
 
-      
+
         [BindProperty]
         public InputModel Input { get; set; }
 
-      
+
         public string ReturnUrl { get; set; }
 
-       
+
         public IList<AuthenticationScheme> ExternalLogins { get; set; }
 
- 
+
         public class InputModel
         {
             [Required]
@@ -82,6 +97,8 @@ namespace HandBook.Web.Areas.Identity.Pages.Account
 
             [Display(Name = "Gender")]
             public string Gender { get; set; }
+
+            public string ImageUrl { get; set; }
         }
 
 
@@ -91,6 +108,27 @@ namespace HandBook.Web.Areas.Identity.Pages.Account
             ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
         }
 
+        public async Task<bool> SaveImage(Photo image)
+        {
+            try
+            {
+                await _cloudinary.UploadAsync(new ImageUploadParams()
+                {
+                    File = new FileDescription(image.Image),
+                    DisplayName = image.ImageName,
+                    PublicId = image.PublicId,
+                    Overwrite = false,
+                });
+
+                return true;
+            }
+            catch (Exception)
+            {
+                // log error
+                return false;
+            }
+        }
+
         public async Task<IActionResult> OnPostAsync(string returnUrl = null)
         {
             returnUrl ??= Url.Content("~/");
@@ -98,10 +136,19 @@ namespace HandBook.Web.Areas.Identity.Pages.Account
             if (ModelState.IsValid)
             {
                 var user = new AppUser();
-
-                user.UserName = Input.Email;
+                user.UserName = Input.Username;
                 user.Email = Input.Email;
                 user.Gender = Input.Gender;
+
+                var photo = new Photo();
+                if (Input.ImageUrl != null && Input.ImageUrl != "")
+                {
+                    photo.Image = Input.ImageUrl;
+                    photo.ImageName = $"profile-image-for-{user.UserName}";
+                    photo.PublicId = $"profile-image-for-{user.UserName}";
+                }
+
+                await SaveImage(photo);
 
                 await _userStore.SetUserNameAsync(user, user.UserName, CancellationToken.None);
                 await _emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);
@@ -139,7 +186,7 @@ namespace HandBook.Web.Areas.Identity.Pages.Account
                 }
             }
 
-             return Page();
+            return Page();
         }
         private IUserEmailStore<AppUser> GetEmailStore()
         {

@@ -1,101 +1,17 @@
 ﻿@using HandBook.Models;
 @model IEnumerable<Post>
 
-@{
+@section Styles {
+    <link href="@Url.Content("~/css/custom/CustomPostIndex.css")" rel="stylesheet" type="text/css" />
 }
-
-<style>
-    .container {
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        height: 100%;
-    }
-
-    .btn-circle {
-        width: 60px;
-        height: 60px;
-        border-radius: 50%;
-        font-size: 24px;
-        position: fixed;
-        right: 20px;
-        bottom: 20px;
-        z-index: 9999;
-    }
-
-    .likeButton {
-        background-color: transparent;
-        border: none;
-        color: #555;
-        line-height: 1;
-        padding: 0;
-        transition: color 0.2s ease-in-out;
-    }
-
-    .commentButton, .shareButton {
-        background-color: transparent;
-        border: none;
-        color: #555;
-        line-height: 1;
-        padding: 0;
-    }
-
-    .likeButton.liked {
-        color: #ff385c;
-    }
-
-    .likeButton span {
-        margin-left: 4px;
-    }
-
-    .image-container {
-        width: 450px;
-        height: 200px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-
-    .fit-image {
-        max-width: 100%;
-        max-height: 100%;
-    }
-
-    .cr-us-name, .cr-us-name:hover {
-        color: black;
-        text-decoration: none;
-    }
-
-    .card-header {
-        background: none;
-    }
-
-    .card, .card-header, .card-body {
-        border: none;
-    }
-
-    .custom-date {
-    }
-
-    .custom-comment-icon {
-        padding: 10px;
-        display: block;
-        text-decoration: none;
-        color: #333;
-    }
-
-    .textarea[contenteditable]:empty::before {
-        content: "Placeholder still possible";
-        color: gray;
-    }
-</style>
-
-<div class="container">
+@section Scripts{
+    <script src="@Url.Content("~/js/custom/postJs.js")" type="text/javascript" asp-append-version="true"></script>
+}
+<div class="container mb-5">
     <br />
     <br />
-    <div class="row">
-        <div class="col-12" data-user-username="@ViewBag.UserUsername">
+    <div class="row justify-content-center ">
+        <div class="row justify-content-center " data-user-username="@ViewBag.UserUsername">
             @{
                 List<int> userLikedCards = ViewBag.UserLikedCards;
                 if (userLikedCards == null)
@@ -146,7 +62,7 @@
                         return displayString;
                     }
 
-                    <div class="card" style="width: 470px">
+                    <div class="card col-7 mt-3">
                         <div class="card-header">
                             <div class="row justify-content-between w-100">
                                 <div class="col-auto">
@@ -164,7 +80,7 @@
                             var base64Image = Convert.ToBase64String(item.image);
                             ViewBag.ImageData = base64Image;
 
-                            <img src="data:image;base64,@ViewBag.ImageData" style="border-radius:6px" alt="Image" class="fit-image">
+                            <img src="data:image;base64,@ViewBag.ImageData" style="border-radius:6px; height:500px" alt="Image" class="fit-image">
                             var commentsCount = 0;
                             if (item.Comments != null)
                             {
@@ -259,7 +175,6 @@
                             </div>
                         </div>
                     </div>
-                    <br />
                 }
             }
         </div>
@@ -278,158 +193,3 @@
         </div>
     </div>
 </div>
-
-<script>
-
-    $(document).on('click', '.submit-btn', function () {
-        var $commentContainer = $(this).closest('.comment-container');
-        var $commentTextarea = $commentContainer.find('.my-text');
-
-        var commentContent = $commentTextarea.val();
-        var userUsername = $commentContainer.data('user-username');
-        var postId = $commentContainer.data('data-post-id');
-        
-        var comment = {
-            AppUsername:userUsername ,
-            CommentContent: commentContent,
-            DateOfCreation: new Date().toString(),
-            PostId: postId
-        };
-
-        $.ajax({
-            url: "/Home/AddOrRemoveAComment",
-            method: 'POST',
-            data: { commentsDTO: comment },
-            success: function (response) {
-                var commentHtml = `
-              <div class="main-comment row">
-                <div class="row">${response.appUser.userName}</div>
-                <div class="row">${response.commentContent}</div>
-                <div class="row">
-                  <div class="col">${GetTimeDisplay(response.dateOfCreation)}</div>
-                  <div class="col"><a>Like</a></div>
-                  <div class="col"><a>Reply</a></div>
-                </div>
-              </div>
-              <div class="look-replies">View Replies</div>
-            `;
-
-                $commentContainer.find('.comments-container').append(commentHtml);
-                $commentContainer.find('.my-text').val('');
-            },
-            error: function (error) {
-                console.error('Error submitting comment:', error);
-            }
-        });
-    });
-    function likeButtonClick(Id) {
-        $.ajax({
-            type: "POST",
-            url: "/Home/IncrementOrDecrementLikeCount",
-            data: { itemId: Id },
-            success: function (result) {
-                var likeCountElement = $('.likeCount[data-item-id="' + Id + '"]');
-                likeCountElement.html(result + ' <i class="fa-solid fa-heart liked fa-sm" style="color: #ff0000;"></i>');
-                likeCountElement.toggle(result > 0);
-            },
-            error: function (result) {
-                alert("Error: " + result.statusText);
-            }
-        });
-    }
-
-
-    function toggleComments(itemId, element) {
-        const card = element.closest('.card');
-        const cardId = `card-overlay-${itemId}`;
-
-        const existingOverlay = document.getElementById(cardId);
-
-        if (existingOverlay) {
-            existingOverlay.remove();
-            document.body.style.overflow = '';
-
-            const commentSection = card.querySelector('.comment-section');
-            commentSection.style.display = 'none';
-
-            card.style.zIndex = ''; // Reset the z-index
-
-            document.removeEventListener('click', handleClickOutside);
-            return;
-        }
-
-        const overlay = document.createElement('div');
-        overlay.id = cardId;
-
-        function disableScroll() {
-            document.body.style.overflow = 'hidden';
-        }
-
-        function enableScroll() {
-            document.body.style.overflow = '';
-        }
-
-        function handleClickOutside(event) {
-            if (event.target === overlay) {
-                enableScroll();
-                card.style.zIndex = '';
-                overlay.remove();
-
-                const commentSection = card.querySelector('.comment-section');
-                commentSection.style.display = 'none';
-
-                document.removeEventListener('click', handleClickOutside);
-            }
-        }
-
-        card.style.zIndex = 1000;
-
-        overlay.style.position = 'fixed';
-        overlay.style.top = '0';
-        overlay.style.left = '0';
-        overlay.style.width = '100%';
-        overlay.style.height = '100%';
-        overlay.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
-
-        const commentSection = card.querySelector('.comment-section');
-
-        if (commentSection.style.display === 'none' || commentSection.style.display === '') {
-            commentSection.style.display = 'block';
-        } else {
-            commentSection.style.display = 'none';
-        }
-
-        document.body.appendChild(overlay);
-
-        disableScroll();
-
-        document.addEventListener('click', handleClickOutside);
-    }
-
-
-    function like(button, Id) {
-        var card = button.closest(".card");
-        var cardId = card.dataset.id;
-        var count = parseInt(button.dataset.count) || 0;
-        var likedCards = JSON.parse(sessionStorage.getItem("likedCards")) || {};
-
-        var heartIcon = button.querySelector("i.fa-heart");
-
-
-        if (heartIcon.classList.contains("liked")) {
-            count--;
-            button.dataset.count = count;
-            button.innerHTML = ` <i class="fa-regular fa-heart fa-xl" style="color: #000;"></i>`;
-            likeButtonClick(Id);
-            delete likedCards[cardId];
-        } else {
-            count++;
-            button.dataset.count = count;
-            button.innerHTML = ` <i class="fa-solid fa-heart fa-xl liked" style="color: #ff0000;"></i>`;
-            likeButtonClick(Id);
-            likedCards[cardId] = true;
-        }
-
-        sessionStorage.setItem("likedCards", JSON.stringify(likedCards));
-    }
-</script>

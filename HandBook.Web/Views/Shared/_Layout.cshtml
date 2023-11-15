@@ -9,74 +9,9 @@
     <link rel="stylesheet" href="~/HandBook.Web.styles.css" asp-append-version="true" />
     <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.0/themes/base/jquery-ui.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
-    <style>
-        #cookie-consent-message{
-            z-index:1000;
-        }
-        .sidebar {
-            position: fixed;
-            top: 0;
-            bottom: 0;
-            left: 0;
-            padding: 58px 0 0; /* Height of navbar */
-            box-shadow: 0 2px 5px 0 rgb(0 0 0 / 5%), 0 2px 10px 0 rgb(0 0 0 / 5%);
-            width: 240px;
-            z-index: 600;
-        }
-
-            .sidebar .active {
-                border-radius: 5px;
-                box-shadow: 0 2px 5px 0 rgb(0 0 0 / 16%), 0 2px 10px 0 rgb(0 0 0 / 12%);
-            }
-
-        .sidebar-sticky {
-            position: relative;
-            top: 0;
-            height: calc(100vh - 48px);
-            padding-top: 0.5rem;
-            overflow-x: hidden;
-            overflow-y: auto; /* Scrollable contents if viewport is shorter than content. */
-        }
-
-        nav {
-            background-color: #EDE6D6;
-        }
-
-        body {
-            background-color: #F5F5F4;
-        }
-
-        #navbarAttributes a {
-            font-size: 24px;
-            color: black;
-        }
-
-        .list-group.icon {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .list-group.label {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .list-group-item {
-            display: flex;
-            align-items: center;
-        }
-
-            .list-group-item .icon {
-                margin-right: 5px;
-            }
-
-        .active {
-            /* Define the styling for the active link */
-            font-weight: bold;
-            color: blue /* Change the color to your desired highlight color */
-        }
-
-    </style>
+    <link rel="stylesheet" type="text/css" href="~/css/custom/CustomLayout.css">
+    <link rel="stylesheet" type="text/css" href="~/css/custom/PostStyling.css">
+    @RenderSection("Styles", false)
 </head>
 
 <body>

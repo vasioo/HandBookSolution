@@ -5,10 +5,14 @@
     ViewData["Title"] = "Notifications";
 }
 
-<div class="col-md-12 col-lg-6 justify-content-center">
-    @foreach (var item in Model)
-    {
-        <partial name="_NotificationsPartial" model="@item" />
-    }
-
+@section Scripts{
+    <script src="@Url.Content("~/js/custom/notificationsPage.js")" type="text/javascript" asp-append-version="true"></script>
+}
+<div class="container">
+    <div class="row justify-content-center">
+        @foreach (var item in Model)
+        {
+            <partial name="_NotificationsPartial" model="@item" />
+        }
+    </div>
 </div>
