@@ -1,4 +1,4 @@
-﻿#cookie-consent-message {
+﻿﻿#cookie-consent-message {
     z-index: 1000;
 }
 
@@ -61,6 +61,5 @@ body {
 
 .active {
     font-weight: bold;
-    color: blue 
+    color: blue
 }
-

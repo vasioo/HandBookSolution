@@ -1,5 +1,5 @@
 ﻿@{
-    if (ViewData.TryGetValue("ParentLayout", out var parentLayout) && parentLayout !=  null)
+    if (ViewData.TryGetValue("ParentLayout", out var parentLayout) && parentLayout != null)
     {
         Layout = parentLayout.ToString();
     }
@@ -8,22 +8,27 @@
         Layout = "/Areas/Identity/Pages/_Layout.cshtml";
     }
 }
+@section Styles {
+    <link href="@Url.Content("~/css/custom/ManageUserNav.css")" rel="stylesheet" type="text/css" />
+}
 
-<h1>Manage your account</h1>
 
-<div>
-    <h2>Change your account settings</h2>
+<div class="row justify-content-center">
+    <h2 class="text-center">Change your account settings</h2>
     <hr />
-    <div class="row">
-        <div class="col-md-3">
-            <partial name="_ManageNav" />
-        </div>
-        <div class="col-md-9">
-            @RenderBody()
+
+    <div class="col-8 justify-content-center">
+        <div class="row">
+            <div class="col-md-3">
+                <partial name="_ManageNav" />
+            </div>
+            <div class="col-md-9">
+                @RenderBody()
+            </div>
         </div>
     </div>
 </div>
 
 @section Scripts {
     @RenderSection("Scripts", required: false)
-}
+    }

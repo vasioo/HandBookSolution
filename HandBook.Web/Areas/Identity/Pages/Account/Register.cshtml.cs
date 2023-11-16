@@ -139,7 +139,6 @@ namespace HandBook.Web.Areas.Identity.Pages.Account
                 user.UserName = Input.Username;
                 user.Email = Input.Email;
                 user.Gender = Input.Gender;
-
                 var photo = new Photo();
                 if (Input.ImageUrl != null && Input.ImageUrl != "")
                 {

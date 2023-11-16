@@ -7,6 +7,5 @@ namespace Messenger.Models
     {
         public string Gender { get; set; } = "";
         public virtual ICollection<Messages> Messages { get; set; }
-        public string CloudinaryProfileImageLink { get; set; }
     }
 }
