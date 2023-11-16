@@ -2,6 +2,8 @@
 @model Notification
 
 @{
+    string link = $"https://res.cloudinary.com/dzaicqbce/image/upload/v1695818842/profile-image-for-{ViewBag.CurrentUserUsername}.png";
+    string alternativeLink = $"https://res.cloudinary.com/dzaicqbce/image/upload/v1700160046/azgysbpf8xpcxpfclb9i.jpg";
     string GetTimeDisplay(DateTime postDate)
     {
         TimeSpan timeDifference = DateTime.Now - postDate;
@@ -45,9 +47,18 @@
 <div class="row justify-content-center pt-3">
     <div class="card col-6 ">
         <div class="card-body">
-            <h5 class="card-title text-center">@Model.CreatorUserName @Model.MainText</h5>
+            <div class="card-title d-flex align-items-center">
+                <img src="@link" alt="Image not found" onerror="this.onerror=null;this.src='@alternativeLink';" style="border-radius:30px; width:50px; margin-right: 10px;" />
+                <div class="row">
+                    <div class="col-auto pr-1 font-weight-bold h5 m-0">@Model.CreatorUserName</div>
+                    <div class="col-auto pl-md-1 h5 m-0">@Model.MainText</div>
+                </div>
+            </div>
+
             <p class="card-text text-left">  @GetTimeDisplay(Model.Time)</p>
-            <button id="myButton" onclick="sendDataToController(@Model.PostId)">View Post</button>
+            <a class="card-title h5 cr-us-name" asp-controller="Home" asp-action="DesiredPost" asp-route-modelData="@Model.PostId">
+                <img src="@Model.Post.image" />
+            </a>
             <div id="partialContainer"></div>
         </div>
     </div>

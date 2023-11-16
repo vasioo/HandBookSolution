@@ -63,7 +63,7 @@ namespace HandBook.Web.Controllers
         }
 
         [Authorize]
-        public async Task<IActionResult> DesiredPost([FromBody] int modelData)
+        public async Task<IActionResult> DesiredPost(int modelData)
         {
             var item = await _dbc.Posts.Where(x => x.Id == modelData).FirstOrDefaultAsync();
             return View("~/Views/Home/DesiredPost.cshtml", item);
@@ -74,6 +74,9 @@ namespace HandBook.Web.Controllers
         {
             var cards = await _dbc.Notifications.ToListAsync();
             cards.Reverse();
+            var username = HttpContext.User?.Identity?.Name ?? "";
+            var user = await _userManager.FindByNameAsync(username);
+            ViewBag.CurrentUserUsername = user.UserName;
             return View("~/Views/Home/Notifications.cshtml", cards);
         }
 

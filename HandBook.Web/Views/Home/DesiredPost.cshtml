@@ -5,10 +5,7 @@
     ViewData["Title"] = "DesiredPost";
 }
 <div>
-    <div>
-    <button id="myButton">"<-"</button>
-    </div>
-    <div>
+    <div class="justify-content-center row">
         @await Html.PartialAsync("_PostsPartial",Model);
         @*<partial name= model="@Model" />*@
     </div>

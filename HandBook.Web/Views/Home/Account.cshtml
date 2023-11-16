@@ -6,15 +6,76 @@
 }
 @section Scripts{
     <script src="@Url.Content("~/js/custom/postJs.js")" type="text/javascript" asp-append-version="true"></script>
+    <script src="@Url.Content("~/js/custom/accountPage.js")" type="text/javascript" asp-append-version="true"></script>
+    <script src="@Url.Content("~/js/custom/mainJs.js")" type="text/javascript" asp-append-version="true"></script>
 }
+<style>
+    .upload-input {
+        position: relative;
+        height: 150px;
+    }
+
+        .upload-input input {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border: 2px dashed rgba(124,134,154,.25);
+            text-indent: -9999px;
+        }
+
+        .upload-input .content {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            padding: 30px;
+            top: 0;
+            left: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .upload-input .plus-icon {
+            height: 50px;
+            width: 50px;
+            color: #fff;
+            background: #88888859;
+            display: inline-block;
+            line-height: 50px;
+            font-size: 18px;
+            border-radius: 5px;
+            -webkit-transition: all 0.4s ease;
+            transition: all 0.4s ease;
+        }
+
+        .upload-input:hover .plus-icon {
+            background-color: #5830E0;
+        }
+
+
+    .uploaded-image {
+        height: 150px;
+        width: 100%;
+    }
+</style>
 
 <div class="container justify-content-center align-items-center d-flex">
     <div class="row">
-        <div class="btn btn-primary">Add a friend</div>
-        <div class="btn border border-3">
-            <a href="@Url.Action("Chat", "Messages", new { userName = Model.UserTemp.UserName})" style="text-decoration:none">
-                Message
-            </a>
+        <div class="row">
+            <div class="col">
+                <div class="upload-input">
+                    <input type="file" id="profile-image" name="profile-image" class="image-upload" accept=".png, .jpg, .jpeg" multiple="multiple" max="1">
+                    <img class="uploaded-image" />
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="btn btn-primary">Add a friend</div>
+            <div class="btn border border-3">
+                <a href="@Url.Action("Chat", "Messages", new { userName = Model.UserTemp.UserName})" style="text-decoration:none">
+                    Message
+                </a>
+            </div>
         </div>
     </div>
 

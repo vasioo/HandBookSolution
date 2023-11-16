@@ -1,11 +1,10 @@
-﻿
-$(document).on('click', '.submit-btn', function () {
-    var $commentContainer = $(this).closest('.comment-container');
+﻿$(document).on('click', '.submit-btn', function () {
+    var $commentContainer = $(this).closest('.comment-section');
     var $commentTextarea = $commentContainer.find('.my-text');
 
     var commentContent = $commentTextarea.val();
-    var userUsername = $commentContainer.data('user-username');
-    var postId = $commentContainer.data('data-post-id');
+    var userUsername = $commentContainer.data('user-username'); // Assuming you have user-username data attribute in comment-section
+    var postId = $commentContainer.data('post-id'); // Use data-post-id directly from the comment section
 
     var comment = {
         AppUsername: userUsername,
@@ -33,13 +32,14 @@ $(document).on('click', '.submit-btn', function () {
             `;
 
             $commentContainer.find('.comments-container').append(commentHtml);
-            $commentContainer.find('.my-text').val('');
+            $commentTextarea.val(''); // Use val() to set the textarea value to an empty string
         },
         error: function (error) {
             console.error('Error submitting comment:', error);
         }
     });
 });
+
 function likeButtonClick(Id) {
     $.ajax({
         type: "POST",
