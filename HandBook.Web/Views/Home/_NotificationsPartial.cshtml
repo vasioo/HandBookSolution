@@ -43,23 +43,26 @@
         return displayString;
     }
 }
-
-<div class="row justify-content-center pt-3">
-    <div class="card col-6 ">
-        <div class="card-body">
-            <div class="card-title d-flex align-items-center">
-                <img src="@link" alt="Image not found" onerror="this.onerror=null;this.src='@alternativeLink';" style="border-radius:30px; width:50px; margin-right: 10px;" />
-                <div class="row">
-                    <div class="col-auto pr-1 font-weight-bold h5 m-0">@Model.CreatorUserName</div>
-                    <div class="col-auto pl-md-1 h5 m-0">@Model.MainText</div>
+<style>
+    .link-to-post, .link-to-post:hover, .link.link-to-post:active {
+        text-decoration: none;
+        color: black;
+    }
+</style>
+<div class="row justify-content-center pt-4">
+    <div class="card col-6 m-0 p-0">
+        <a class="link-to-post" asp-controller="Home" asp-action="DesiredPost" asp-route-modelData="@Model.PostId">
+            <div class="card-body">
+                <div class="card-title d-flex align-items-center">
+                    <div class="col-2">
+                        <img src="@link" alt="Image not found" onerror="this.onerror=null;this.src='@alternativeLink';" style="border-radius:30px; width:50px; margin-right: 10px;" />
+                    </div>
+                    <div class="row">
+                        <div class="col-auto font-weight-bold h5 m-0 p-0">@Model.CreatorUserName @Model.MainText</div>
+                    </div>
                 </div>
+                <p class="card-text text-left">  @GetTimeDisplay(Model.Time)</p>
             </div>
-
-            <p class="card-text text-left">  @GetTimeDisplay(Model.Time)</p>
-            <a class="card-title h5 cr-us-name" asp-controller="Home" asp-action="DesiredPost" asp-route-modelData="@Model.PostId">
-                <img src="@Model.Post.image" />
-            </a>
-            <div id="partialContainer"></div>
-        </div>
+        </a>
     </div>
 </div>

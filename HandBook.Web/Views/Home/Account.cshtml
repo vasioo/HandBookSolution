@@ -149,7 +149,7 @@
                             var base64Image = Convert.ToBase64String(item.image);
                             ViewBag.ImageData = base64Image;
 
-                            <img src="data:image;base64,@ViewBag.ImageData" style="border-radius:6px" alt="Image" class="fit-image">
+                            <img src="data:image;base64,@ViewBag.ImageData" style="border-radius:6px; height:500px" alt="Image" class="fit-image">
                             var commentsCount = 0;
                             if (item.Comments != null)
                             {

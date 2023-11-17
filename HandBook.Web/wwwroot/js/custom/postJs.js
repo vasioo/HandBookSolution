@@ -56,7 +56,6 @@ function likeButtonClick(Id) {
     });
 }
 
-
 function toggleComments(itemId, element) {
     const card = element.closest('.card');
     const cardId = `card-overlay-${itemId}`;
@@ -65,13 +64,11 @@ function toggleComments(itemId, element) {
 
     if (existingOverlay) {
         existingOverlay.remove();
-        document.body.style.overflow = ''; // Enable body scrolling
-
         const commentSection = card.querySelector('.comment-section');
         commentSection.style.display = 'none';
 
         card.style.zIndex = '';
-        card.style.overflow = '';
+        card.style.position = ''; // Reset card position
 
         document.removeEventListener('click', handleClickOutside);
         return;
@@ -80,19 +77,10 @@ function toggleComments(itemId, element) {
     const overlay = document.createElement('div');
     overlay.id = cardId;
 
-    function disableScroll() {
-        document.body.style.overflow = 'hidden';
-    }
-
-    function enableScroll() {
-        document.body.style.overflow = '';
-    }
-
     function handleClickOutside(event) {
         if (event.target === overlay) {
-            enableScroll();
             card.style.zIndex = '';
-            card.style.overflow = '';
+            card.style.position = ''; // Reset card position
             overlay.remove();
 
             const commentSection = card.querySelector('.comment-section');
@@ -103,6 +91,7 @@ function toggleComments(itemId, element) {
     }
 
     card.style.zIndex = 1000;
+    card.style.position = 'relative'; // Adjust card position to maintain its layout in the document flow
 
     overlay.style.position = 'fixed';
     overlay.style.top = '0';
@@ -110,6 +99,7 @@ function toggleComments(itemId, element) {
     overlay.style.width = '100%';
     overlay.style.height = '100%';
     overlay.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
+    overlay.style.backdropFilter = 'blur(5px)'; // Apply a blur effect to the backdrop
 
     const commentSection = card.querySelector('.comment-section');
 
@@ -118,9 +108,6 @@ function toggleComments(itemId, element) {
 
         // Scroll to the top of the card
         card.scrollIntoView({ behavior: 'smooth', block: 'start', inline: 'nearest' });
-
-        card.style.overflow = 'auto'; // Set card overflow to make it scrollable
-        disableScroll(); // Disable body scrolling
     } else {
         commentSection.style.display = 'none';
     }

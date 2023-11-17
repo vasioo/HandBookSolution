@@ -7,13 +7,15 @@
         text-decoration: none;
         color: black;
     }
-
+    .user-information{
+        background:white;
+    }
 </style>
 <div class="pt-5">
     <form id="searchForm" method="get">
         <div class="form-actions no-color">
             <div class="row justify-content-center">
-                <input class="col-8" type="text" placeholder="Search" name="SearchString" autocomplete="off" id="searchInput" value="@ViewData["CurrentFilter"]" />
+                <input class="col-8 h5 pt-1 pb-1" type="text" placeholder="Search" name="SearchString" autocomplete="off" id="searchInput" value="@ViewData["CurrentFilter"]" />
             </div>
         </div>
     </form>
@@ -47,21 +49,31 @@
                         var resultsContainer = document.getElementById('searchResults');
                         resultsContainer.innerHTML = '';
                         users.forEach(function (user) {
+                            var usernameLink = 'https://res.cloudinary.com/dzaicqbce/image/upload/v1695818842/profile-image-for-' + user.userName + '.png';
+                            var alternativeLink = 'https://res.cloudinary.com/dzaicqbce/image/upload/v1700160046/azgysbpf8xpcxpfclb9i.jpg';
+                            var imgTag = '<img src="' + usernameLink + '" alt="Image not found" onerror="this.onerror=null;this.src=\'' + alternativeLink + '\';" style="border-radius:30px; width:50px; margin-right:10px;" />';
+
                             var userDiv = document.createElement('div');
                             userDiv.innerHTML =
                                 '<div class="row justify-content-center pt-1">' +
-                                '<div class="col-8 border">' +
-                                '<a class="user-link" href="/Home/Account?username=' + user.userName + '">'+
-                                '<div class="col-1">' +
-                                '</div>' +
-                                '<div class="col p-2">' +
-                                user.userName +
-                                '</div>' +
-                                '</a>' +
-                                '</div>' +
+                                '   <div class="col-8 border">' +
+                                '       <a class="user-link" href="/Home/Account?username=' + user.userName + '">' +
+                                '           <div class="row align-items-center user-information">' +
+                                '               <div class="col-1 pt-1 pb-1">' +
+                                '                   ' + imgTag +
+                                '               </div>' +
+                                '               <div class="col">' +
+                                '                   <div class="row p-0 m-0 h5">' +
+                                '                       ' + user.userName +
+                                '                   </div>' +
+                                '               </div>' +
+                                '           </div>' +
+                                '       </a>' +
+                                '   </div>' +
                                 '</div>';
 
                             resultsContainer.appendChild(userDiv);
+
                         });
                     } else {
 
