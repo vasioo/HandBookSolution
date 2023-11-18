@@ -97,7 +97,14 @@
                                             </span>
                                         </div>
                                         <div>
-                                            <span class="commentsCount" data-item-id="@item.Id">@commentsCount comments</span>
+                                            @if (@commentsCount == 1)
+                                            {
+                                                <span class="commentsCount" data-item-id="@item.Id">@commentsCount comment</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="commentsCount" data-item-id="@item.Id">@commentsCount comments</span>
+                                            }
                                         </div>
                                     </div>
                                 </div>
@@ -144,7 +151,7 @@
                                             <div class="border col-10 pl-1 pr-1 m-0">
                                                 <textarea class="my-text w-100" style="max-height:400px" placeholder="Write a comment..."></textarea>
                                             </div>
-                                          
+
                                             <div class="input-group-append align-self-end col-2">
                                                 <button class="btn btn-primary submit-btn" type="button"> <i class="fas fa-right-long"></i></button>
                                             </div>
@@ -154,19 +161,36 @@
 
                                 @if (item.Comments != null)
                                 {
+                                    <div class="comment-section-regulation-div">
                                     @foreach (var comment in item.Comments.Where(com => com.CommentDeriveFromId == 0))
                                     {
-                                        <div class="main-comment row">
-                                            <div class="row">@comment.AppUser.UserName</div>
-                                            <div class="row">@comment.CommentContent</div>
-                                            <div class="row">
-                                                <div class="col">@GetTimeDisplay(comment.DateOfCreation)</div>
-                                                <div class="col"><a>Like</a></div>
-                                                <div class="col"><a>Reply</a></div>
+                                        string link = $"https://res.cloudinary.com/dzaicqbce/image/upload/v1695818842/profile-image-for-{comment.AppUser.UserName}.png";
+                                        string alternativeLink = $"https://res.cloudinary.com/dzaicqbce/image/upload/v1700160046/azgysbpf8xpcxpfclb9i.jpg";
+                                        <div class="comment-container pt-2">
+                                            <div class="profile-column">
+                                                <img src="@link" alt="Image not found" onerror="this.onerror=null;this.src='@alternativeLink';" style="border-radius:30px; width:50px; margin-right: 10px;" />
+                                            </div>
+                                            <div class="comment-column">
+                                                <div class="comment">
+                                                    <div class="comment-header">
+                                                        <div class="comment-username">@comment.AppUser.UserName</div>
+                                                        <div class="comment-time">@GetTimeDisplay(comment.DateOfCreation)</div>
+                                                    </div>
+                                                    <div class="comment-content">@comment.CommentContent</div>
+                                                    <div class="comment-actions">
+                                                        <a href="#" class="comment-action">Like</a>
+                                                        <a href="#" class="comment-action">Reply</a>
+                                                    </div>
+                                                </div>
+                                                <div class="replies-container">
+                                                   
+                                                </div>
+                                                <div class="view-replies">View Replies</div>
                                             </div>
                                         </div>
-                                        <div class="look-replies">View Replies</div>
+
                                     }
+                                    </div>
                                 }
                                 else
                                 {

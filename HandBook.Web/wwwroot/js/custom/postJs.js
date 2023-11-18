@@ -3,11 +3,9 @@
     var $commentTextarea = $commentContainer.find('.my-text');
 
     var commentContent = $commentTextarea.val();
-    var userUsername = $commentContainer.data('user-username'); // Assuming you have user-username data attribute in comment-section
-    var postId = $commentContainer.data('post-id'); // Use data-post-id directly from the comment section
+    var postId = $commentContainer.data('post-id');
 
     var comment = {
-        AppUsername: userUsername,
         CommentContent: commentContent,
         DateOfCreation: new Date().toString(),
         PostId: postId
@@ -17,28 +15,50 @@
         url: "/Home/AddOrRemoveAComment",
         method: 'POST',
         data: { commentsDTO: comment },
+        dataType: 'json',
         success: function (response) {
-            var commentHtml = `
-              <div class="main-comment row">
-                <div class="row">${response.appUser.userName}</div>
-                <div class="row">${response.commentContent}</div>
-                <div class="row">
-                  <div class="col">${GetTimeDisplay(response.dateOfCreation)}</div>
-                  <div class="col"><a>Like</a></div>
-                  <div class="col"><a>Reply</a></div>
-                </div>
-              </div>
-              <div class="look-replies">View Replies</div>
-            `;
+            var commentDto = JSON.parse(response);
 
-            $commentContainer.find('.comments-container').append(commentHtml);
-            $commentTextarea.val(''); // Use val() to set the textarea value to an empty string
+            var usernameLink = 'https://res.cloudinary.com/dzaicqbce/image/upload/v1695818842/profile-image-for-' + commentDto.UserUsername + '.png';
+            var alternativeLink = 'https://res.cloudinary.com/dzaicqbce/image/upload/v1700160046/azgysbpf8xpcxpfclb9i.jpg';
+            var imgTag = '<img src="' + usernameLink + '" alt="Image not found" onerror="this.onerror=null;this.src=\'' + alternativeLink + '\';" style="border-radius:30px; width:50px; margin-right:10px;" />';
+
+            var commentHtml = `
+            <div class="comment-container pt-2">
+                <div class="profile-column">
+                   `+ imgTag + `
+                </div>
+                <div class="comment-column">
+                    <div class="comment">
+                        <div class="comment-header">
+                            <div class="comment-username">${commentDto.UserUsername}</div>
+                            <div class="comment-time">Now</div>
+                        </div>
+                        <div class="comment-content">${commentDto.CommentContent}</div>
+                        <div class="comment-actions">
+                            <a href="#" class="comment-action">Like</a>
+                            <a href="#" class="comment-action">Reply</a>
+                        </div>
+                    </div>
+                    <div class="replies-container">
+                        <!-- Add replies here if available -->
+                    </div>
+                    <div class="view-replies">View Replies</div>
+                </div>
+            </div>
+        `;
+
+            $('.comment-section-regulation-div').prepend(commentHtml);
+
+
         },
         error: function (error) {
+            // Add logging
             console.error('Error submitting comment:', error);
         }
     });
 });
+
 
 function likeButtonClick(Id) {
     $.ajax({

@@ -7,8 +7,10 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 using System.Diagnostics;
 using System.Linq;
+using Newtonsoft.Json;
 
 namespace HandBook.Web.Controllers
 {
@@ -34,7 +36,7 @@ namespace HandBook.Web.Controllers
             {
                 var username = HttpContext.User?.Identity?.Name ?? "";
                 var user = await _userManager.FindByNameAsync(username);
-                var cards = _dbc.Posts.OrderByDescending(x => x.Time);
+                var cards = _dbc.Posts.OrderByDescending(x => x.Time).Include(p => p.Comments);
 
                 if (user != null)
                 {
@@ -76,7 +78,7 @@ namespace HandBook.Web.Controllers
             cards.Reverse();
             var username = HttpContext.User?.Identity?.Name ?? "";
             var user = await _userManager.FindByNameAsync(username);
-            ViewBag.CurrentUserUsername = user.UserName;
+            ViewBag.CurrentUserUsername = user!.UserName;
             return View("~/Views/Home/Notifications.cshtml", cards);
         }
 
@@ -105,7 +107,7 @@ namespace HandBook.Web.Controllers
             {
                 tfm.CreatorUserName = username!;
                 ntf.AppUser = user!;
-                ntf.CreatorUserName=user!.UserName!;
+                ntf.CreatorUserName = user!.UserName!;
                 ntf.Time = DateTime.Now;
                 ntf.MainText = "added a new post";
                 await _dbc.AddAsync(tfm);
@@ -120,7 +122,7 @@ namespace HandBook.Web.Controllers
 
         [HttpPost]
         [Authorize]
-        public async Task<IActionResult> AddOrRemoveAComment(CommentsDTO commentsDTO )
+        public async Task<JsonResult> AddOrRemoveAComment(CommentsDTO commentsDTO)
         {
             try
             {
@@ -128,15 +130,18 @@ namespace HandBook.Web.Controllers
                 var username = HttpContext.User?.Identity?.Name ?? "";
                 var user = await _userManager.FindByNameAsync(username);
 
-                var existingComment = await _dbc.Comments.FirstOrDefaultAsync(x=>x.Id==commentsDTO.Id);
-                Guid randomGuid = Guid.NewGuid();
+                var existingComment = await _dbc.Comments.FirstOrDefaultAsync(x => x.Id == commentsDTO.Id);
 
+                // Add logging
+                Guid randomGuid = Guid.NewGuid();
                 string randomGuidString = randomGuid.ToString();
-                if (existingComment!=null)
+
+                if (existingComment != null)
                 {
                     var existingNotif = await _dbc.Notifications.FirstOrDefaultAsync(x => x.UserId == user!.Id && x.PostId == commentsDTO.PostId && x.MainText == "commented on your post");
 
                     _dbc.Comments.Remove(existingComment);
+
                     if (existingNotif != null)
                     {
                         _dbc.Notifications.Remove(existingNotif);
@@ -144,7 +149,6 @@ namespace HandBook.Web.Controllers
                 }
                 else
                 {
-                   
                     var comment = new Comment
                     {
                         DateOfCreation = DateTime.Now,
@@ -155,27 +159,46 @@ namespace HandBook.Web.Controllers
                         UniqueIdentifier = randomGuidString
                     };
 
-                    Notification ntf = new Notification();
-                    ntf.AppUser = user!;
-                    ntf.CreatorUserName = user!.UserName!;
-                    ntf.Post = item!;
-                    ntf.Time = DateTime.Now;
-                    ntf.MainText = "commented on your post";
+                    Notification ntf = new Notification
+                    {
+                        AppUser = user!,
+                        CreatorUserName = user!.UserName!,
+                        Post = item!,
+                        Time = DateTime.Now,
+                        MainText = "commented on your post"
+                    };
+
                     await _dbc.AddAsync(ntf);
                     await _dbc.Comments.AddAsync(comment);
                 }
 
                 await _dbc.SaveChangesAsync();
 
-                var neededComment = await _dbc.Comments.FirstOrDefaultAsync(x => x.UniqueIdentifier== randomGuidString);
+                var neededComment = await _dbc.Comments.FirstOrDefaultAsync(x => x.UniqueIdentifier.Equals(randomGuidString));
 
-                return Json(neededComment);
+                var commentDto = new CommentsDTO
+                {
+                    Id = neededComment.Id,
+                    UserUsername = username,
+                    CommentContent = neededComment.CommentContent,
+                    CommentDeriveFromId = neededComment.CommentDeriveFromId,
+                    DateOfCreation = neededComment.DateOfCreation,
+                    PostId = neededComment.Post.Id,
+                };
+
+                var jsonResult = JsonConvert.SerializeObject(commentDto);
+
+                return Json(jsonResult);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                // Add logging
+                Console.WriteLine($"Error occurred: {ex.Message}");
+
                 return Json("Error occurred while processing the like/unlike action.");
             }
         }
+
 
         [HttpPost]
         [Authorize]
@@ -234,7 +257,7 @@ namespace HandBook.Web.Controllers
         [Authorize]
         public async Task<IActionResult> Account(string username)
         {
-            if (username==null||username=="")
+            if (username == null || username == "")
             {
                 return View("~/Views/Home/Index.cshtml");
             }
