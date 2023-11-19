@@ -36,7 +36,7 @@ namespace HandBook.Web.Controllers
             {
                 var username = HttpContext.User?.Identity?.Name ?? "";
                 var user = await _userManager.FindByNameAsync(username);
-                var cards = _dbc.Posts.OrderByDescending(x => x.Time).Include(p => p.Comments);
+                var cards = _dbc.Posts.OrderBy(x => x.Time).Include(p => p.Comments);
 
                 if (user != null)
                 {
