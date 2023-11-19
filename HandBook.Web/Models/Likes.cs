@@ -1,4 +1,5 @@
-﻿using Messenger.Models;
+﻿using HandBook.Web.Models;
+using Messenger.Models;
 using ServiceStack.DataAnnotations;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -15,10 +16,14 @@ namespace HandBook.Models
         public string UserId { get; set; } = "";
         [System.ComponentModel.DataAnnotations.Schema.ForeignKey("Post")]
         public int PostId { get; set; }
+        [System.ComponentModel.DataAnnotations.Schema.ForeignKey("Comment")]
+        public int CommentId { get; set; }
         public DateTime LikedDate { get; set; }
 
         // Navigation properties
         public AppUser AppUser { get; set; } = new AppUser();
         public Post Post { get; set; }=new Post();
+        public Comment Comment { get; set; } = new Comment();
+
     }
 }

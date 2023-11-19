@@ -199,7 +199,6 @@ namespace HandBook.Web.Controllers
             }
         }
 
-
         [HttpPost]
         [Authorize]
         public async Task<IActionResult> IncrementOrDecrementLikeCount(int itemId)
@@ -238,6 +237,61 @@ namespace HandBook.Web.Controllers
                     ntf.AppUser = user!;
                     ntf.CreatorUserName = user!.UserName!;
                     ntf.Post = item!;
+                    ntf.Time = DateTime.Now;
+                    ntf.MainText = "liked your post";
+                    await _dbc.AddAsync(ntf);
+                    await _dbc.Likes.AddAsync(like);
+                }
+
+                await _dbc.SaveChangesAsync();
+
+                return Json(item.AmountOfLikes);
+            }
+            catch (Exception)
+            {
+                return Json("Error occurred while processing the like/unlike action.");
+            }
+        }
+
+        [HttpPost]
+        [Authorize]
+        public async Task<IActionResult> IncrementOrDecrementCommentLikeCount(int itemId)
+        {
+            try
+            {
+                var item = await _dbc.Comments.FirstOrDefaultAsync(i => i.Id == itemId);
+                int likeCount = item!.AmountOfLikes;
+                var username = HttpContext.User?.Identity?.Name ?? "";
+                var user = await _userManager.FindByNameAsync(username);
+
+                var existingLike = await _dbc.Likes.FirstOrDefaultAsync(x => x.UserId == user!.Id && x.PostId == itemId);
+
+                if (existingLike != null)
+                {
+                    var existingNotif = await _dbc.Notifications.FirstOrDefaultAsync(x => x.UserId == user!.Id && x.PostId == itemId && x.MainText == "liked your post");
+
+                    item.AmountOfLikes--;
+                    _dbc.Likes.Remove(existingLike);
+                    if (existingNotif != null)
+                    {
+                        _dbc.Notifications.Remove(existingNotif);
+                    }
+                }
+                else
+                {
+                    item.AmountOfLikes++;
+                    var like = new Likes
+                    {
+                        Post=item.Post,
+                        Comment = item,
+                        AppUser = user!,
+                        LikedDate = DateTime.Now
+                    };
+
+                    Notification ntf = new Notification();
+                    ntf.AppUser = user!;
+                    ntf.CreatorUserName = user!.UserName!;
+                    ntf.Post = item!.Post;
                     ntf.Time = DateTime.Now;
                     ntf.MainText = "liked your post";
                     await _dbc.AddAsync(ntf);

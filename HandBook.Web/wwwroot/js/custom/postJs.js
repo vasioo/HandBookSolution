@@ -1,6 +1,6 @@
 ﻿$(document).on('click', '.submit-btn', function () {
     var $commentContainer = $(this).closest('.comment-section');
-    var $commentTextarea = $commentContainer.find('.my-text');
+    var $commentTextarea = $commentContainer.find('.comments-text');
 
     var commentContent = $commentTextarea.val();
     var postId = $commentContainer.data('post-id');
@@ -59,6 +59,72 @@
     });
 });
 
+$(document).on('click', '.submit-reply-btn', function () {
+    var $commentContainer = $(this).closest('.input-group');
+
+    // Find the replies-container inside the comment-container
+    var $repliesContainer = $commentContainer.closest('.replies-container');
+
+    // Get the ID from the replies-container
+    var commentDeriveFromId = $repliesContainer.attr('id');
+
+    // Rest of your existing code
+    var $commentTextarea = $commentContainer.find('.replies-text');
+    var commentContent = $commentTextarea.val();
+    var postId = $commentContainer.data('post-id');
+
+    var comment = {
+        CommentContent: commentContent,
+        DateOfCreation: new Date().toString(),
+        PostId: postId,
+        CommentDeriveFromId: commentDeriveFromId
+    };
+
+
+    $.ajax({
+        url: "/Home/AddOrRemoveAComment",
+        method: 'POST',
+        data: { commentsDTO: comment },
+        dataType: 'json',
+        success: function (response) {
+            var commentDto = JSON.parse(response);
+
+            var usernameLink = 'https://res.cloudinary.com/dzaicqbce/image/upload/v1695818842/profile-image-for-' + commentDto.UserUsername + '.png';
+            var alternativeLink = 'https://res.cloudinary.com/dzaicqbce/image/upload/v1700160046/azgysbpf8xpcxpfclb9i.jpg';
+            var imgTag = '<img src="' + usernameLink + '" alt="Image not found" onerror="this.onerror=null;this.src=\'' + alternativeLink + '\';" style="border-radius:30px; width:50px; margin-right:10px;" />';
+
+            var commentHtml = `
+            <div class="comment-container pt-2">
+                <div class="profile-column">
+                   `+ imgTag + `
+                </div>
+                <div class="profile-column">
+                    <div class="comment">
+                        <div class="comment-header">
+                            <div class="comment-username">${commentDto.UserUsername}</div>
+                            <div class="comment-time">Now</div>
+                        </div>
+                        <div class="comment-content">${commentDto.CommentContent}</div>
+                        <div class="comment-actions">
+                            <a href="#" class="comment-action">Like</a>
+                            <a href="#" class="comment-action">Reply</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+
+            var replyContainerId = "container-" + commentDto.CommentDeriveFromId;
+            var $repliesContainer = $('#' + replyContainerId);
+
+            $repliesContainer.prepend(commentHtml);
+        },
+        error: function (error) {
+            // Add logging
+            console.error('Error submitting comment:', error);
+        }
+    });
+});
 
 function likeButtonClick(Id) {
     $.ajax({
@@ -162,4 +228,13 @@ function like(button, Id) {
     }
 
     sessionStorage.setItem("likedCards", JSON.stringify(likedCards));
+}
+
+function toggleReplies(link) {
+    var repliesContainer = link.nextElementSibling; // Assumes the replies-container is the next sibling
+    if (repliesContainer.style.display === 'none') {
+        repliesContainer.style.display = 'block';
+    } else {
+        repliesContainer.style.display = 'none';
+    }
 }

@@ -21,7 +21,7 @@ namespace HandBook.Web.Models
         public AppUser AppUser { get; set; } = new AppUser();
         public Post Post { get; set; } = new Post();
 
-        public IEnumerable<Likes> LikesOnComment { get; set; }
+        public int AmountOfLikes { get; set; }
 
         public int CommentDeriveFromId { get; set; }
     }

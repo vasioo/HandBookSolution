@@ -149,7 +149,7 @@
                                     <div class="col">
                                         <div class="input-group">
                                             <div class="border col-10 pl-1 pr-1 m-0">
-                                                <textarea class="my-text w-100" style="max-height:400px" placeholder="Write a comment..."></textarea>
+                                                <textarea class="comments-text w-100" style="max-height:400px" placeholder="Write a comment..."></textarea>
                                             </div>
 
                                             <div class="input-group-append align-self-end col-2">
@@ -179,41 +179,45 @@
                                                         <div class="comment-content mt-2">@comment.CommentContent</div>
                                                         <div class="comment-actions mt-2">
                                                             <a class="comment-action-like text-decoration-none text-primary">Like</a>
-                                                            <a class="comment-action-reply text-decoration-none text-primary">Reply</a>
                                                         </div>
                                                     </div>
-                                                    <div class="view-replies mt-2 text-primary">View Replies</div>
-                                                    <div class="replies-container" style="display:none">
-                                                        <div class="input-group mt-3">
+                                                    <a class="view-replies mt-2 text-primary" onclick="toggleReplies(this)">View Replies </a>
+                                                    <div class=" p-3 m-1 replies-container" id="@comment.Id" style="display:none">
+                                                        <div class="input-group mt-3" data-post-id="@item.Id">
                                                             <div class="border col-10 p-0">
-                                                                <textarea class="form-control" style="max-height:400px" placeholder="Reply to @comment.AppUser.UserName..."></textarea>
+                                                                <textarea class="replies-text form-control" style="max-height:400px" placeholder="Reply to @comment.AppUser.UserName..."></textarea>
                                                             </div>
                                                             <div class="input-group-append col-2">
-                                                                <button class="btn btn-primary submit-btn" type="button"><i class="fas fa-right-long"></i></button>
+                                                                <button class="btn btn-primary submit-reply-btn" type="button"><i class="fas fa-right-long"></i></button>
                                                             </div>
                                                         </div>
-                                                        @foreach (var reply in item.Comments.Where(x => x.CommentDeriveFromId == comment.Id).OrderBy(x => x.DateOfCreation))
-                                                        {
-                                                            string replyLink = $"https://res.cloudinary.com/dzaicqbce/image/upload/v1695818842/profile-image-for-{reply.AppUser.UserName}.png";
-                                                            <div class="comment-container pt-2">
-                                                                <div class="profile-column">
-                                                                    <img src="@replyLink" alt="Image not found" onerror="this.onerror=null;this.src='@alternativeLink';" class="rounded-circle" style="width:50px; margin-right: 10px;" />
-                                                                </div>
-                                                                <div class="comment-column">
-                                                                    <div class="comment">
-                                                                        <div class="comment-header">
-                                                                            <div class="comment-username font-weight-bold">@reply.AppUser.UserName</div>
-                                                                            <div class="comment-time text-muted">@GetTimeDisplay(reply.DateOfCreation)</div>
-                                                                        </div>
-                                                                        <div class="comment-content mt-2">@reply.CommentContent</div>
-                                                                        <div class="comment-actions mt-2">
-                                                                            <a href="#" class="comment-action text-decoration-none text-primary">Like</a>
+                                                        @{
+                                                            var replyContainerId = $"container-{comment.Id}";
+                                                        }
+                                                        <div id="@replyContainerId">
+                                                            @foreach (var reply in item.Comments.Where(x => x.CommentDeriveFromId == comment.Id).OrderByDescending(x => x.DateOfCreation))
+                                                            {
+                                                                string replyLink = $"https://res.cloudinary.com/dzaicqbce/image/upload/v1695818842/profile-image-for-{reply.AppUser.UserName}.png";
+                                                                <div class="comment-container pt-2">
+                                                                    <div class="profile-column">
+                                                                        <img src="@replyLink" alt="Image not found" onerror="this.onerror=null;this.src='@alternativeLink';" class="rounded-circle" style="width:50px; margin-right: 10px;" />
+                                                                    </div>
+                                                                    <div class="comment-column">
+                                                                        <div class="comment">
+                                                                            <div class="comment-header">
+                                                                                <div class="comment-username font-weight-bold">@reply.AppUser.UserName</div>
+                                                                                <div class="comment-time text-muted">@GetTimeDisplay(reply.DateOfCreation)</div>
+                                                                            </div>
+                                                                            <div class="comment-content mt-2">@reply.CommentContent</div>
+                                                                            <div class="comment-actions mt-2">
+                                                                                <a href="#" class="comment-action text-decoration-none text-primary">Like</a>
+                                                                            </div>
                                                                         </div>
                                                                     </div>
                                                                 </div>
-                                                            </div>
 
-                                                        }
+                                                            }
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>
