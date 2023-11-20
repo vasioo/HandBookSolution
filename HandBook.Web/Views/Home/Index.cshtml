@@ -18,6 +18,11 @@
                 {
                     userLikedCards = new List<int>();
                 }
+                List<int> userLikedComments = ViewBag.UserLikedComments;
+                if (userLikedComments == null)
+                {
+                    userLikedComments = new List<int>();
+                }
             }
             @if (Model != null)
             {
@@ -171,14 +176,34 @@
                                                     <img src="@link" alt="Image not found" onerror="this.onerror=null;this.src='@alternativeLink';" class="rounded-circle" style="width:50px; margin-right: 10px;" />
                                                 </div>
                                                 <div class="comment-column">
+
                                                     <div class="comment">
-                                                        <div class="comment-header d-flex justify-content-between align-items-center">
+                                                        <div class="comment-header">
                                                             <div class="comment-username font-weight-bold">@comment.AppUser.UserName</div>
                                                             <div class="comment-time text-muted">@GetTimeDisplay(comment.DateOfCreation)</div>
                                                         </div>
-                                                        <div class="comment-content mt-2">@comment.CommentContent</div>
+                                                        <div class="comment-content mt-2">
+                                                            <div class="row">
+                                                                @comment.CommentContent
+                                                            </div>
+                                                            <div class="row">
+                                                                <span class="commentlikeCount" data-item-id="@comment.Id" style="display: @(comment.AmountOfLikes > 0 ? "block" : "none");">
+                                                                    @comment.AmountOfLikes <i class="fa-solid fa-heart liked fa-sm" style="color: #ff0000;"></i>
+                                                                </span>
+                                                            </div>
+                                                        </div>
                                                         <div class="comment-actions mt-2">
-                                                            <a class="comment-action-like text-decoration-none text-primary">Like</a>
+                                                            <button class="comment-like-button text-decoration-none text-primary" onclick="likecom(this,@comment.Id)" data-count="@item.AmountOfLikes">
+                                                                @if (userLikedComments.Contains(comment.Id))
+                                                                {
+                                                                    <div class="liked com-btn">Liked</div>
+                                                                }
+                                                                else
+                                                                {
+
+                                                                    <div class="com-btn">Like</div>
+                                                                }
+                                                            </button>
                                                         </div>
                                                     </div>
                                                     <a class="view-replies mt-2 text-primary" onclick="toggleReplies(this)">View Replies </a>
@@ -208,12 +233,32 @@
                                                                                 <div class="comment-username font-weight-bold">@reply.AppUser.UserName</div>
                                                                                 <div class="comment-time text-muted">@GetTimeDisplay(reply.DateOfCreation)</div>
                                                                             </div>
-                                                                            <div class="comment-content mt-2">@reply.CommentContent</div>
+                                                                            <div class="comment-content mt-2">
+                                                                                <div class="row">
+                                                                                    @reply.CommentContent
+                                                                                </div>
+                                                                                <div class="row">
+                                                                                    <span class="commentlikeCount" data-item-id="@reply.Id" style="display: @(reply.AmountOfLikes > 0 ? "block" : "none");">
+                                                                                        @reply.AmountOfLikes <i class="fa-solid fa-heart liked fa-sm" style="color: #ff0000;"></i>
+                                                                                    </span>
+                                                                                </div>
+                                                                            </div>
                                                                             <div class="comment-actions mt-2">
-                                                                                <a href="#" class="comment-action text-decoration-none text-primary">Like</a>
+                                                                                <button class="comment-like-button text-decoration-none text-primary" onclick="likecom(this,@reply.Id)" data-count="@item.AmountOfLikes">
+                                                                                    @if (userLikedComments.Contains(reply.Id))
+                                                                                    {
+                                                                                        <div class="liked com-btn">Liked</div>
+                                                                                    }
+                                                                                    else
+                                                                                    {
+
+                                                                                        <div class="com-btn">Like</div>
+                                                                                    }
+                                                                                </button>
                                                                             </div>
                                                                         </div>
                                                                     </div>
+
                                                                 </div>
 
                                                             }

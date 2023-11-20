@@ -9,8 +9,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using System.Diagnostics;
-using System.Linq;
-using Newtonsoft.Json;
 
 namespace HandBook.Web.Controllers
 {
@@ -40,10 +38,17 @@ namespace HandBook.Web.Controllers
 
                 if (user != null)
                 {
-                    var userLikedCards = _dbc.Likes.Where(like => like.UserId == user!.Id);
+                    var userLikedCards = _dbc.Likes.Where(like => like.UserId == user!.Id&&like.CommentId==0);
+                    var userLikedComments = _dbc.Likes.Where(com => com.AppUser.Id == user!.Id&&com.CommentId!=0);
+
                     if (userLikedCards != null && userLikedCards.Count() > 0)
                     {
                         ViewBag.UserLikedCards = userLikedCards.Select(x => x.PostId).ToList();
+                    }
+
+                    if (userLikedComments != null && userLikedComments.Count() > 0)
+                    {
+                        ViewBag.UserLikedComments = userLikedComments.Select(x=>x.CommentId).ToList();
                     }
                 }
 
@@ -264,11 +269,11 @@ namespace HandBook.Web.Controllers
                 var username = HttpContext.User?.Identity?.Name ?? "";
                 var user = await _userManager.FindByNameAsync(username);
 
-                var existingLike = await _dbc.Likes.FirstOrDefaultAsync(x => x.UserId == user!.Id && x.PostId == itemId);
+                var existingLike = await _dbc.Likes.FirstOrDefaultAsync(x => x.AppUser.Id == user!.Id && x.CommentId == itemId);
 
                 if (existingLike != null)
                 {
-                    var existingNotif = await _dbc.Notifications.FirstOrDefaultAsync(x => x.UserId == user!.Id && x.PostId == itemId && x.MainText == "liked your post");
+                    var existingNotif = await _dbc.Notifications.FirstOrDefaultAsync(x => x.UserId == user!.Id && x.PostId == itemId && x.MainText == "liked your comment");
 
                     item.AmountOfLikes--;
                     _dbc.Likes.Remove(existingLike);
@@ -282,10 +287,10 @@ namespace HandBook.Web.Controllers
                     item.AmountOfLikes++;
                     var like = new Likes
                     {
-                        Post=item.Post,
-                        Comment = item,
+                        Post = item.Post,
                         AppUser = user!,
-                        LikedDate = DateTime.Now
+                        LikedDate = DateTime.Now,
+                        CommentId=item.Id
                     };
 
                     Notification ntf = new Notification();
@@ -293,7 +298,7 @@ namespace HandBook.Web.Controllers
                     ntf.CreatorUserName = user!.UserName!;
                     ntf.Post = item!.Post;
                     ntf.Time = DateTime.Now;
-                    ntf.MainText = "liked your post";
+                    ntf.MainText = "liked your comment";
                     await _dbc.AddAsync(ntf);
                     await _dbc.Likes.AddAsync(like);
                 }

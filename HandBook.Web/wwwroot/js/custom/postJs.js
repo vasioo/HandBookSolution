@@ -126,6 +126,7 @@ $(document).on('click', '.submit-reply-btn', function () {
     });
 });
 
+
 function likeButtonClick(Id) {
     $.ajax({
         type: "POST",
@@ -237,4 +238,46 @@ function toggleReplies(link) {
     } else {
         repliesContainer.style.display = 'none';
     }
+}
+
+function likecom(button, Id) {
+    var card = button.closest(".comment");
+    var cardId = card.dataset.id;
+    var count = parseInt(button.dataset.count) || 0;
+    var likedComments = JSON.parse(sessionStorage.getItem("likedComments")) || {};
+
+    var heartIcon = button.querySelector(".com-btn");
+
+
+    if (heartIcon.classList.contains("liked")) {
+        count--;
+        button.dataset.count = count;
+        button.innerHTML = `<div class="com-btn">Like</div>`;
+        likeCommentClick(Id);
+        delete likedComments[cardId];
+    } else {
+        count++;
+        button.dataset.count = count;
+        button.innerHTML = `<div class="liked com-btn">Liked</div>`;
+        likeCommentClick(Id);
+        likedComments[cardId] = true;
+    }
+
+    sessionStorage.setItem("likedComments", JSON.stringify(likedComments));
+}
+
+function likeCommentClick(Id) {
+    $.ajax({
+        type: "POST",
+        url: "/Home/IncrementOrDecrementCommentLikeCount",
+        data: { itemId: Id },
+        success: function (result) {
+            var likeCountElement = $('.commentlikeCount[data-item-id="' + Id + '"]');
+            likeCountElement.html(result + ' <i class="fa-solid fa-heart liked fa-sm" style="color: #ff0000;"></i>');
+            likeCountElement.toggle(result > 0);
+        },
+        error: function (result) {
+            alert("Error: " + result.statusText);
+        }
+    });
 }

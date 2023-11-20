@@ -11,19 +11,24 @@ namespace HandBook.Models
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
-
-        [System.ComponentModel.DataAnnotations.Schema.ForeignKey("AppUser")]
-        public string UserId { get; set; } = "";
-        [System.ComponentModel.DataAnnotations.Schema.ForeignKey("Post")]
-        public int PostId { get; set; }
-        [System.ComponentModel.DataAnnotations.Schema.ForeignKey("Comment")]
-        public int CommentId { get; set; }
         public DateTime LikedDate { get; set; }
 
         // Navigation properties
-        public AppUser AppUser { get; set; } = new AppUser();
-        public Post Post { get; set; }=new Post();
-        public Comment Comment { get; set; } = new Comment();
+        [System.ComponentModel.DataAnnotations.Schema.ForeignKey("AppUser")]
+        public string UserId { get; set; } = "";
+
+        [System.ComponentModel.DataAnnotations.Schema.ForeignKey("Post")]
+        public int PostId { get; set; }
+
+        [System.ComponentModel.DataAnnotations.Schema.ForeignKey("Comment")]
+        public int CommentId { get; set; }
+
+        [System.ComponentModel.DataAnnotations.Schema.ForeignKey("UserId")]
+        public virtual AppUser AppUser { get; set; } = new AppUser();
+
+        [System.ComponentModel.DataAnnotations.Schema.ForeignKey("PostId")]
+        public virtual Post Post { get; set; } = new Post();
+
 
     }
 }

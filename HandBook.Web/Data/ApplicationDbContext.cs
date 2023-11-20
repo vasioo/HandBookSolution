@@ -40,10 +40,8 @@ namespace HandBook.Web.Data
                 .WithMany()
                 .HasForeignKey(l => l.PostId);
 
-
             builder.Entity<Comment>()
             .HasKey(l => l.Id);
-
         }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
