@@ -34,12 +34,23 @@ namespace HandBook.Web.Controllers
             {
                 var username = HttpContext.User?.Identity?.Name ?? "";
                 var user = await _userManager.FindByNameAsync(username);
-                var cards = _dbc.Posts.OrderBy(x => x.Time).Include(p => p.Comments);
+                var cards = _dbc.Posts.OrderBy(x => x.Time).Include(p => p.Comments).Take(20);
+
+                var posts = cards.Select(post => new CardDTO
+                {
+                    Id = post.Id,
+                    CreatorUserName = post.CreatorUserName,
+                    AmountOfComments = post.Comments.Count(),
+                    AmountOfLikes =post.AmountOfLikes,
+                    image = post.image,
+                    Time = post.Time
+                }).ToList();
+
 
                 if (user != null)
                 {
-                    var userLikedCards = _dbc.Likes.Where(like => like.UserId == user!.Id&&like.CommentId==0);
-                    var userLikedComments = _dbc.Likes.Where(com => com.AppUser.Id == user!.Id&&com.CommentId!=0);
+                    var userLikedCards = _dbc.Likes.Where(like => like.UserId == user!.Id && like.CommentId == 0);
+                    var userLikedComments = _dbc.Likes.Where(com => com.AppUser.Id == user!.Id && com.CommentId != 0);
 
                     if (userLikedCards != null && userLikedCards.Count() > 0)
                     {
@@ -48,13 +59,13 @@ namespace HandBook.Web.Controllers
 
                     if (userLikedComments != null && userLikedComments.Count() > 0)
                     {
-                        ViewBag.UserLikedComments = userLikedComments.Select(x=>x.CommentId).ToList();
+                        ViewBag.UserLikedComments = userLikedComments.Select(x => x.CommentId).ToList();
                     }
                 }
 
                 ViewBag.UserUsername = username;
 
-                return View("~/Views/Home/Index.cshtml", cards);
+                return View("~/Views/Home/Index.cshtml", posts);
             }
             catch (Exception)
             {
@@ -79,10 +90,10 @@ namespace HandBook.Web.Controllers
         [Authorize]
         public async Task<IActionResult> Notifications()
         {
-            var cards = await _dbc.Notifications.ToListAsync();
-            cards.Reverse();
             var username = HttpContext.User?.Identity?.Name ?? "";
             var user = await _userManager.FindByNameAsync(username);
+            var cards = await _dbc.Notifications.Where(card => card.UserId == user!.Id).ToListAsync();
+            cards.Reverse();
             ViewBag.CurrentUserUsername = user!.UserName;
             return View("~/Views/Home/Notifications.cshtml", cards);
         }
@@ -111,6 +122,7 @@ namespace HandBook.Web.Controllers
             if (user != null)
             {
                 tfm.CreatorUserName = username!;
+
                 ntf.AppUser = user!;
                 ntf.CreatorUserName = user!.UserName!;
                 ntf.Time = DateTime.Now;
@@ -163,17 +175,19 @@ namespace HandBook.Web.Controllers
                         CommentContent = commentsDTO.CommentContent,
                         UniqueIdentifier = randomGuidString
                     };
-
-                    Notification ntf = new Notification
+                    if (item!.CreatorUserName != user!.UserName)
                     {
-                        AppUser = user!,
-                        CreatorUserName = user!.UserName!,
-                        Post = item!,
-                        Time = DateTime.Now,
-                        MainText = "commented on your post"
-                    };
+                        Notification ntf = new Notification
+                        {
+                            AppUser = user!,
+                            CreatorUserName = user!.UserName!,
+                            Post = item!,
+                            Time = DateTime.Now,
+                            MainText = "commented on your post"
+                        };
 
-                    await _dbc.AddAsync(ntf);
+                        await _dbc.AddAsync(ntf);
+                    }
                     await _dbc.Comments.AddAsync(comment);
                 }
 
@@ -238,13 +252,16 @@ namespace HandBook.Web.Controllers
                         LikedDate = DateTime.Now
                     };
 
-                    Notification ntf = new Notification();
-                    ntf.AppUser = user!;
-                    ntf.CreatorUserName = user!.UserName!;
-                    ntf.Post = item!;
-                    ntf.Time = DateTime.Now;
-                    ntf.MainText = "liked your post";
-                    await _dbc.AddAsync(ntf);
+                    if (item.CreatorUserName != user.UserName)
+                    {
+                        Notification ntf = new Notification();
+                        ntf.AppUser = user!;
+                        ntf.CreatorUserName = user!.UserName!;
+                        ntf.Post = item!;
+                        ntf.Time = DateTime.Now;
+                        ntf.MainText = "liked your post";
+                        await _dbc.AddAsync(ntf);
+                    }
                     await _dbc.Likes.AddAsync(like);
                 }
 
@@ -290,16 +307,19 @@ namespace HandBook.Web.Controllers
                         Post = item.Post,
                         AppUser = user!,
                         LikedDate = DateTime.Now,
-                        CommentId=item.Id
+                        CommentId = item.Id
                     };
 
-                    Notification ntf = new Notification();
-                    ntf.AppUser = user!;
-                    ntf.CreatorUserName = user!.UserName!;
-                    ntf.Post = item!.Post;
-                    ntf.Time = DateTime.Now;
-                    ntf.MainText = "liked your comment";
-                    await _dbc.AddAsync(ntf);
+                    if (item.AppUser.UserName != user.UserName)
+                    {
+                        Notification ntf = new Notification();
+                        ntf.AppUser = user!;
+                        ntf.CreatorUserName = user!.UserName!;
+                        ntf.Post = item!.Post;
+                        ntf.Time = DateTime.Now;
+                        ntf.MainText = "liked your comment";
+                        await _dbc.AddAsync(ntf);
+                    }
                     await _dbc.Likes.AddAsync(like);
                 }
 
@@ -366,6 +386,83 @@ namespace HandBook.Web.Controllers
             var userResults = users.Select(u => new { u.UserName }).ToList(); // Adjust the properties you want to return
 
             return Json(userResults);
+        }
+
+        [HttpPost]
+        [Authorize]
+        public async Task<IActionResult> AddFollowerRelationship(string username)
+        {
+            try
+            {
+                if (username == null || username == "")
+                {
+                    return View("~/Views/Home/Index.cshtml");
+                }
+                var usernamefollower = HttpContext.User?.Identity?.Name ?? "";
+
+                var follow = await _userManager.FindByNameAsync(username);
+                var follower = await _userManager.FindByNameAsync(usernamefollower);
+
+                if (follow != null && follower != null)
+                {
+                    var followerrelation = new Followers();
+
+                    followerrelation.Follower = follower;
+                    followerrelation.Followed = follow;
+
+                    await _dbc.Followers.AddAsync(followerrelation);
+                }
+                await _dbc.SaveChangesAsync();
+                return Json("Success");
+            }
+            catch (Exception)
+            {
+                return Json("Error occurred while processing the relation.");
+            }
+        }
+       
+        [HttpPost]
+        [Authorize]
+        public async Task<JsonResult> LoadMorePosts(int offset)
+        {
+            try
+            {
+                var cards = _dbc.Posts.OrderBy(x => x.Time).Skip(offset).Take(20);
+
+                var posts =await cards.Select(post => new CardDTO
+                {
+                    Id = post.Id,
+                    CreatorUserName = post.CreatorUserName,
+                    AmountOfComments = post.Comments.Count(),
+                    AmountOfLikes = post.AmountOfLikes,
+                    image = post.image,
+                    Time = post.Time
+                }).ToListAsync();
+
+                return Json(JsonConvert.SerializeObject(posts));
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error occurred: {ex.Message}");
+                return Json("Error occurred while adding newer posts.");
+            }
+        }
+
+        [HttpPost]
+        [Authorize]
+        public async Task<JsonResult> LoadMoreComments(int offset,int derivingFrom)
+        {
+            try
+            {
+                var comments = _dbc.Comments.OrderBy(x => x.DateOfCreation).Where(x=>x.CommentDeriveFromId==derivingFrom).Skip(offset).Take(20);
+
+                return Json(JsonConvert.SerializeObject(comments));
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error occurred: {ex.Message}");
+                return Json("Error occurred while adding newer posts.");
+            }
         }
     }
 }

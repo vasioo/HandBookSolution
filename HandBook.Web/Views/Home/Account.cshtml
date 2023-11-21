@@ -1,4 +1,7 @@
 ﻿@model UserAccountDTO
+@using Microsoft.AspNetCore.Authorization
+
+@inject IAuthorizationService AuthorizationService
 
 @section Styles {
     <link href="@Url.Content("~/css/custom/CustomPostIndex.css")" rel="stylesheet" type="text/css" />
@@ -63,14 +66,30 @@
     <div class="row">
         <div class="row">
             <div class="col">
-                <div class="upload-input">
-                    <input type="file" id="profile-image" name="profile-image" class="image-upload" accept=".png, .jpg, .jpeg" multiple="multiple" max="1">
-                    <img class="uploaded-image" />
-                </div>
+                @{
+                    string link = $"https://res.cloudinary.com/dzaicqbce/image/upload/v1695818842/profile-image-for-{Model!.UserTemp!.UserName!}.png";
+                    string alternativeLink = $"https://res.cloudinary.com/dzaicqbce/image/upload/v1700160046/azgysbpf8xpcxpfclb9i.jpg";
+                    @if (User!.Identity!.Name == Model!.UserTemp.UserName)
+                    {
+                        <div class="upload-input">
+                            <input type="file" id="profile-image" name="profile-image" class="image-upload" accept=".png, .jpg, .jpeg" multiple="multiple" max="1">
+                            <img src="@link" alt="Image not found" onerror="this.onerror=null;this.src='@alternativeLink';" class="rounded-circle uploaded-image" style="width:100px; margin-right: 10px;" />
+                        </div>
+                    }
+                    else
+                    {
+                        <img src="@link" alt="Image not found" onerror="this.onerror=null;this.src='@alternativeLink';" class="rounded-circle uploaded-image" style="width:100px; margin-right: 10px;" />
+                    }
+                }
+                
             </div>
         </div>
         <div class="row">
-            <div class="btn btn-primary">Add a friend</div>
+            <div class="btn btn-primary">
+                <a href="@Url.Action("AddFollowerRelationship", "Home", new { username = Model.UserTemp.UserName})" style="text-decoration:none">
+                    Message
+                </a>
+            </div>
             <div class="btn border border-3">
                 <a href="@Url.Action("Chat", "Messages", new { userName = Model.UserTemp.UserName})" style="text-decoration:none">
                     Message

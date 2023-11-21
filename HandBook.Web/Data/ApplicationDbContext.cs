@@ -19,6 +19,7 @@ namespace HandBook.Web.Data
         public DbSet<Likes> Likes { get; set; }
         public DbSet<Messages> Messages { get; set; }
         public DbSet<Comment> Comments { get; set; }
+        public DbSet<Followers> Followers { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {

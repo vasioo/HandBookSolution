@@ -126,7 +126,6 @@ $(document).on('click', '.submit-reply-btn', function () {
     });
 });
 
-
 function likeButtonClick(Id) {
     $.ajax({
         type: "POST",
@@ -204,7 +203,6 @@ function toggleComments(itemId, element) {
     document.addEventListener('click', handleClickOutside);
 }
 
-
 function like(button, Id) {
     var card = button.closest(".card");
     var cardId = card.dataset.id;
@@ -280,4 +278,109 @@ function likeCommentClick(Id) {
             alert("Error: " + result.statusText);
         }
     });
+}
+
+var offset = 20;
+var loading = false;
+
+var offset = 20; // Initial offset
+var loading = false; // Flag to prevent multiple simultaneous requests
+
+$(window).scroll(function () {
+    if ($(window).scrollTop() + $(window).height() >= $(".postContainer").height() - 200 && !loading) {
+        loading = true;
+        loadMorePosts();
+    }
+});
+
+function loadMorePosts() {
+    $.ajax({
+        type: "POST",
+        url: "/Home/LoadMorePosts",
+        data: { offset: offset },
+        success: function (data) {
+            var posts = JSON.parse(data);
+
+            if (posts.length > 0) {
+                offset += posts.length;
+
+                posts.forEach(function (post) {
+                    $(".postContainer").append('@await Html.PartialAsync("_PostsPartial", '+post+');');
+                });
+            }
+
+            loading = false;
+        },
+        error: function (error) {
+            console.log("Error loading more posts: " + error.responseText);
+            loading = false;
+        }
+    });
+}
+
+function getTimeDisplay(postDate) {
+    var timeDifference = new Date() - new Date(postDate);
+
+    var seconds = Math.floor(timeDifference / 1000);
+    var minutes = Math.floor(timeDifference / (1000 * 60));
+    var hours = Math.floor(timeDifference / (1000 * 60 * 60));
+    var days = Math.floor(timeDifference / (1000 * 60 * 60 * 24));
+
+    var displayString = "";
+
+    if (days > 365 || (days > 7 && new Date(postDate).getFullYear() !== new Date().getFullYear())) {
+        var options = { year: 'numeric', month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric' };
+        displayString = new Date(postDate).toLocaleDateString('en-US', options);
+    } else if (days > 7) {
+        displayString = new Date(postDate).toLocaleDateString('en-US', { month: 'long', day: 'numeric' });
+    } else if (days >= 1) {
+        displayString = days === 1 ? "1 day ago" : `${Math.floor(days)} days ago`;
+    } else if (hours >= 1) {
+        displayString = hours === 1 ? "1 hour ago" : `${Math.floor(hours)} hours ago`;
+    } else if (minutes >= 1) {
+        displayString = minutes === 1 ? "1 minute ago" : `${Math.floor(minutes)} minutes ago`;
+    } else {
+        displayString = seconds === 1 ? "1 second ago" : `${Math.floor(seconds)} seconds ago`;
+    }
+
+    return displayString;
+}   
+
+var loadingComments = false;
+
+$(window).scroll(function () {
+    if ($(window).scrollTop() + $(window).height() >= $(".comment-section").height() - 200 && !loadingComments) {
+        loadingComments = true;
+        loadMoreComments();
+    }
+});
+
+function loadMoreComments() {
+    $.ajax({
+        type: "POST",
+        url: "/Home/LoadMoreComments",
+        data: { offset: offset, derivingFrom: derivingFrom() },
+        success: function (data) {
+            var posts = JSON.parse(data);
+
+            if (posts.length > 0) {
+                offset += posts.length;
+
+                posts.forEach(function (post) {
+                    $(".comment-section-regulation-div").append('@await Html.PartialAsync("_CommentPartial", ' + post + ');');
+                });
+            }
+
+            loading = false;
+        },
+        error: function (error) {
+            console.log("Error loading more posts: " + error.responseText);
+            loading = false;
+        }
+    });
+}
+
+function derivingFrom() {
+    var lastItem = $(".comment-section-regulation-div").children().last();
+    return lastItem.data("comment-id");
 }

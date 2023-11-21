@@ -1,0 +1,112 @@
+﻿@model Comment
+
+@{
+    var comment = Model;
+    string link = $"https://res.cloudinary.com/dzaicqbce/image/upload/v1695818842/profile-image-for-{comment.AppUser.UserName}.png";
+    string alternativeLink = $"https://res.cloudinary.com/dzaicqbce/image/upload/v1700160046/azgysbpf8xpcxpfclb9i.jpg";
+}
+<div class="comment-container pt-2" data-comment-id="@comment.CommentDeriveFromId">
+    <div class="profile-column">
+        <img src="@link" alt="Image not found" onerror="this.onerror=null;this.src='@alternativeLink';" class="rounded-circle" style="width:50px; margin-right: 10px;" />
+    </div>
+    <div class="comment-column">
+
+        <div class="comment">
+            <div class="comment-header">
+                <div class="comment-username font-weight-bold">@comment.AppUser.UserName</div>
+                <div class="comment-time text-muted">
+                    <script type="text/javascript">
+                        var postDate = '@comment.DateOfCreation'; // Assuming comment.DateOfCreation is a string
+                        document.write(getTimeDisplay(postDate));
+                    </script>
+                </div>
+            </div>
+            <div class="comment-content mt-2">
+                <div class="row">
+                    @comment.CommentContent
+                </div>
+                <div class="row">
+                    <span class="commentlikeCount" data-item-id="@comment.Id" style="display: @(comment.AmountOfLikes > 0 ? "block" : "none");">
+                        @comment.AmountOfLikes <i class="fa-solid fa-heart liked fa-sm" style="color: #ff0000;"></i>
+                    </span>
+                </div>
+            </div>
+            <div class="comment-actions mt-2">
+                <button class="comment-like-button text-decoration-none text-primary" onclick="likecom(this,@comment.Id)" data-count="@comment.Post.AmountOfLikes">
+                    @if (ViewBag.UserLikedComments.Contains(comment.Id))
+                    {
+                        <div class="liked com-btn">Liked</div>
+                    }
+                    else
+                    {
+
+                        <div class="com-btn">Like</div>
+                    }
+                </button>
+            </div>
+        </div>
+        <a class="view-replies mt-2 text-primary" onclick="toggleReplies(this)">View Replies </a>
+        <div class=" p-3 m-1 replies-container" id="@comment.Id" style="display:none">
+            <div class="input-group mt-3" data-post-id="@comment.Post.Id">
+                <div class="border col-10 p-0">
+                    <textarea class="replies-text form-control" style="max-height:400px" placeholder="Reply to @comment.AppUser.UserName..."></textarea>
+                </div>
+                <div class="input-group-append col-2">
+                    <button class="btn btn-primary submit-reply-btn" type="button"><i class="fas fa-right-long"></i></button>
+                </div>
+            </div>
+            @{
+                var replyContainerId = $"container-{comment.Id}";
+            }
+            <div id="@replyContainerId">
+                @foreach (var reply in comment.Post.Comments.Where(x => x.CommentDeriveFromId == comment.Id).OrderByDescending(x => x.DateOfCreation))
+                {
+                    string replyLink = $"https://res.cloudinary.com/dzaicqbce/image/upload/v1695818842/profile-image-for-{reply.AppUser.UserName}.png";
+                    <div class="comment-container pt-2">
+                        <div class="profile-column">
+                            <img src="@replyLink" alt="Image not found" onerror="this.onerror=null;this.src='@alternativeLink';" class="rounded-circle" style="width:50px; margin-right: 10px;" />
+                        </div>
+                        <div class="comment-column">
+                            <div class="comment">
+                                <div class="comment-header">
+                                    <div class="comment-username font-weight-bold">@reply.AppUser.UserName</div>
+                                    <div class="comment-time text-muted">
+                                        <script type="text/javascript">
+                                            var postDate = '@reply.DateOfCreation';
+                                            document.write(getTimeDisplay(postDate));
+                                        </script>
+                                    </div>
+                                </div>
+                                <div class="comment-content mt-2">
+                                    <div class="row">
+                                        @reply.CommentContent
+                                    </div>
+                                    <div class="row">
+                                        <span class="commentlikeCount" data-item-id="@reply.Id" style="display: @(reply.AmountOfLikes > 0 ? "block" : "none");">
+                                            @reply.AmountOfLikes <i class="fa-solid fa-heart liked fa-sm" style="color: #ff0000;"></i>
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="comment-actions mt-2">
+                                    <button class="comment-like-button text-decoration-none text-primary" onclick="likecom(this,@reply.Id)" data-count="@comment.Post.AmountOfLikes">
+                                        @if (ViewBag.UserLikedComments.Contains(reply.Id))
+                                        {
+                                            <div class="liked com-btn">Liked</div>
+                                        }
+                                        else
+                                        {
+
+                                            <div class="com-btn">Like</div>
+                                        }
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                }
+            </div>
+        </div>
+    </div>
+</div>
