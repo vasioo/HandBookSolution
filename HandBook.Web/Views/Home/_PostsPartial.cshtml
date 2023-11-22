@@ -43,11 +43,12 @@
         return displayString;
     }
 
-    List<int> userLikedCards = ViewBag.UserLikedCards;
+    List<int> userLikedCards = (List<int>)TempData["UserLikedCards"];
     if (userLikedCards == null)
     {
         userLikedCards = new List<int>();
     }
+    TempData.Keep();
 }
 <div class="card col-7 mt-3" data-post-id="@item.Id">
     <div class="card-header">
@@ -65,9 +66,9 @@
 
     @{
         var base64Image = Convert.ToBase64String(item.image);
-        ViewBag.ImageData = base64Image;
+        TempData["ImageData"] = base64Image;
 
-        <img src="data:image;base64,@ViewBag.ImageData" style="border-radius:6px; height:500px" alt="Image" class="fit-image">
+        <img src="data:image;base64,@TempData["ImageData"]" style="border-radius:6px; height:500px" alt="Image" class="fit-image">
         var commentsCount = item.AmountOfLikes;
     }
     <div class="card-body p-0 m-0">
@@ -142,10 +143,13 @@
                 </div>
             </div>
             <div class="comment-section-regulation-div">
-                @if (ViewBag.UserLikedComments == null)
+                @if (TempData["UserLikedComments"] == null)
                 {
-                    ViewBag.UserLikedComments = new List<int>();
+                    TempData["UserLikedComments"] = new List<int>();
                 }
+            </div>
+            <div class="">
+                <a class="load-more-comments">Load More Comments</a>
             </div>
         </div>
     </div>

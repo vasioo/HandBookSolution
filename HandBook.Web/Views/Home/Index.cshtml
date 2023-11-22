@@ -1,5 +1,5 @@
 ﻿@using HandBook.Models;
-@model IEnumerable<Post>
+@model IEnumerable<CardDTO>
 
 @section Styles {
     <link href="@Url.Content("~/css/custom/CustomPostIndex.css")" rel="stylesheet" type="text/css" />
@@ -11,9 +11,10 @@
     <br />
     <br />
     <div class="row justify-content-center ">
-        <div class="row justify-content-center post-container" data-user-username="@ViewBag.UserUsername">
+        <div class="row justify-content-center post-container" data-user-username="@TempData["UserUsername"]">
             @if (Model != null)
             {
+                TempData.Keep();
                 @foreach (var item in Model)
                 {
                     @await Html.PartialAsync("_PostsPartial", item);

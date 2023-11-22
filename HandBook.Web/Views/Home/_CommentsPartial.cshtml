@@ -1,0 +1,9 @@
+﻿@model IEnumerable<Comment>
+
+@{
+    TempData.Keep();
+}
+@foreach (var comment in Model)
+{
+    @await Html.PartialAsync("_CommentPartial",comment)
+}

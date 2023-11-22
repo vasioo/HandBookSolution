@@ -6,6 +6,9 @@ using Messenger.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.AspNetCore.Mvc.ViewEngines;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using System.Diagnostics;
@@ -41,7 +44,7 @@ namespace HandBook.Web.Controllers
                     Id = post.Id,
                     CreatorUserName = post.CreatorUserName,
                     AmountOfComments = post.Comments.Count(),
-                    AmountOfLikes =post.AmountOfLikes,
+                    AmountOfLikes = post.AmountOfLikes,
                     image = post.image,
                     Time = post.Time
                 }).ToList();
@@ -54,12 +57,15 @@ namespace HandBook.Web.Controllers
 
                     if (userLikedCards != null && userLikedCards.Count() > 0)
                     {
-                        ViewBag.UserLikedCards = userLikedCards.Select(x => x.PostId).ToList();
+                        TempData["UserLikedCards"] = userLikedCards.Select(x => x.PostId).ToList();
                     }
 
                     if (userLikedComments != null && userLikedComments.Count() > 0)
                     {
-                        ViewBag.UserLikedComments = userLikedComments.Select(x => x.CommentId).ToList();
+                        string commentIdsString = string.Join(",", userLikedComments.Select(x => x.CommentId));
+
+                        TempData["UserLikedComments"] = commentIdsString;
+
                     }
                 }
 
@@ -420,7 +426,7 @@ namespace HandBook.Web.Controllers
                 return Json("Error occurred while processing the relation.");
             }
         }
-       
+
         [HttpPost]
         [Authorize]
         public async Task<JsonResult> LoadMorePosts(int offset)
@@ -429,7 +435,7 @@ namespace HandBook.Web.Controllers
             {
                 var cards = _dbc.Posts.OrderBy(x => x.Time).Skip(offset).Take(20);
 
-                var posts =await cards.Select(post => new CardDTO
+                var posts = await cards.Select(post => new CardDTO
                 {
                     Id = post.Id,
                     CreatorUserName = post.CreatorUserName,
@@ -450,11 +456,15 @@ namespace HandBook.Web.Controllers
 
         [HttpPost]
         [Authorize]
-        public async Task<JsonResult> LoadMoreComments(int offset,int derivingFrom)
+        public async Task<JsonResult> LoadMoreComments(int offset, int derivingFrom)
         {
             try
             {
-                var comments = _dbc.Comments.OrderBy(x => x.DateOfCreation).Where(x=>x.CommentDeriveFromId==derivingFrom).Skip(offset).Take(20);
+                var comments = _dbc.Comments.OrderBy(x => x.DateOfCreation)
+                                 .Where(x => x.CommentDeriveFromId == derivingFrom)
+                                 .Skip(offset)
+                                 .Take(20)
+                                 .ToList(); // Ensure the comments are materialized into a list
 
                 return Json(JsonConvert.SerializeObject(comments));
             }

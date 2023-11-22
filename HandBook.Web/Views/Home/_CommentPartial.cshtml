@@ -1,9 +1,12 @@
 ﻿@model Comment
-
 @{
+    TempData.Keep();
     var comment = Model;
     string link = $"https://res.cloudinary.com/dzaicqbce/image/upload/v1695818842/profile-image-for-{comment.AppUser.UserName}.png";
     string alternativeLink = $"https://res.cloudinary.com/dzaicqbce/image/upload/v1700160046/azgysbpf8xpcxpfclb9i.jpg";
+
+    string tempdata = TempData["UserLikedComments"] as string;
+    List<int> userLikedComments = tempdata.Split(',').Select(int.Parse).ToList();
 }
 <div class="comment-container pt-2" data-comment-id="@comment.CommentDeriveFromId">
     <div class="profile-column">
@@ -33,7 +36,7 @@
             </div>
             <div class="comment-actions mt-2">
                 <button class="comment-like-button text-decoration-none text-primary" onclick="likecom(this,@comment.Id)" data-count="@comment.Post.AmountOfLikes">
-                    @if (ViewBag.UserLikedComments.Contains(comment.Id))
+                    @if (userLikedComments.Contains(comment.Id))
                     {
                         <div class="liked com-btn">Liked</div>
                     }
@@ -89,7 +92,7 @@
                                 </div>
                                 <div class="comment-actions mt-2">
                                     <button class="comment-like-button text-decoration-none text-primary" onclick="likecom(this,@reply.Id)" data-count="@comment.Post.AmountOfLikes">
-                                        @if (ViewBag.UserLikedComments.Contains(reply.Id))
+                                        @if (userLikedComments.Contains(reply.Id))
                                         {
                                             <div class="liked com-btn">Liked</div>
                                         }
@@ -106,6 +109,9 @@
                     </div>
 
                 }
+            </div>
+            <div class="">
+                <a class="load-more-replies">Load More Replies</a>
             </div>
         </div>
     </div>

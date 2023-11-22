@@ -280,8 +280,8 @@ function likeCommentClick(Id) {
     });
 }
 
-var offset = 20;
-var loading = false;
+var offsetPost = 20;
+var loadingPost = false;
 
 var offset = 20; // Initial offset
 var loading = false; // Flag to prevent multiple simultaneous requests
@@ -297,23 +297,23 @@ function loadMorePosts() {
     $.ajax({
         type: "POST",
         url: "/Home/LoadMorePosts",
-        data: { offset: offset },
+        data: { offset: offsetPost },
         success: function (data) {
             var posts = JSON.parse(data);
 
             if (posts.length > 0) {
-                offset += posts.length;
+                offsetPost += posts.length;
 
                 posts.forEach(function (post) {
-                    $(".postContainer").append('@await Html.PartialAsync("_PostsPartial", '+post+');');
+                    $(".postContainer").append('@await Html.PartialAsync("_PostsPartial", ' + post + ');');
                 });
             }
 
-            loading = false;
+            loadingPost = false;
         },
         error: function (error) {
             console.log("Error loading more posts: " + error.responseText);
-            loading = false;
+            loadingPost = false;
         }
     });
 }
@@ -344,43 +344,149 @@ function getTimeDisplay(postDate) {
     }
 
     return displayString;
-}   
+}
 
 var loadingComments = false;
 
-$(window).scroll(function () {
-    if ($(window).scrollTop() + $(window).height() >= $(".comment-section").height() - 200 && !loadingComments) {
-        loadingComments = true;
-        loadMoreComments();
-    }
+$('.load-more-comments').click(function () {
+    loadMoreComments(0);
 });
 
-function loadMoreComments() {
+$('.load-more-replies').click(function () {
+    var commentId = $(this).closest('.comment-container').data('comment-id');
+    loadMoreComments(commentId);
+});
+
+function loadMoreComments(derivingFromId) {
     $.ajax({
         type: "POST",
         url: "/Home/LoadMoreComments",
-        data: { offset: offset, derivingFrom: derivingFrom() },
+        data: { offset: offset, derivingFrom: derivingFromId },
         success: function (data) {
+
             var posts = JSON.parse(data);
 
             if (posts.length > 0) {
                 offset += posts.length;
 
                 posts.forEach(function (post) {
-                    $(".comment-section-regulation-div").append('@await Html.PartialAsync("_CommentPartial", ' + post + ');');
+
+                    var repliesHtml = '';
+
+                    for (var i = 0; i < post.Post.Comments.length; i++) {
+                        var reply = post.Post.Comments[i];
+                        var replyLink = "https://res.cloudinary.com/dzaicqbce/image/upload/v1695818842/profile-image-for-" + reply.AppUser.UserName + ".png";
+
+                        repliesHtml += '<div class="comment-container pt-2">';
+                        repliesHtml += '<div class="profile-column">';
+                        repliesHtml += '<img src="' + replyLink + '" alt="Image not found" onerror="this.onerror=null;this.src=' + alternativeLink + ';" class="rounded-circle" style="width:50px; margin-right: 10px;" />';
+                        repliesHtml += '</div>';
+                        repliesHtml += '<div class="comment-column">';
+                        repliesHtml += '<div class="comment">';
+                        repliesHtml += '<div class="comment-header">';
+                        repliesHtml += '<div class="comment-username font-weight-bold">' + reply.AppUser.UserName + '</div>';
+                        repliesHtml += '<div class="comment-time text-muted">';
+                        repliesHtml += '<script type="text/javascript">';
+                        repliesHtml += 'var postDate = \'' + reply.DateOfCreation + '\';';
+                        repliesHtml += 'document.write(getTimeDisplay(postDate));';
+                        repliesHtml += '</script>';
+                        repliesHtml += '</div>';
+                        repliesHtml += '</div>';
+                        repliesHtml += '<div class="comment-content mt-2">';
+                        repliesHtml += '<div class="row">';
+                        repliesHtml += reply.CommentContent;
+                        repliesHtml += '</div>';
+                        repliesHtml += '<div class="row">';
+                        repliesHtml += '<span class="commentlikeCount" data-item-id="' + reply.Id + '" style="display: ' + (reply.AmountOfLikes > 0 ? 'block' : 'none') + ';">';
+                        repliesHtml += reply.AmountOfLikes + ' <i class="fa-solid fa-heart liked fa-sm" style="color: #ff0000;"></i>';
+                        repliesHtml += '</span>';
+                        repliesHtml += '</div>';
+                        repliesHtml += '</div>';
+                        repliesHtml += '<div class="comment-actions mt-2">';
+                        repliesHtml += '<button class="comment-like-button text-decoration-none text-primary" onclick="likecom(this,' + reply.Id + ')" data-count="' + comment.Post.AmountOfLikes + '">';
+                        repliesHtml += '<div class="liked com-btn">Liked</div>';
+                        repliesHtml += '<div class="com-btn">Like</div>';
+                        repliesHtml += '</button>';
+                        repliesHtml += '</div>';
+                        repliesHtml += '</div>';
+                        repliesHtml += '</div>';
+                        repliesHtml += '</div>';
+                    }
+                    var replyContainerId = "container-{' + post.Id +'}";
+
+
+                    var link = 'https://res.cloudinary.com/dzaicqbce/image/upload/v1695818842/profile-image-for-' + post.AppUser.UserName + '.png';
+                    var alternativeLink = "https://res.cloudinary.com/dzaicqbce/image/upload/v1700160046/azgysbpf8xpcxpfclb9i.jpg";
+                    var htmlString = '<div class="comment-container pt-2" data-comment-id="' + post.CommentDeriveFromId + '">' +
+                        '<div class="profile-column">' +
+                        '<img src="' + link + '" alt="Image not found" onerror="this.onerror=null;this.src=' + alternativeLink + ';" class="rounded-circle" style="width:50px; margin-right: 10px;" />' +
+                        '</div>' +
+                        '<div class="comment-column">' +
+                        '<div class="comment">' +
+                        '<div class="comment-header">' +
+                        '<div class="comment-username font-weight-bold">' + post.AppUser.UserName + '</div>' +
+                        '<div class="comment-time text-muted">' +
+                        '<script type="text/javascript">' +
+                        'var postDate = ' + post.DateOfCreation + ';' +
+                        'document.write(getTimeDisplay(postDate));' +
+                        '</script>' +
+                        '</div>' +
+                        '</div>' +
+                        '<div class="comment-content mt-2">' +
+                        '<div class="row">' +
+                        '@comment.CommentContent' +
+                        '</div>' +
+                        '<div class="row">' +
+                        '<span class="commentlikeCount" data-item-id="' + post.Id + '" style="display: @(' + post.AmountOfLikes + ' > 0 ? "block" : "none");">' +
+                        '@comment.AmountOfLikes <i class="fa-solid fa-heart liked fa-sm" style="color: #ff0000;"></i>' +
+                        '</span>' +
+                        '</div>' +
+                        '</div>' +
+                        '<div class="comment-actions mt-2">' +
+                        '<button class="comment-like-button text-decoration-none text-primary" onclick="likecom(this,' + post.Id + ')" data-count="' + post.Post.AmountOfLikes + '">' +
+                        '@if (userLikedComments.Contains(post.Id)) {' +
+                        '<div class="liked com-btn">Liked</div>' +
+                        '} else {' +
+                        '<div class="com-btn">Like</div>' +
+                        '}' +
+                        '</button>' +
+                        '</div>' +
+                        '<a class="view-replies mt-2 text-primary" onclick="toggleReplies(this)">View Replies </a>' +
+                        '<div class="p-3 m-1 replies-container" id="' + post.Id + '" style="display:none">' +
+                        '<div class="input-group mt-3" data-post-id="' + post.Post.Id + '">' +
+                        '<div class="border col-10 p-0">' +
+                        '<textarea class="replies-text form-control" style="max-height:400px" placeholder="Reply to ' + post.AppUser.UserName + '...."></textarea>' +
+                        '</div>' +
+                        '<div class="input-group-append col-2">' +
+                        '<button class="btn btn-primary submit-reply-btn" type="button"><i class="fas fa-right-long"></i></button>' +
+                        '</div>' +
+                        '</div>' +
+                        '<div id="' + replyContainerId + '">' +
+                        repliesHtml +
+                        '</div>' +
+                        '<div class="">' +
+                        '<a class="load-more-replies">Load More Replies</a>' +
+                        '</div>' +
+                        '</div>' +
+                        '</div>' +
+                        '</div>';
+
+                    $(".comment-section-regulation-div").append(htmlString);
                 });
             }
-
+            if (commentContainerCount < 20) {
+                if (derivingFromId > 0) {
+                    $('.load-more-replies').hide();
+                }
+                else {
+                    $('.load-more-comments').hide();
+                }
+            }
             loading = false;
         },
         error: function (error) {
-            console.log("Error loading more posts: " + error.responseText);
+            console.log("Error loading more comments: " + error.responseText);
             loading = false;
         }
     });
-}
-
-function derivingFrom() {
-    var lastItem = $(".comment-section-regulation-div").children().last();
-    return lastItem.data("comment-id");
 }

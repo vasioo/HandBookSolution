@@ -1,9 +1,14 @@
 ﻿using Messenger.Models;
+using System.ComponentModel.DataAnnotations.Schema;
+using System.ComponentModel.DataAnnotations;
 
 namespace HandBook.Web.Models
 {
     public class Followers
     {
+        [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        public int Id { get; set; }
         public int FollowerUserId { get; set; }
         public int FollowedUserId { get; set; }
 
