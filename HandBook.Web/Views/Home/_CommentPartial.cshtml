@@ -62,53 +62,6 @@
                 var replyContainerId = $"container-{comment.Id}";
             }
             <div id="@replyContainerId">
-                @foreach (var reply in comment.Post.Comments.Where(x => x.CommentDeriveFromId == comment.Id).OrderByDescending(x => x.DateOfCreation))
-                {
-                    string replyLink = $"https://res.cloudinary.com/dzaicqbce/image/upload/v1695818842/profile-image-for-{reply.AppUser.UserName}.png";
-                    <div class="comment-container pt-2">
-                        <div class="profile-column">
-                            <img src="@replyLink" alt="Image not found" onerror="this.onerror=null;this.src='@alternativeLink';" class="rounded-circle" style="width:50px; margin-right: 10px;" />
-                        </div>
-                        <div class="comment-column">
-                            <div class="comment">
-                                <div class="comment-header">
-                                    <div class="comment-username font-weight-bold">@reply.AppUser.UserName</div>
-                                    <div class="comment-time text-muted">
-                                        <script type="text/javascript">
-                                            var postDate = '@reply.DateOfCreation';
-                                            document.write(getTimeDisplay(postDate));
-                                        </script>
-                                    </div>
-                                </div>
-                                <div class="comment-content mt-2">
-                                    <div class="row">
-                                        @reply.CommentContent
-                                    </div>
-                                    <div class="row">
-                                        <span class="commentlikeCount" data-item-id="@reply.Id" style="display: @(reply.AmountOfLikes > 0 ? "block" : "none");">
-                                            @reply.AmountOfLikes <i class="fa-solid fa-heart liked fa-sm" style="color: #ff0000;"></i>
-                                        </span>
-                                    </div>
-                                </div>
-                                <div class="comment-actions mt-2">
-                                    <button class="comment-like-button text-decoration-none text-primary" onclick="likecom(this,@reply.Id)" data-count="@comment.Post.AmountOfLikes">
-                                        @if (userLikedComments.Contains(reply.Id))
-                                        {
-                                            <div class="liked com-btn">Liked</div>
-                                        }
-                                        else
-                                        {
-
-                                            <div class="com-btn">Like</div>
-                                        }
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-
-                    </div>
-
-                }
             </div>
             <div class="">
                 <a class="load-more-replies">Load More Replies</a>

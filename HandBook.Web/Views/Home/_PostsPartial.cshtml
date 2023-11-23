@@ -69,7 +69,7 @@
         TempData["ImageData"] = base64Image;
 
         <img src="data:image;base64,@TempData["ImageData"]" style="border-radius:6px; height:500px" alt="Image" class="fit-image">
-        var commentsCount = item.AmountOfLikes;
+        var commentsCount = item.AmountOfComments;
     }
     <div class="card-body p-0 m-0">
         <div class="row justify-content-center p-0 m-0">
@@ -147,6 +147,7 @@
                 {
                     TempData["UserLikedComments"] = new List<int>();
                 }
+                
             </div>
             <div class="">
                 <a class="load-more-comments">Load More Comments</a>

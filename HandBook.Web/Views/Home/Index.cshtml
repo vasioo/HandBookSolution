@@ -12,6 +12,7 @@
     <br />
     <div class="row justify-content-center ">
         <div class="row justify-content-center post-container" data-user-username="@TempData["UserUsername"]">
+            <div class="liked-comments-from-temp" data-comments-list="@TempData["UserLikedComments"]"></div>
             @if (Model != null)
             {
                 TempData.Keep();

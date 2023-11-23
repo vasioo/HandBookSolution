@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Mvc.ViewEngines;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
+using ServiceStack;
 using System.Diagnostics;
 
 namespace HandBook.Web.Controllers
@@ -456,15 +457,16 @@ namespace HandBook.Web.Controllers
 
         [HttpPost]
         [Authorize]
-        public async Task<JsonResult> LoadMoreComments(int offset, int derivingFrom)
+        public async Task<JsonResult> LoadMoreComments(int offset, int derivingFrom, int postId)
         {
             try
             {
-                var comments = _dbc.Comments.OrderBy(x => x.DateOfCreation)
-                                 .Where(x => x.CommentDeriveFromId == derivingFrom)
+                var comments = _dbc.Comments.OrderByDescending(x => x.DateOfCreation)
+                                 .Where(x => x.Post.Id == postId && x.CommentDeriveFromId == derivingFrom)
                                  .Skip(offset)
                                  .Take(20)
-                                 .ToList(); // Ensure the comments are materialized into a list
+                                 .Include(x => x.AppUser)
+                                 .ToList();
 
                 return Json(JsonConvert.SerializeObject(comments));
             }
