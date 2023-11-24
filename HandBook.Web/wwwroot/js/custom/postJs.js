@@ -158,7 +158,9 @@ function toggleComments(itemId, element) {
         commentSection.style.display = 'none';
 
         card.style.zIndex = '';
-        card.style.position = ''; // Reset card position
+        card.style.position = '';
+
+        $('.comment-section-regulation-div').empty();
 
         document.removeEventListener('click', handleClickOutside);
         return;
@@ -233,12 +235,23 @@ function like(button, Id) {
     sessionStorage.setItem("likedCards", JSON.stringify(likedCards));
 }
 
-function toggleReplies(link) {
-    var repliesContainer = link.nextElementSibling; // Assumes the replies-container is the next sibling
+function toggleReplies(element) {
+    var commentId = element.closest('.comment-container')
+    var commentNeededId = $(commentId).data('comment-id');
+
+    const card = element.closest('.card');
+    var postId = $(card).data('post-id');
+
+    loadMoreComments(commentNeededId, postId);
+    var repliesContainer = element.nextElementSibling;
     if (repliesContainer.style.display === 'none') {
         repliesContainer.style.display = 'block';
     } else {
+        var neededID = `container-${commentNeededId}`;
+
+        $(`#${neededID}`).empty();
         repliesContainer.style.display = 'none';
+
     }
 }
 
@@ -352,27 +365,36 @@ function getTimeDisplay(postDate) {
 
 var loadingComments = false;
 
-$('.load-more-comments').click(function () {
-    const $card = element.closest('.card');
-    var postId = $card.data('post-id');
+$(document).on('click', '.load-more-comments', function () {
+
+    const card = $(this).closest('.card');
+    var postId = $(card).data('post-id');
 
     loadMoreComments(0, postId);
 });
 
-$('.load-more-replies').click(function () {
+$(document).on('click', '.load-more-replies', function () {
     var commentId = $(this).closest('.comment-container').data('comment-id');
 
-    const $card = element.closest('.card');
-    var postId = $card.data('post-id');
+    const card = $(this).closest('.card');
+    var postId = $(card).data('post-id');
 
     loadMoreComments(commentId, postId);
 });
 
 function loadMoreComments(derivingFromId, postAttrId) {
+
+    var concOffset = offset;
+
+    if (derivingFromId > 0) {
+        var concOffset = $('.profile-reply-image-class').length;
+    }
+
+
     $.ajax({
         type: "POST",
         url: "/Home/LoadMoreComments",
-        data: { offset: offset, derivingFrom: derivingFromId, postId: postAttrId },
+        data: { offset: concOffset, derivingFrom: derivingFromId, postId: postAttrId },
         success: function (data) {
 
             var posts = JSON.parse(data);
@@ -380,66 +402,74 @@ function loadMoreComments(derivingFromId, postAttrId) {
             var commentsList = $(".liked-comments-from-temp").data('comments-list');
 
             if (posts.length > 0) {
-                offset += posts.length;
                 var alternativeLink = "https://res.cloudinary.com/dzaicqbce/image/upload/v1700160046/azgysbpf8xpcxpfclb9i.jpg";
                 if (derivingFromId > 0) {
                     posts.forEach(function (post) {
 
-                        var repliesHtml = '';
-                        var replyLink = "https://res.cloudinary.com/dzaicqbce/image/upload/v1695818842/profile-image-for-" + reply.AppUser.UserName + ".png";
+                        var replyLink = "https://res.cloudinary.com/dzaicqbce/image/upload/v1695818842/profile-image-for-" + post.AppUser.UserName + ".png";
 
-                        var imgTag = '<img src="' + replyLink + '" alt="Image not found" onerror="this.onerror=null;this.src=\'' + alternativeLink + '\';" style="border-radius:30px; width:50px; margin-right:10px;" />';
+                        var imgTag = '<img src="' + replyLink + '" class="profile-reply-image-class" alt="Image not found" style="border-radius:30px; width:50px; margin-right:10px;" />';
 
                         var isliked = '<div class="com-btn">Like</div>';
                         if (commentsList && commentsList.includes(post.Id)) {
                             isliked = '<div class="liked com-btn">Liked</div>';
                         }
 
-                        repliesHtml += '<div class="comment-container pt-2">';
-                        repliesHtml += '<div class="profile-column">';
-                        repliesHtml += imgTag
-                        repliesHtml += '</div>';
-                        repliesHtml += '<div class="comment-column">';
-                        repliesHtml += '<div class="comment">';
-                        repliesHtml += '<div class="comment-header">';
-                        repliesHtml += '<div class="comment-username font-weight-bold">' + post.AppUser.UserName + '</div>';
-                        repliesHtml += '<div class="comment-time text-muted">';
-                        repliesHtml += getTimeDisplay(post.DateOfCreation);
-                        repliesHtml += '</div>';
-                        repliesHtml += '</div>';
-                        repliesHtml += '<div class="comment-content mt-2">';
-                        repliesHtml += '<div class="row">';
-                        repliesHtml += post.CommentContent;
-                        repliesHtml += '</div>';
-                        repliesHtml += '<div class="row">';
-                        repliesHtml += '<span class="commentlikeCount" data-item-id="' + post.Id + '" style="display: ' + (post.AmountOfLikes > 0 ? 'block' : 'none') + ';">' +
-                        repliesHtml += post.AmountOfLikes + ' <i class="fa-solid fa-heart liked fa-sm" style="color: #ff0000;"></i>';
-                        repliesHtml += '</span>';
-                        repliesHtml += '</div>';
-                        repliesHtml += '</div>';
-                        repliesHtml += '<div class="comment-actions mt-2">';
-                        repliesHtml += '<button class="comment-like-button text-decoration-none text-primary" onclick="likecom(this,' + post.Id + ')" data-count="' + post.Post.AmountOfLikes + '">';
-                        repliesHtml += isliked;
-                        repliesHtml += '</button>';
-                        repliesHtml += '</div>';
-                        repliesHtml += '</div>';
-                        repliesHtml += '</div>';
-                        repliesHtml += '</div>';
-                    });
-                    $("container-"+post.Id+"").append(repliesHtml);
+                        var repliesHtml = '<div class="comment-container pt-2">' +
+                            '<div class="profile-column">' +
+                            imgTag +
+                            '</div>' +
+                            '<div class="comment-column">' +
+                            '<div class="comment">' +
+                            '<div class="comment-header">' +
+                            '<div class="comment-username font-weight-bold">' + post.AppUser.UserName + '</div>' +
+                            '<div class="comment-time text-muted">' +
+                            getTimeDisplay(post.DateOfCreation) +
+                            '</div>' +
+                            '</div>' +
+                            '<div class="comment-content mt-2">' +
+                            '<div class="row">' +
+                            post.CommentContent +
+                            '</div>' +
+                            '<div class="row">' +
+                            '<span class="commentlikeCount" data-item-id="' + post.Id + '" style="display: ' + (post.AmountOfLikes > 0 ? 'block' : 'none') + ';">' +
+                            post.AmountOfLikes + ' <i class="fa-solid fa-heart liked fa-sm" style="color: #ff0000;"></i>' +
+                            '</span>' +
+                            '</div>' +
+                            '</div>' +
+                            '<div class="comment-actions mt-2">' +
+                            '<button class="comment-like-button text-decoration-none text-primary" onclick="likecom(this,' + post.Id + ')" data-count="' + post.Post.AmountOfLikes + '">' +
+                            isliked +
+                            '</button>' +
+                            '</div>' +
+                            '</div>' +
+                            '</div>' +
+                            '</div>' +
+                            '</div>';
+                        var containerId = 'container-' + post.CommentDeriveFromId;
 
+                        $('.' + containerId).append(repliesHtml);
+
+
+                        $('.profile-reply-image-class').on('error', function (event) {
+                            $(this).attr('src', 'https://res.cloudinary.com/dzaicqbce/image/upload/v1700160046/azgysbpf8xpcxpfclb9i.jpg');
+                            $(this).off('error');
+                        });
+                    });
                 }
                 else {
+                    offset += posts.length;
                     posts.forEach(function (post) {
                         var link = 'https://res.cloudinary.com/dzaicqbce/image/upload/v1695818842/profile-image-for-' + post.AppUser.UserName + '.png';
-                        var imgTag = '<img src="' + link + '" alt="Image not found" onerror="this.onerror=null;this.src=\'' + alternativeLink + '\';" style="border-radius:30px; width:50px; margin-right:10px;" />';
+                        var imgTag = '<img src="' + link + '" class="profile-image-class" alt="Image not found" style="border-radius:30px; width:50px; margin-right:10px;" />';
+
 
                         var isliked = '<div class="com-btn">Like</div>';
                         if (commentsList && commentsList.includes(post.Id)) {
                             isliked = '<div class="liked com-btn">Liked</div>';
                         }
 
-                        var htmlString = '<div class="comment-container pt-2" data-comment-id="' + post.CommentDeriveFromId + '">' +
+                        var htmlString = '<div class="comment-container pt-2" data-comment-id="' + post.Id + '">' +
                             '<div class="profile-column">' +
                             imgTag +
                             '</div>' +
@@ -477,7 +507,7 @@ function loadMoreComments(derivingFromId, postAttrId) {
                             '<button class="btn btn-primary submit-reply-btn" type="button"><i class="fas fa-right-long"></i></button>' +
                             '</div>' +
                             '</div>' +
-                            '<div id="container' + post.Id + '">' +
+                            '<div class="container-' + post.Id + '">' +
                             '</div>' +
                             '<div class="">' +
                             '<a class="load-more-replies">Load More Replies</a>' +
@@ -486,6 +516,11 @@ function loadMoreComments(derivingFromId, postAttrId) {
                             '</div>' +
                             '</div>';
                         $(".comment-section-regulation-div").append(htmlString);
+
+                        $('.profile-image-class').on('error', function (event) {
+                            $(this).attr('src', 'https://res.cloudinary.com/dzaicqbce/image/upload/v1700160046/azgysbpf8xpcxpfclb9i.jpg');
+                            $(this).off('error');
+                        });
                     });
                 }
             }
@@ -505,3 +540,13 @@ function loadMoreComments(derivingFromId, postAttrId) {
         }
     });
 }
+
+function checkImage(url) {
+    return fetch(url, { method: 'HEAD' })
+        .then(res => res.ok)
+        .catch(error => {
+            console.error('Error checking image:', error);
+            return false;
+        });
+}
+
