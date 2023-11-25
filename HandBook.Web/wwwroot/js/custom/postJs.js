@@ -322,7 +322,96 @@ function loadMorePosts() {
                 offsetPost += posts.length;
 
                 posts.forEach(function (post) {
-                    $(".postContainer").append('@await Html.PartialAsync("_PostsPartial", ' + post + ');');
+                    var postString = '';
+                    offsetPost += posts.length;
+
+                    var link = "https://res.cloudinary.com/dzaicqbce/image/upload/v1695818842/profile-image-for-" + post.CreatorUserName + ".png";
+
+                    var imgTag = '<img src="' + link + '" class="profile-image-class" alt="Image not found" style="border-radius:30px; width:50px; margin-right:10px;" />';
+
+
+                    var postHtml = '<div class="card col-7 mt-3" data-post-id="' + post.Id + '">' +
+                        '<div class="card-header">' +
+                        '<div class="row justify-content-between w-100">' +
+                        '<div class="profile-column-post d-flex align-items-center">' +
+                        imgTag +
+                        '<div class="">' +
+                        '<a class="card-title h5 cr-us-name" asp-controller="Home" asp-action="Account" asp-route-username="' + post.CreatorUserName + '">' +
+                        '&#64;' + post.CreatorUserName +
+                        '</a>' +
+                        '<div class="custom-date">' + getTimeDisplay(post.Time) + '</div>' +
+                        '</div>' +
+                        '</div>' +
+                        '</div>' +
+                        '</div>' +
+
+                        '<img src="data:image;base64,' + base64Image + '" style="border-radius:6px; height:500px" alt="Image" class="fit-image">' +
+                        '<div class="card-body p-0 m-0">' +
+                        '<div class="row justify-content-center p-0 m-0">' +
+                        '<div class="col-10 pt-3">' +
+                        '<div class="d-flex justify-content-between">' +
+                        '<div>' +
+                        '<span class="likeCount" data-item-id="' + post.Id + '" style="display: ' + (post.AmountOfLikes > 0 ? 'block' : 'none') + '">' +
+                        post.AmountOfLikes + ' <i class="fa-solid ' + likeButtonIcon + '" style="color: #ff0000;"></i>' +
+                        '</span>' +
+                        '</div>' +
+                        '<div>' +
+                        '<span class="commentsCount" data-item-id="' + post.Id + '">' + commentsCount + ' ' + commentsText + '</span>' +
+                        '</div>' +
+                        '</div>' +
+                        '</div>' +
+                        '</div>' +
+
+                        '<div class="d-flex justify-content-center">' +
+                        '<hr class="col-11">' +
+                        '</div>' +
+
+                        '<div class="row">' +
+                        '<div class="col-12 d-flex justify-content-around">' +
+                        '<div class="col-1 pt-2 text-center pb-3">' +
+                        '<button class="likeButton" onclick="like(this,' + post.Id + ')" data-count="' + post.AmountOfLikes + '">' +
+                        '<i class="fa-regular ' + likeButtonIcon + '" style="color: #000;"></i>' +
+                        '</button>' +
+                        '<br>' +
+                        '</div>' +
+                        '<div class="col-1 pt-2 text-center pb-3">' +
+                        '<button class="commentButton" onclick="toggleComments(' + post.Id + ', this)">' +
+                        '<i class="fa-regular fa-comment fa-xl"></i>' +
+                        '</button>' +
+                        '<br>' +
+                        '</div>' +
+                        '<div class="col-1 pt-2 text-center pb-3">' +
+                        '<button class="shareButton" onclick="share(this,' + post.Id + ')">' +
+                        '<i class="fa-solid fa-share-from-square fa-xl"></i>' +
+                        '</button>' +
+                        '<br>' +
+                        '</div>' +
+                        '</div>' +
+                        '</div>' +
+                        '<div class="row comment-section" style="display:none" data-post-id="' + post.Id + '">' +
+                        '<div class="col">' +
+                        '<div class="col">' +
+                        '<div class="input-group">' +
+                        '<div class="border col-10 pl-1 pr-1 m-0">' +
+                        '<textarea class="comments-text w-100" style="max-height:400px" placeholder="Write a comment..."></textarea>' +
+                        '</div>' +
+                        '<div class="input-group-append align-self-end col-2">' +
+                        '<button class="btn btn-primary submit-btn" type="button"> <i class="fas fa-right-long"></i></button>' +
+                        '</div>' +
+                        '</div>' +
+                        '</div>' +
+                        '</div>' +
+                        '<div class="comment-section-regulation-div">' +
+                        '</div>' +
+                        '<div class="">' +
+                        '<a class="load-more-comments">Load More Comments</a>' +
+                        '</div>' +
+                        '</div>' +
+                        '</div>' +
+                        '</div>';
+
+
+                    $(".post-container").append(postString);
                 });
             }
 
@@ -408,7 +497,7 @@ function loadMoreComments(derivingFromId, postAttrId) {
 
                         var replyLink = "https://res.cloudinary.com/dzaicqbce/image/upload/v1695818842/profile-image-for-" + post.AppUser.UserName + ".png";
 
-                        var imgTag = '<img src="' + replyLink + '" class="profile-reply-image-class" alt="Image not found" style="border-radius:30px; width:50px; margin-right:10px;" />';
+                        var imgTag = '<img src="' + replyLink + '" class="profile-image-class" alt="Image not found" style="border-radius:30px; width:50px; margin-right:10px;" />';
 
                         var isliked = '<div class="com-btn">Like</div>';
                         if (commentsList && commentsList.includes(post.Id)) {
@@ -451,7 +540,7 @@ function loadMoreComments(derivingFromId, postAttrId) {
                         $('.' + containerId).append(repliesHtml);
 
 
-                        $('.profile-reply-image-class').on('error', function (event) {
+                        $('.profile-image-class').on('error', function (event) {
                             $(this).attr('src', 'https://res.cloudinary.com/dzaicqbce/image/upload/v1700160046/azgysbpf8xpcxpfclb9i.jpg');
                             $(this).off('error');
                         });
@@ -550,3 +639,14 @@ function checkImage(url) {
         });
 }
 
+$('.profile-image-class').on('load', function () {
+}).on('error', function () {
+    $(this).attr('src', 'https://res.cloudinary.com/dzaicqbce/image/upload/v1700160046/azgysbpf8xpcxpfclb9i.jpg');
+    $(this).off('error');
+});
+
+$('.profile-image-class').each(function () {
+    if (this.complete || (typeof this.naturalWidth !== 'undefined' && this.naturalWidth === 0)) {
+        $(this).trigger('error');
+    }
+});

@@ -10,7 +10,11 @@
 }
 <div class="comment-container pt-2" data-comment-id="@comment.CommentDeriveFromId">
     <div class="profile-column">
-        <img src="@link" alt="Image not found" onerror="this.onerror=null;this.src='@alternativeLink';" class="rounded-circle" style="width:50px; margin-right: 10px;" />
+        @{
+            var pilink = "https://res.cloudinary.com/dzaicqbce/image/upload/v1695818842/profile-image-for-" + comment.AppUser.UserName + ".png";
+        }
+
+        <img src="@pilink" class="profile-image-class" alt="Image not found" style="border-radius:30px; width:50px; margin-right:10px;" />
     </div>
     <div class="comment-column">
 

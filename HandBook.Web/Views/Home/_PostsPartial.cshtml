@@ -53,13 +53,17 @@
 <div class="card col-7 mt-3" data-post-id="@item.Id">
     <div class="card-header">
         <div class="row justify-content-between w-100">
-            <div class="col-auto">
-                <a class="card-title h5 cr-us-name" asp-controller="Home" asp-action="Account" asp-route-username="@item.CreatorUserName">
-                    &#64;@item.CreatorUserName
-                </a>
-            </div>
-            <div class="col-auto p-0">
-                <div class="custom-date">@GetTimeDisplay(item.Time)</div>
+            <div class="profile-column-post d-flex align-items-center">
+                @{
+                    var link = "https://res.cloudinary.com/dzaicqbce/image/upload/v1695818842/profile-image-for-" + item.CreatorUserName + ".png";
+                }
+                <img src="@link" class="profile-image-class" alt="Image not found" style="border-radius:30px; width:50px; margin-right:10px;" />
+                <div>
+                    <a class="card-title h5 cr-us-name" asp-controller="Home" asp-action="Account" asp-route-username="@item.CreatorUserName">
+                        &#64;@item.CreatorUserName
+                    </a>
+                    <div class="custom-date">@GetTimeDisplay(item.Time)</div>
+                </div>
             </div>
         </div>
     </div>
@@ -147,7 +151,7 @@
                 {
                     TempData["UserLikedComments"] = new List<int>();
                 }
-                
+
             </div>
             <div class="">
                 <a class="load-more-comments">Load More Comments</a>
