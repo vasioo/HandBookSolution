@@ -14,5 +14,11 @@
         {
             <partial name="_NotificationsPartial" model="@item" />
         }
+        @if (Model == null || Model.Count() < 1)
+        {
+            <h1 class="row mt-5 pt-5 justify-content-center">
+                No Notificaitons!
+            </h1>
+        }
     </div>
 </div>

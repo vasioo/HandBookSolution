@@ -331,11 +331,13 @@ function loadMorePosts() {
 
 
                     var postHtml = '<div class="card col-7 mt-3" data-post-id="' + post.Id + '">' +
-                        '<div class="card-header">' +
+                        '<div class="card-header border-bottom mb-2">' +
                         '<div class="row justify-content-between w-100">' +
                         '<div class="profile-column-post d-flex align-items-center">' +
+                        '<a class="" asp-controller="Home" asp-action="Account" asp-route-username="' + post.CreatorUserName + '">' +
                         imgTag +
-                        '<div class="">' +
+                        '</a>' +
+                        '<div>'+
                         '<a class="card-title h5 cr-us-name" asp-controller="Home" asp-action="Account" asp-route-username="' + post.CreatorUserName + '">' +
                         '&#64;' + post.CreatorUserName +
                         '</a>' +

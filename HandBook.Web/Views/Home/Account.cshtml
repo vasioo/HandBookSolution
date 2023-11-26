@@ -15,14 +15,12 @@
 <style>
     .upload-input {
         position: relative;
-        height: 150px;
     }
 
         .upload-input input {
             position: absolute;
             width: 100%;
             height: 100%;
-            border: 2px dashed rgba(124,134,154,.25);
             text-indent: -9999px;
         }
 
@@ -57,15 +55,14 @@
 
 
     .uploaded-image {
-        height: 150px;
-        width: 100%;
+        height: 100px;
     }
 </style>
 
-<div class="container justify-content-center align-items-center d-flex">
-    <div class="row">
-        <div class="row">
-            <div class="col">
+<div class="row justify-content-center">
+    <div class="col-7 pt-4 pb-3">
+        <div class="row justify-content-around">
+            <div class="col-md-3">
                 @{
                     string link = $"https://res.cloudinary.com/dzaicqbce/image/upload/v1695818842/profile-image-for-{Model!.UserTemp!.UserName!}.png";
                     string alternativeLink = $"https://res.cloudinary.com/dzaicqbce/image/upload/v1700160046/azgysbpf8xpcxpfclb9i.jpg";
@@ -73,7 +70,7 @@
                     {
                         <div class="upload-input">
                             <input type="file" id="profile-image" name="profile-image" class="image-upload" accept=".png, .jpg, .jpeg" multiple="multiple" max="1">
-                            <img src="@link" alt="Image not found" onerror="this.onerror=null;this.src='@alternativeLink';" class="rounded-circle uploaded-image" style="width:100px; margin-right: 10px;" />
+                            <img src="@link" alt="Image not found" onerror="this.onerror=null;this.src='@alternativeLink';" class="rounded-circle uploaded-image" style="   " />
                         </div>
                     }
                     else
@@ -81,23 +78,59 @@
                         <img src="@link" alt="Image not found" onerror="this.onerror=null;this.src='@alternativeLink';" class="rounded-circle uploaded-image" style="width:100px; margin-right: 10px;" />
                     }
                 }
-                
+            </div>
+            <div class="col-md-6">
+                <div class="row">
+                    <div class="col pr-1">
+                        <div class="d-flex justify-content-center">
+                            <span>@Model.PostsTemp.Count()</span>
+                        </div>
+                        <div class="d-flex justify-content-center">
+                            <span>Posts</span>
+                        </div>
+                    </div>
+                    <div class="col pr-1">
+                        <div class="d-flex justify-content-center">
+                            <span>@ViewBag.Followers</span>
+                        </div>
+                        <div class="d-flex justify-content-center">
+                            <span class="text">Followers</span>
+                        </div>
+                    </div>
+                    <div class="col pr-1">
+                        <div class="d-flex justify-content-center">
+                            <span>@ViewBag.Follows</span>
+                        </div>
+                        <div class="d-flex justify-content-center">
+                            <span class="text">Following</span>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
-        <div class="row">
-            <div class="btn btn-primary">
-                <a href="@Url.Action("AddFollowerRelationship", "Home", new { username = Model.UserTemp.UserName})" style="text-decoration:none">
+    </div>
+    <div class="col-7">
+        <div class="d-flex justify-content-around">
+            @if (ViewBag.FollowsThePerson == false)
+            {
+                <div class="btn btn-primary add-following col-5" data-username="@Model.UserTemp.UserName">
                     Follow
-                </a>
-            </div>
-            <div class="btn border border-3">
+                </div>
+            }
+            else
+            {
+                <div class="btn btn-secondary remove-following col-5" data-username="@Model.UserTemp.UserName">
+                    Followed
+                </div>
+            }
+
+            <div class="btn border border-3 col-5">
                 <a href="@Url.Action("Chat", "Messages", new { userName = Model.UserTemp.UserName})" style="text-decoration:none">
                     Message
                 </a>
             </div>
         </div>
     </div>
-
     <div class="row justify-content-center">
         <div class="row justify-content-center" data-user-username="@ViewBag.UserUsername">
             @{

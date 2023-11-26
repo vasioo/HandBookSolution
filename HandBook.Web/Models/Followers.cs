@@ -9,8 +9,8 @@ namespace HandBook.Web.Models
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
-        public int FollowerUserId { get; set; }
-        public int FollowedUserId { get; set; }
+        public string FollowerUserId { get; set; }
+        public string FollowedUserId { get; set; }
 
         public AppUser Follower { get; set; } = new AppUser();
         public AppUser Followed { get; set; } = new AppUser();  

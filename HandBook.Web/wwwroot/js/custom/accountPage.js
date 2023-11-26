@@ -61,8 +61,6 @@ function validateAndResizeImage(file, callback) {
         callback(false, 'Invalid file type.');
     }
 }
-
-
 function resizeImage(image, maxSize, callback) {
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d');
@@ -91,9 +89,6 @@ function resizeImage(image, maxSize, callback) {
 
     callback(resizedDataUrl);
 }
-
-
-
 function getImageSizeInBytes(dataUrl) {
     const base64String = dataUrl.split(',')[1],
         padding = (base64String.length % 4 === 0 ? 0 : 4 - (base64String.length % 4)),
@@ -102,3 +97,39 @@ function getImageSizeInBytes(dataUrl) {
 
     return sizeInBytes;
 }
+
+$('.add-following').click(function () {
+    var buttonElement = $(this);
+    var username = buttonElement.data("username");
+
+    $.ajax({
+        type: "POST",
+        url: "/Home/AddFollowerRelationship",
+        data: { username: username },
+        success: function (data) {
+            buttonElement.removeClass("btn-primary add-following").addClass("btn-secondary remove-following");
+            buttonElement.text("Following");
+        },
+        error: function (error) {
+            console.log("Error loading more posts: " + error.responseText);
+        }
+    });
+});
+
+$('.remove-following').click(function () {
+    var buttonElement = $(this);
+    var username = buttonElement.data("username");
+
+    $.ajax({
+        type: "POST",
+        url: "/Home/RemoveFollowerRelationship",
+        data: { username: username },
+        success: function (data) {
+            buttonElement.removeClass("btn-secondary remove-following").addClass("btn-primary add-following");
+            buttonElement.text("Follow");
+        },
+        error: function (error) {
+            console.log("Error loading more posts: " + error.responseText);
+        }
+    });
+});

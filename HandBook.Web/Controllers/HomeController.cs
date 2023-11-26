@@ -99,7 +99,13 @@ namespace HandBook.Web.Controllers
         {
             var username = HttpContext.User?.Identity?.Name ?? "";
             var user = await _userManager.FindByNameAsync(username);
-            var cards = await _dbc.Notifications.Where(card => card.UserId == user!.Id).ToListAsync();
+            var followers = _dbc.Followers.Where(f => f.FollowedUserId == user.Id).Select(f => f.FollowerUserId);
+
+            var cards = await _dbc.Notifications
+                .Where(card => followers.Contains(card.UserId))
+                .OrderBy(x => x.Time)
+                .ToListAsync();
+
             cards.Reverse();
             ViewBag.CurrentUserUsername = user!.UserName;
             return View("~/Views/Home/Notifications.cshtml", cards);
@@ -353,6 +359,9 @@ namespace HandBook.Web.Controllers
             useraccdto.UserTemp = user;
             useraccdto.PostsTemp = _dbc.Posts.Where(x => x.CreatorUserName == username);
 
+            var currusername = HttpContext.User?.Identity?.Name ?? "";
+            var curruser = await _userManager.FindByNameAsync(username);
+
             if (user != null)
             {
                 var userLikedCards = _dbc.Likes.Where(like => like.UserId == user!.Id);
@@ -363,7 +372,16 @@ namespace HandBook.Web.Controllers
             }
 
             ViewBag.UserUsername = username;
+            bool isConnected = _dbc.Followers
+                       .Any(f => f.FollowerUserId == curruser.Id && f.FollowedUserId == user.Id);
 
+            ViewBag.FollowsThePerson = isConnected;
+
+            var countOfFollows = _dbc.Followers.Where(p=>p.FollowedUserId==curruser!.Id).Count();
+            var countOfFollowers = _dbc.Followers.Where(p=>p.FollowerUserId==user!.Id).Count();
+
+            ViewBag.Follows = countOfFollows;
+            ViewBag.Followers = countOfFollowers;
 
             return View("~/Views/Home/Account.cshtml", useraccdto);
         }
@@ -395,7 +413,6 @@ namespace HandBook.Web.Controllers
             return Json(userResults);
         }
 
-        [HttpPost]
         [Authorize]
         public async Task<IActionResult> AddFollowerRelationship(string username)
         {
@@ -418,6 +435,54 @@ namespace HandBook.Web.Controllers
                     followerrelation.Followed = follow;
 
                     await _dbc.Followers.AddAsync(followerrelation);
+
+                    Notification ntf = new Notification
+                    {
+                        AppUser = follow!,
+                        CreatorUserName = follow!.UserName!,
+                        Time = DateTime.Now,
+                        MainText = "started followed you"
+                    };
+
+                    await _dbc.AddAsync(ntf);
+                }
+                await _dbc.SaveChangesAsync();
+                return Json("Success");
+            }
+            catch (Exception)
+            {
+                return Json("Error occurred while processing the relation.");
+            }
+        }
+
+        [Authorize]
+        public async Task<IActionResult> RemoveFollowerRelationship(string username)
+        {
+            try
+            {
+                if (username == null || username == "")
+                {
+                    return View("~/Views/Home/Index.cshtml");
+                }
+                var usernamefollower = HttpContext.User?.Identity?.Name ?? "";
+
+                var follow = await _userManager.FindByNameAsync(username);
+                var follower = await _userManager.FindByNameAsync(usernamefollower);
+
+                if (follow != null && follower != null)
+                {
+                    var followerrelation = new Followers();
+
+                    followerrelation.Follower = follower;
+                    followerrelation.Followed = follow;
+
+                    _dbc.Followers.Remove(followerrelation);
+
+                    var existingNotif = await _dbc.Notifications.FirstOrDefaultAsync(x => x.UserId == follow!.Id && x.MainText == "started followed you");
+                    if (existingNotif != null)
+                    {
+                        _dbc.Notifications.Remove(existingNotif);
+                    }
                 }
                 await _dbc.SaveChangesAsync();
                 return Json("Success");
