@@ -6,299 +6,272 @@
 @section Styles {
     <link href="@Url.Content("~/css/custom/CustomPostIndex.css")" rel="stylesheet" type="text/css" />
     <link href="@Url.Content("~/css/custom/PostStyling.css")" rel="stylesheet" type="text/css" />
+    <link href="@Url.Content("~/css/custom/CustomUserAccount.css")" rel="stylesheet" type="text/css" />
 }
 @section Scripts{
     <script src="@Url.Content("~/js/custom/postJs.js")" type="text/javascript" asp-append-version="true"></script>
     <script src="@Url.Content("~/js/custom/accountPage.js")" type="text/javascript" asp-append-version="true"></script>
     <script src="@Url.Content("~/js/custom/mainJs.js")" type="text/javascript" asp-append-version="true"></script>
 }
-<style>
-    .upload-input {
-        position: relative;
-    }
-
-        .upload-input input {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            text-indent: -9999px;
-        }
-
-        .upload-input .content {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            padding: 30px;
-            top: 0;
-            left: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .upload-input .plus-icon {
-            height: 50px;
-            width: 50px;
-            color: #fff;
-            background: #88888859;
-            display: inline-block;
-            line-height: 50px;
-            font-size: 18px;
-            border-radius: 5px;
-            -webkit-transition: all 0.4s ease;
-            transition: all 0.4s ease;
-        }
-
-        .upload-input:hover .plus-icon {
-            background-color: #5830E0;
-        }
-
-
-    .uploaded-image {
-        height: 100px;
-    }
-</style>
-
-<div class="row justify-content-center">
-    <div class="col-7 pt-4 pb-3">
-        <div class="row justify-content-around">
-            <div class="col-md-3">
-                @{
-                    string link = $"https://res.cloudinary.com/dzaicqbce/image/upload/v1695818842/profile-image-for-{Model!.UserTemp!.UserName!}.png";
-                    string alternativeLink = $"https://res.cloudinary.com/dzaicqbce/image/upload/v1700160046/azgysbpf8xpcxpfclb9i.jpg";
-                    @if (User!.Identity!.Name == Model!.UserTemp.UserName)
-                    {
-                        <div class="upload-input">
-                            <input type="file" id="profile-image" name="profile-image" class="image-upload" accept=".png, .jpg, .jpeg" multiple="multiple" max="1">
-                            <img src="@link" alt="Image not found" onerror="this.onerror=null;this.src='@alternativeLink';" class="rounded-circle uploaded-image" style="   " />
-                        </div>
-                    }
-                    else
-                    {
-                        <img src="@link" alt="Image not found" onerror="this.onerror=null;this.src='@alternativeLink';" class="rounded-circle uploaded-image" style="width:100px; margin-right: 10px;" />
-                    }
-                }
-            </div>
-            <div class="col-md-6">
-                <div class="row">
-                    <div class="col pr-1">
-                        <div class="d-flex justify-content-center">
-                            <span>@Model.PostsTemp.Count()</span>
-                        </div>
-                        <div class="d-flex justify-content-center">
-                            <span>Posts</span>
-                        </div>
-                    </div>
-                    <div class="col pr-1">
-                        <div class="d-flex justify-content-center">
-                            <span>@ViewBag.Followers</span>
-                        </div>
-                        <div class="d-flex justify-content-center">
-                            <span class="text">Followers</span>
-                        </div>
-                    </div>
-                    <div class="col pr-1">
-                        <div class="d-flex justify-content-center">
-                            <span>@ViewBag.Follows</span>
-                        </div>
-                        <div class="d-flex justify-content-center">
-                            <span class="text">Following</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="col-7">
-        <div class="d-flex justify-content-around">
-            @if (ViewBag.FollowsThePerson == false)
-            {
-                <div class="btn btn-primary add-following col-5" data-username="@Model.UserTemp.UserName">
-                    Follow
-                </div>
-            }
-            else
-            {
-                <div class="btn btn-secondary remove-following col-5" data-username="@Model.UserTemp.UserName">
-                    Followed
-                </div>
-            }
-
-            <div class="btn border border-3 col-5">
-                <a href="@Url.Action("Chat", "Messages", new { userName = Model.UserTemp.UserName})" style="text-decoration:none">
-                    Message
-                </a>
-            </div>
-        </div>
-    </div>
+@if (Model != null && Model.UserTemp != null)
+{
     <div class="row justify-content-center">
-        <div class="row justify-content-center" data-user-username="@ViewBag.UserUsername">
-            @{
-                List<int> userLikedCards = ViewBag.UserLikedCards;
-                if (userLikedCards == null)
-                {
-                    userLikedCards = new List<int>();
-                }
-            }
-            @if (Model != null)
-            {
-                @foreach (var item in Model.PostsTemp)
-                {
-                    string GetTimeDisplay(DateTime postDate)
-                    {
-                        TimeSpan timeDifference = DateTime.Now - postDate;
-
-                        double seconds = Math.Floor(timeDifference.TotalSeconds);
-                        double minutes = Math.Floor(timeDifference.TotalMinutes);
-                        double hours = Math.Floor(timeDifference.TotalHours);
-                        double days = Math.Floor(timeDifference.TotalDays);
-
-                        string displayString = "";
-
-                        if (days > 365 || (days > 7 && postDate.Year != DateTime.Now.Year))
+        <div class="col-7 pt-4 pb-3">
+            <div class="row justify-content-around align-items-center">
+                <div class="col-md-3">
+                    @{
+                        string link = $"https://res.cloudinary.com/dzaicqbce/image/upload/v1695818842/profile-image-for-{Model!.UserTemp!.UserName!}.png";
+                        string alternativeLink = $"https://res.cloudinary.com/dzaicqbce/image/upload/v1700160046/azgysbpf8xpcxpfclb9i.jpg";
+                        @if (User!.Identity!.Name == Model!.UserTemp.UserName)
                         {
-                            displayString = postDate.ToString("yyyy-MM-dd HH:mm:ss");
-                        }
-                        else if (days > 7)
-                        {
-                            displayString = postDate.ToString("MMMM d");
-                        }
-                        else if (days >= 1)
-                        {
-                            displayString = days == 1 ? "1 day ago" : $"{(int)days} days ago";
-                        }
-                        else if (hours >= 1)
-                        {
-                            displayString = hours == 1 ? "1 hour ago" : $"{(int)hours} hours ago";
-                        }
-                        else if (minutes >= 1)
-                        {
-                            displayString = minutes == 1 ? "1 minute ago" : $"{(int)minutes} minutes ago";
+                            <div class="upload-container">
+                                <img src="@link" alt="Image not found" onerror="this.onerror=null;this.src='@alternativeLink';" onclick="showProfileImage()" class="rounded-circle uploaded-image" />
+                                <div class="upload-input" style="cursor:pointer;">
+                                    <div class="overlay">
+                                        <div class="plus-icon">
+                                            <input type="file" id="profile-image" name="profile-image" class="image-upload" accept=".png, .jpg, .jpeg" multiple="multiple" max="1">
+                                            <i class="fa-solid fa-camera"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div id="custom-view-profile-image-container-id" class="d-flex justify-content-center align-items-center">
+                                <img src="@link" alt="Image not found" onerror="this.onerror=null;this.src='@alternativeLink';" id="custom-view-profile-image-id" />
+                            </div>
                         }
                         else
                         {
-                            displayString = seconds == 1 ? "1 second ago" : $"{(int)seconds} seconds ago";
+                            <img src="@link" alt="Image not found" onerror="this.onerror=null;this.src='@alternativeLink';" class="rounded-circle uploaded-image" style="width:100px; margin-right: 10px;" />
                         }
-
-                        return displayString;
                     }
-
-                    <div class="card col-7 mt-3">
-                        <div class="card-header">
-                            <div class="row justify-content-between w-100">
-                                <div class="col-auto">
-                                    <a class="card-title h5 cr-us-name" asp-controller="Home" asp-action="Account" asp-route-username="@item.CreatorUserName">
-                                        &#64;@item.CreatorUserName
-                                    </a>
-                                </div>
-                                <div class="col-auto p-0">
-                                    <div class="custom-date">@GetTimeDisplay(item.Time)</div>
-                                </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="row" id="following-information">
+                        <div class="col pr-1">
+                            <div class="d-flex justify-content-center">
+                                <span>@Model.PostsTemp.Count()</span>
+                            </div>
+                            <div class="d-flex justify-content-center">
+                                <span>Posts</span>
                             </div>
                         </div>
-
-                        @{
-                            var base64Image = Convert.ToBase64String(item.image);
-                            ViewBag.ImageData = base64Image;
-
-                            <img src="data:image;base64,@ViewBag.ImageData" style="border-radius:6px; height:500px" alt="Image" class="fit-image">
-                            var commentsCount = 0;
-                            if (item.Comments != null)
-                            {
-                                commentsCount = item.Comments.Count();
-                            }
-                        }
-                        <div class="card-body p-0 m-0">
-                            <div class="row justify-content-center p-0 m-0">
-                                <div class="col-10 pt-3">
-                                    <div class="d-flex justify-content-between">
-                                        <div>
-                                            <span class="likeCount" data-item-id="@item.Id" style="display: @(item.AmountOfLikes > 0 ? "block" : "none");">
-                                                @item.AmountOfLikes <i class="fa-solid fa-heart liked fa-sm" style="color: #ff0000;"></i>
-                                            </span>
-                                        </div>
-                                        <div>
-                                            <span class="commentsCount" data-item-id="@item.Id">@commentsCount comments</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
+                        <div class="col pr-1">
                             <div class="d-flex justify-content-center">
-                                <hr class="col-11">
+                                <span>@ViewBag.Followers</span>
                             </div>
-
-                            <div class="row">
-                                <div class="col-12 d-flex justify-content-around">
-                                    <div class="col-1 pt-2 text-center pb-3">
-                                        <button class="likeButton" onclick="like(this,@item.Id)" data-count="@item.AmountOfLikes">
-                                            @if (userLikedCards.Contains(item.Id))
-                                            {
-                                                <i class="fa-solid fa-heart liked fa-xl" style="color: #ff0000;"></i>
-                                            }
-                                            else
-                                            {
-
-                                                <i class="fa-regular fa-heart fa-xl" style="color: #000;"></i>
-                                            }
-                                        </button>
-                                        <br>
-                                    </div>
-                                    <div class="col-1 pt-2 text-center pb-3">
-                                        <button class="commentButton" onclick="toggleComments(@item.Id, this)">
-                                            <i class="fa-regular fa-comment fa-xl"></i>
-                                        </button>
-                                        <br>
-                                    </div>
-                                    <div class="col-1 pt-2 text-center pb-3">
-                                        <button class="shareButton" onclick="share(this,@item.Id)">
-                                            <i class="fa-solid fa-share-from-square fa-xl"></i>
-                                        </button>
-                                        <br>
-                                    </div>
-                                </div>
+                            <div class="d-flex justify-content-center">
+                                <span class="text">Followers</span>
                             </div>
-                            <div class="row comment-section" style="display:none" data-post-id="@item.Id">
-                                <div class="col">
-                                    <div class="col">
-                                        <div class="input-group">
-                                            <div class="border col-10 pl-1 pr-1 m-0">
-                                                <textarea class="my-text w-100" style="max-height:400px" placeholder="Write a comment..."></textarea>
-                                            </div>
-
-                                            <div class="input-group-append align-self-end col-2">
-                                                <button class="btn btn-primary submit-btn" type="button"> <i class="fas fa-right-long"></i></button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                @if (item.Comments != null)
-                                {
-                                    @foreach (var comment in item.Comments.Where(com => com.CommentDeriveFromId == 0))
-                                    {
-                                        <div class="main-comment row">
-                                            <div class="row">@comment.AppUser.UserName</div>
-                                            <div class="row">@comment.CommentContent</div>
-                                            <div class="row">
-                                                <div class="col">@GetTimeDisplay(comment.DateOfCreation)</div>
-                                                <div class="col"><a>Like</a></div>
-                                                <div class="col"><a>Reply</a></div>
-                                            </div>
-                                        </div>
-                                        <div class="look-replies">View Replies</div>
-                                    }
-                                }
-                                else
-                                {
-                                    <div class="row justify-content-center mb-3"> No Comments</div>
-                                }
+                        </div>
+                        <div class="col pr-1">
+                            <div class="d-flex justify-content-center">
+                                <span>@ViewBag.Follows</span>
+                            </div>
+                            <div class="d-flex justify-content-center">
+                                <span class="text">Following</span>
                             </div>
                         </div>
                     </div>
-                    <br />
+                </div>
+            </div>
+        </div>
+        <div class="col-7">
+            <div class="d-flex justify-content-around py-3">
+                @if (ViewBag.FollowsThePerson == false)
+                {
+                    <div class="btn btn-primary add-following col-5" data-username="@Model.UserTemp.UserName">
+                        Follow
+                    </div>
                 }
-            }
+                else
+                {
+                    <div class="btn btn-secondary remove-following col-5" data-username="@Model.UserTemp.UserName">
+                        Followed
+                    </div>
+                }
+
+                <div class="btn border border-3 col-5">
+                    <a href="@Url.Action("Chat", "Messages", new { userName = Model.UserTemp.UserName})" style="text-decoration:none">
+                        Message
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="row justify-content-center pt-4">
+            <div class="row justify-content-center" data-user-username="@ViewBag.UserUsername">
+                @{
+                    List<int> userLikedCards = ViewBag.UserLikedCards;
+                    if (userLikedCards == null)
+                    {
+                        userLikedCards = new List<int>();
+                    }
+                }
+                @if (Model != null)
+                {
+                    @foreach (var item in Model.PostsTemp)
+                    {
+                        string GetTimeDisplay(DateTime postDate)
+                        {
+                            TimeSpan timeDifference = DateTime.Now - postDate;
+
+                            double seconds = Math.Floor(timeDifference.TotalSeconds);
+                            double minutes = Math.Floor(timeDifference.TotalMinutes);
+                            double hours = Math.Floor(timeDifference.TotalHours);
+                            double days = Math.Floor(timeDifference.TotalDays);
+
+                            string displayString = "";
+
+                            if (days > 365 || (days > 7 && postDate.Year != DateTime.Now.Year))
+                            {
+                                displayString = postDate.ToString("yyyy-MM-dd HH:mm:ss");
+                            }
+                            else if (days > 7)
+                            {
+                                displayString = postDate.ToString("MMMM d");
+                            }
+                            else if (days >= 1)
+                            {
+                                displayString = days == 1 ? "1 day ago" : $"{(int)days} days ago";
+                            }
+                            else if (hours >= 1)
+                            {
+                                displayString = hours == 1 ? "1 hour ago" : $"{(int)hours} hours ago";
+                            }
+                            else if (minutes >= 1)
+                            {
+                                displayString = minutes == 1 ? "1 minute ago" : $"{(int)minutes} minutes ago";
+                            }
+                            else
+                            {
+                                displayString = seconds == 1 ? "1 second ago" : $"{(int)seconds} seconds ago";
+                            }
+
+                            return displayString;
+                        }
+
+                        <div class="card col-7 mt-3">
+                            <div class="card-header">
+                                <div class="row justify-content-between w-100">
+                                    <div class="col-auto">
+                                        <a class="card-title h5 cr-us-name" asp-controller="Home" asp-action="Account" asp-route-username="@item.CreatorUserName">
+                                            &#64;@item.CreatorUserName
+                                        </a>
+                                    </div>
+                                    <div class="col-auto p-0">
+                                        <div class="custom-date">@GetTimeDisplay(item.Time)</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            @{
+                                var base64Image = Convert.ToBase64String(item.image);
+                                ViewBag.ImageData = base64Image;
+
+                                <img src="data:image;base64,@ViewBag.ImageData" style="border-radius:6px; height:500px" alt="Image" class="fit-image">
+                                var commentsCount = 0;
+                                if (item.Comments != null)
+                                {
+                                    commentsCount = item.Comments.Count();
+                                }
+                            }
+                            <div class="card-body p-0 m-0">
+                                <div class="row justify-content-center p-0 m-0">
+                                    <div class="col-10 pt-3">
+                                        <div class="d-flex justify-content-between">
+                                            <div>
+                                                <span class="likeCount" data-item-id="@item.Id" style="display: @(item.AmountOfLikes > 0 ? "block" : "none");">
+                                                    @item.AmountOfLikes <i class="fa-solid fa-heart liked fa-sm" style="color: #ff0000;"></i>
+                                                </span>
+                                            </div>
+                                            <div>
+                                                <span class="commentsCount" data-item-id="@item.Id">@commentsCount comments</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="d-flex justify-content-center">
+                                    <hr class="col-11">
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-12 d-flex justify-content-around">
+                                        <div class="col-1 pt-2 text-center pb-3">
+                                            <button class="likeButton" onclick="like(this,@item.Id)" data-count="@item.AmountOfLikes">
+                                                @if (userLikedCards.Contains(item.Id))
+                                                {
+                                                    <i class="fa-solid fa-heart liked fa-xl" style="color: #ff0000;"></i>
+                                                }
+                                                else
+                                                {
+
+                                                    <i class="fa-regular fa-heart fa-xl" style="color: #000;"></i>
+                                                }
+                                            </button>
+                                            <br>
+                                        </div>
+                                        <div class="col-1 pt-2 text-center pb-3">
+                                            <button class="commentButton" onclick="toggleComments(@item.Id, this)">
+                                                <i class="fa-regular fa-comment fa-xl"></i>
+                                            </button>
+                                            <br>
+                                        </div>
+                                        <div class="col-1 pt-2 text-center pb-3">
+                                            <button class="shareButton" onclick="share(this,@item.Id)">
+                                                <i class="fa-solid fa-share-from-square fa-xl"></i>
+                                            </button>
+                                            <br>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row comment-section" style="display:none" data-post-id="@item.Id">
+                                    <div class="col">
+                                        <div class="col">
+                                            <div class="input-group">
+                                                <div class="border col-10 pl-1 pr-1 m-0">
+                                                    <textarea class="my-text w-100" style="max-height:400px" placeholder="Write a comment..."></textarea>
+                                                </div>
+
+                                                <div class="input-group-append align-self-end col-2">
+                                                    <button class="btn btn-primary submit-btn" type="button"> <i class="fas fa-right-long"></i></button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    @if (item.Comments != null)
+                                    {
+                                        @foreach (var comment in item.Comments.Where(com => com.CommentDeriveFromId == 0))
+                                        {
+                                            <div class="main-comment row">
+                                                <div class="row">@comment.AppUser.UserName</div>
+                                                <div class="row">@comment.CommentContent</div>
+                                                <div class="row">
+                                                    <div class="col">@GetTimeDisplay(comment.DateOfCreation)</div>
+                                                    <div class="col"><a>Like</a></div>
+                                                    <div class="col"><a>Reply</a></div>
+                                                </div>
+                                            </div>
+                                            <div class="look-replies">View Replies</div>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <div class="row justify-content-center mb-3"> No Comments</div>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                        <br />
+                    }
+                }
+            </div>
         </div>
     </div>
-</div>
+}
+else
+{
+    <div class="row justify-content-center py-5">
+        <h1>The user is not found!</h1>
+    </div>
+}

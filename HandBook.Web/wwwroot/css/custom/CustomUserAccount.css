@@ -1,1 +1,65 @@
-﻿
+﻿.upload-container {
+    position: relative;
+    display: inline-block;
+}
+
+.upload-input {
+    position: relative;
+}
+
+    .upload-input input {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        text-indent: -9999px;
+    }
+
+.uploaded-image {
+    height: 100px;
+    cursor:pointer;
+}
+
+.overlay {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+}
+
+.plus-icon {
+    height: 30px;
+    width: 30px;
+    color: white;
+    background: #0b5ed7;
+    display: inline-block;
+    line-height: 30px;
+    font-size: 14px;
+    border-radius: 50%;
+    text-align: center;
+    -webkit-transition: all 0.4s ease;
+    transition: all 0.4s ease;
+}
+
+.upload-input:hover .plus-icon {
+    background-color: #4830C0;
+}
+
+#following-information {
+    font-size: 1.1em;
+}
+
+.add-following, .remove-following {
+    font-size: 1.1em;
+}
+
+#custom-view-profile-image-container-id {
+    z-index: 1000;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(5px);
+    overflow: hidden;
+    display:none !important;
+}

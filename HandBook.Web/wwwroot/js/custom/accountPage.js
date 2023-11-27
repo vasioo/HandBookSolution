@@ -4,12 +4,14 @@
     // Event listener for file input change
     $profileImages.change(function (event) {
         const $self = $(this),
-            $uploadedImage = $self.siblings('.uploaded-image'),
+            $uploadedImage = $self.closest('.uploaded-image'),
+            $uploadedImageContainer = $('#custom-view-profile-image-id'),
             file = event.target.files[0];
 
         validateAndResizeImage(file, function (isValid, imageData) {
             if (isValid) {
                 $uploadedImage.attr('src', imageData);
+                $uploadedImageContainer.attr('src', imageData);
 
             } else {
                 Swal.fire({
@@ -19,17 +21,6 @@
                 })
             }
         });
-
-        // You can also perform additional actions with the file, such as reading its content or sending it to the server
-        // For example, if you want to read the content of the file, you can use FileReader:
-        /*
-        const reader = new FileReader();
-        reader.onload = function (e) {
-            // e.target.result contains the base64-encoded image data
-            $uploadedImage.attr('src', e.target.result);
-        };
-        reader.readAsDataURL(file);
-        */
     });
 });
 function validateAndResizeImage(file, callback) {
@@ -97,7 +88,6 @@ function getImageSizeInBytes(dataUrl) {
 
     return sizeInBytes;
 }
-
 $('.add-following').click(function () {
     var buttonElement = $(this);
     var username = buttonElement.data("username");
@@ -115,7 +105,6 @@ $('.add-following').click(function () {
         }
     });
 });
-
 $('.remove-following').click(function () {
     var buttonElement = $(this);
     var username = buttonElement.data("username");
@@ -132,4 +121,21 @@ $('.remove-following').click(function () {
             console.log("Error loading more posts: " + error.responseText);
         }
     });
+});
+
+function showProfileImage() {
+    var itemContainer = document.getElementById('custom-view-profile-image-container-id');
+    itemContainer.style.setProperty('display', 'flex', 'important');
+
+    var neededBody = document.getElementsByTagName('body')[0];
+    neededBody.style.overflow = 'hidden';
+}
+
+
+$('#custom-view-profile-image-container-id').click(function () {
+    var itemContainer = document.getElementById('custom-view-profile-image-container-id');
+    itemContainer.style.setProperty('display', 'none', 'important');
+
+    var neededBody = document.getElementsByTagName('body')[0];
+    neededBody.style.overflow = 'hidden';
 });

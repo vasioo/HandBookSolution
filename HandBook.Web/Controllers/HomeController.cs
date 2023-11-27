@@ -349,13 +349,17 @@ namespace HandBook.Web.Controllers
         [Authorize]
         public async Task<IActionResult> Account(string username)
         {
+            var useraccdto = new UserAccountDTO();
+
             if (username == null || username == "")
             {
-                return View("~/Views/Home/Index.cshtml");
+                username = "[Error]";
+                return View("~/Views/Home/Account.cshtml", useraccdto);
             }
-            var user = await _userManager.FindByNameAsync(username);
 
-            var useraccdto = new UserAccountDTO();
+            username = username.Trim();
+
+            var user = await _userManager.FindByNameAsync(username);
             useraccdto.UserTemp = user;
             useraccdto.PostsTemp = _dbc.Posts.Where(x => x.CreatorUserName == username);
 
@@ -377,8 +381,8 @@ namespace HandBook.Web.Controllers
 
             ViewBag.FollowsThePerson = isConnected;
 
-            var countOfFollows = _dbc.Followers.Where(p=>p.FollowedUserId==curruser!.Id).Count();
-            var countOfFollowers = _dbc.Followers.Where(p=>p.FollowerUserId==user!.Id).Count();
+            var countOfFollows = _dbc.Followers.Where(p => p.FollowedUserId == curruser!.Id).Count();
+            var countOfFollowers = _dbc.Followers.Where(p => p.FollowerUserId == user!.Id).Count();
 
             ViewBag.Follows = countOfFollows;
             ViewBag.Followers = countOfFollowers;
