@@ -8,7 +8,7 @@
 
         public int AmountOfLikes { get; set; }
 
-        public byte[] image { get; set; } = new byte[0];
+        public string image { get; set; } = "";
 
         public DateTime Time { get; set; } = DateTime.Now;
 

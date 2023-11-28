@@ -28,10 +28,8 @@ namespace HandBook.Models
 
         public List<Comment> Comments { get; set; }
 
-        //public virtual AppUser Creator { get; set; }
-
         [System.ComponentModel.DataAnnotations.Required]
-        public byte[] image { get; set; } = new byte[0];
+        public string ImageLink { get; set; } = "";
 
         [NotMapped]
         public bool IsLiked { get; set; } = false;

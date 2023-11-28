@@ -26,7 +26,7 @@ namespace HandBook.Web.Data
             base.OnModelCreating(builder);
 
             builder.Entity<Post>()
-                .Property(m => m.image).HasColumnType("varbinary(max)");
+                .Property(m => m.ImageLink).HasColumnType("varbinary(max)");
 
             builder.Entity<Likes>()
             .HasKey(l => l.Id);

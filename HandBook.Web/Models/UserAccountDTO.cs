@@ -5,8 +5,8 @@ namespace HandBook.Web.Models
 {
     public class UserAccountDTO
     {
-        public AppUser UserTemp { get; set; }
+        public string UserTempUsername { get; set; }
 
-        public IEnumerable<Post> PostsTemp { get; set; }
+        public IEnumerable<CardDTO> PostsTemp { get; set; }
     }
 }

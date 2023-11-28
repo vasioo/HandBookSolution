@@ -1,4 +1,6 @@
 ﻿
+using CloudinaryDotNet.Actions;
+using CloudinaryDotNet;
 using HandBook.Models;
 using HandBook.Web.Data;
 using HandBook.Web.Models;
@@ -13,6 +15,9 @@ using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using ServiceStack;
 using System.Diagnostics;
+using System.Configuration;
+using ServiceStack.Html;
+using System.Text;
 
 namespace HandBook.Web.Controllers
 {
@@ -23,12 +28,24 @@ namespace HandBook.Web.Controllers
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly ILogger<HomeController> _logger;
         private readonly ApplicationDbContext _dbc;
-        public HomeController(ILogger<HomeController> logger, ApplicationDbContext dbc, UserManager<AppUser> userManager, IHttpContextAccessor httpContextAccessor)
+        public IConfiguration Configuration;
+        private CloudinarySettings _cloudinarySettings;
+        private Cloudinary _cloudinary;
+        public HomeController(ILogger<HomeController> logger, ApplicationDbContext dbc,
+            IConfiguration configuration, UserManager<AppUser> userManager,
+            IHttpContextAccessor httpContextAccessor)
         {
             _logger = logger;
             _dbc = dbc;
             _userManager = userManager;
             _httpContextAccessor = httpContextAccessor;
+            Configuration = configuration;
+            _cloudinarySettings = Configuration.GetSection("CloudinarySettings").Get<CloudinarySettings>() ?? new CloudinarySettings();
+            CloudinaryDotNet.Account account = new CloudinaryDotNet.Account(
+              _cloudinarySettings.CloudName,
+              _cloudinarySettings.ApiKey,
+              _cloudinarySettings.ApiSecret);
+            _cloudinary = new Cloudinary(account);
         }
 
         [Authorize]
@@ -38,7 +55,7 @@ namespace HandBook.Web.Controllers
             {
                 var username = HttpContext.User?.Identity?.Name ?? "";
                 var user = await _userManager.FindByNameAsync(username);
-                var cards = _dbc.Posts.OrderBy(x => x.Time).Include(p => p.Comments).Take(20);
+                var cards = _dbc.Posts.OrderByDescending(x => x.Time).Include(p => p.Comments).Take(20);
 
                 var posts = cards.Select(post => new CardDTO
                 {
@@ -46,8 +63,8 @@ namespace HandBook.Web.Controllers
                     CreatorUserName = post.CreatorUserName,
                     AmountOfComments = post.Comments.Count(),
                     AmountOfLikes = post.AmountOfLikes,
-                    image = post.image,
-                    Time = post.Time
+                    Time = post.Time,
+                    image = post.ImageLink
                 }).ToList();
 
 
@@ -117,21 +134,34 @@ namespace HandBook.Web.Controllers
             return View("~/Views/Home/AddAPost.cshtml");
         }
 
+        static string GenerateRandomId(int length, Random random)
+        {
+            const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+            StringBuilder idBuilder = new StringBuilder();
+
+            for (int i = 0; i < length; i++)
+            {
+                int index = random.Next(chars.Length);
+                idBuilder.Append(chars[index]);
+            }
+
+            return idBuilder.ToString();
+        }
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize]
-        public async Task<IActionResult> AddAPost(Post tfm, IFormFile image, Notification ntf)
+        public async Task<IActionResult> AddAPost(Post tfm, IFormFile ImageUrl, Notification ntf)
         {
-            if (image != null && image.Length > 0)
-            {
-                using (var memoryStream = new MemoryStream())
-                {
-                    await image!.CopyToAsync(memoryStream);
-                    tfm.image = memoryStream.ToArray();
-                }
-            }
             var username = HttpContext.User?.Identity?.Name ?? "";
             var user = await _userManager.FindByNameAsync(username);
+            Random random = new Random();
+            string randomId = GenerateRandomId(8, random);
+
+            if (ImageUrl != null)
+            {
+                tfm.ImageLink = await UploadToCloudinaryAsync(ImageUrl, $"post-{randomId}", $"post-{randomId}");
+            }
             if (user != null)
             {
                 tfm.CreatorUserName = username!;
@@ -148,6 +178,24 @@ namespace HandBook.Web.Controllers
             }
             return Error();
 
+        }
+
+        private async Task<string> UploadToCloudinaryAsync(IFormFile file, string imageName, string publicId)
+        {
+            using (var stream = file.OpenReadStream())
+            {
+                var uploadParams = new ImageUploadParams
+                {
+                    File = new FileDescription(imageName, stream),
+                    DisplayName = imageName,
+                    PublicId = publicId,
+                    Overwrite = false,
+                    // You can add more parameters as needed
+                };
+
+                var uploadResult = await _cloudinary.UploadAsync(uploadParams);
+                return uploadResult.SecureUrl.AbsoluteUri;
+            }
         }
 
         [HttpPost]
@@ -351,7 +399,7 @@ namespace HandBook.Web.Controllers
         {
             var useraccdto = new UserAccountDTO();
 
-            if (username == null || username == "")
+            if (string.IsNullOrEmpty(username))
             {
                 username = "[Error]";
                 return View("~/Views/Home/Account.cshtml", useraccdto);
@@ -360,32 +408,50 @@ namespace HandBook.Web.Controllers
             username = username.Trim();
 
             var user = await _userManager.FindByNameAsync(username);
-            useraccdto.UserTemp = user;
-            useraccdto.PostsTemp = _dbc.Posts.Where(x => x.CreatorUserName == username);
+            useraccdto.UserTempUsername = user?.UserName;
 
+            var posts = _dbc.Posts
+                .Where(x => x.CreatorUserName == username)
+                .OrderByDescending(x => x.Time)
+                .Take(20)
+                .Select(post => new CardDTO
+                {
+                    Id = post.Id,
+                    CreatorUserName = post.CreatorUserName,
+                    AmountOfLikes = post.AmountOfLikes,
+                    image = post.ImageLink,
+                    Time = post.Time,
+                    AmountOfComments = post.Comments.Count()
+                });
+
+            useraccdto.PostsTemp = posts.ToList();
             var currusername = HttpContext.User?.Identity?.Name ?? "";
             var curruser = await _userManager.FindByNameAsync(username);
 
             if (user != null)
             {
                 var userLikedCards = _dbc.Likes.Where(like => like.UserId == user!.Id);
+                var userLikedComments = _dbc.Likes.Where(com => com.AppUser.Id == user!.Id && com.CommentId != 0);
                 if (userLikedCards != null && userLikedCards.Count() > 0)
                 {
-                    ViewBag.UserLikedCards = userLikedCards.Select(x => x.PostId).ToList();
+                    TempData["UserLikedCards"] = userLikedCards.Select(x => x.PostId).ToList();
+                }
+
+                if (userLikedComments != null && userLikedComments.Count() > 0)
+                {
+                    string commentIdsString = string.Join(",", userLikedComments.Select(x => x.CommentId));
+
+                    TempData["UserLikedComments"] = commentIdsString;
                 }
             }
-
-            ViewBag.UserUsername = username;
-            bool isConnected = _dbc.Followers
-                       .Any(f => f.FollowerUserId == curruser.Id && f.FollowedUserId == user.Id);
-
-            ViewBag.FollowsThePerson = isConnected;
-
+            bool isConnected = _dbc.Followers.Any(f => f.FollowerUserId == curruser.Id && f.FollowedUserId == user.Id);
             var countOfFollows = _dbc.Followers.Where(p => p.FollowedUserId == curruser!.Id).Count();
             var countOfFollowers = _dbc.Followers.Where(p => p.FollowerUserId == user!.Id).Count();
 
             ViewBag.Follows = countOfFollows;
             ViewBag.Followers = countOfFollowers;
+            ViewBag.FollowsThePerson = isConnected;
+            ViewBag.IsTheSamePerson = isConnected;
 
             return View("~/Views/Home/Account.cshtml", useraccdto);
         }
@@ -431,7 +497,7 @@ namespace HandBook.Web.Controllers
                 var follow = await _userManager.FindByNameAsync(username);
                 var follower = await _userManager.FindByNameAsync(usernamefollower);
 
-                if (follow != null && follower != null)
+                if (follow != null && follower != null&&usernamefollower!=username)
                 {
                     var followerrelation = new Followers();
 
@@ -473,7 +539,7 @@ namespace HandBook.Web.Controllers
                 var follow = await _userManager.FindByNameAsync(username);
                 var follower = await _userManager.FindByNameAsync(usernamefollower);
 
-                if (follow != null && follower != null)
+                if (follow != null && follower != null && usernamefollower != username)
                 {
                     var followerrelation = new Followers();
 
@@ -503,7 +569,7 @@ namespace HandBook.Web.Controllers
         {
             try
             {
-                var cards = _dbc.Posts.OrderBy(x => x.Time).Skip(offset).Take(20);
+                var cards = _dbc.Posts.OrderByDescending(x => x.Time).Skip(offset).Take(20);
 
                 var posts = await cards.Select(post => new CardDTO
                 {
@@ -511,7 +577,7 @@ namespace HandBook.Web.Controllers
                     CreatorUserName = post.CreatorUserName,
                     AmountOfComments = post.Comments.Count(),
                     AmountOfLikes = post.AmountOfLikes,
-                    image = post.image,
+                    image = post.ImageLink,
                     Time = post.Time
                 }).ToListAsync();
 
