@@ -15,11 +15,8 @@
                         </div>
                         <span for="ImageUrl" class="small text-danger"></span>
                     </div>
-
-                    <!-- Add other fields as needed -->
-
                     <div class="row mt-4">
-                        <input id="confirmationButton" class="btn btn-dark" type="submit" value="Save" />
+                        <button id="confirmationButton" class="btn btn-dark" type="button">Submit</button>
                     </div>
                     @ViewBag.message
                 </form>
@@ -29,6 +26,14 @@
 </div>
 
 <script>
+    document.getElementById('confirmationButton').addEventListener('click', function (e) {
+        e.preventDefault();
+        // Disable the button to prevent multiple submissions
+        this.disabled = true;
+        document.getElementById('uploadForm').submit();
+    });
+
+
     document.getElementById('imageInput').addEventListener('change', function (e) {
         const previewImage = document.getElementById('previewImage');
         const fileInput = e.target;

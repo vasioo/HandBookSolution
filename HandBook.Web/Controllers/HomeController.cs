@@ -158,26 +158,49 @@ namespace HandBook.Web.Controllers
             Random random = new Random();
             string randomId = GenerateRandomId(8, random);
 
-            if (ImageUrl != null)
+            // Declare the transaction outside the try block
+            using (var transaction = await _dbc.Database.BeginTransactionAsync())
             {
-                tfm.ImageLink = await UploadToCloudinaryAsync(ImageUrl, $"post-{randomId}", $"post-{randomId}");
-            }
-            if (user != null)
-            {
-                tfm.CreatorUserName = username!;
+                try
+                {
+                    if (user != null)
+                    {
+                        tfm.CreatorUserName = username!;
 
-                ntf.AppUser = user!;
-                ntf.CreatorUserName = user!.UserName!;
-                ntf.Time = DateTime.Now;
-                ntf.MainText = "added a new post";
-                await _dbc.AddAsync(tfm);
-                await _dbc.AddAsync(ntf);
-                await _dbc.SaveChangesAsync();
+                        ntf.AppUser = user!;
+                        ntf.CreatorUserName = user!.UserName!;
+                        ntf.Time = DateTime.Now;
+                        ntf.MainText = "added a new post";
 
-                return RedirectToAction("Index");
+                        if (ImageUrl != null && ImageUrl.Length > 0)
+                        {
+                            tfm.ImageLink = await UploadToCloudinaryAsync(ImageUrl, $"post-{randomId}", $"post-{randomId}");
+                        }
+
+                        if (tfm != null)
+                        {
+                            // Database operations (e.g., SaveChangesAsync)
+                            await _dbc.Posts.AddAsync(tfm);
+                            await _dbc.Notifications.AddAsync(ntf);
+                            await _dbc.SaveChangesAsync();
+
+                            // Commit the transaction if everything is successful
+                            await transaction.CommitAsync();
+
+                            return RedirectToAction("Index");
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    // Handle the exception, log it, and/or return an appropriate response
+                    // Rollback the transaction to avoid partial updates
+                    await transaction.RollbackAsync();
+                    return Error();
+                }
             }
+
             return Error();
-
         }
 
         private async Task<string> UploadToCloudinaryAsync(IFormFile file, string imageName, string publicId)

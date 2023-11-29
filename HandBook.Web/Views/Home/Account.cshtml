@@ -14,94 +14,99 @@
 @if (Model != null && Model.UserTempUsername != null)
 {
     <div class="row justify-content-center">
-        <div class="col-7 pt-4 pb-3">
-            <div class="row justify-content-around align-items-center">
-                <div class="col-md-3">
-                    @{
-                        string link = $"https://res.cloudinary.com/dzaicqbce/image/upload/v1695818842/profile-image-for-{Model.UserTempUsername!}.png";
-                        string alternativeLink = $"https://res.cloudinary.com/dzaicqbce/image/upload/v1700160046/azgysbpf8xpcxpfclb9i.jpg";
-                        @if (User!.Identity!.Name == Model.UserTempUsername)
-                        {
-                            <div class="upload-container">
-                                <img src="@link" alt="Image not found" onerror="this.onerror=null;this.src='@alternativeLink';" onclick="showProfileImage()" class="rounded-circle uploaded-image" />
-                                <div class="upload-input" style="cursor:pointer;">
-                                    <div class="overlay">
-                                        <div class="plus-icon">
-                                            <input type="file" id="profile-image" name="profile-image" class="image-upload" accept=".png, .jpg, .jpeg" multiple="multiple" max="1">
-                                            <i class="fa-solid fa-camera"></i>
+        <div class="row justify-content-center">
+
+            <div class="col-7 pt-4 pb-3">
+                <div class="row justify-content-around align-items-center">
+                    <div class="col-md-3">
+                        @{
+                            string link = $"https://res.cloudinary.com/dzaicqbce/image/upload/v1695818842/profile-image-for-{Model.UserTempUsername!}.png";
+                            string alternativeLink = $"https://res.cloudinary.com/dzaicqbce/image/upload/v1700160046/azgysbpf8xpcxpfclb9i.jpg";
+                            @if (User!.Identity!.Name == Model.UserTempUsername)
+                            {
+                                <div class="upload-container">
+                                    <img src="@link" alt="Image not found" onerror="this.onerror=null;this.src='@alternativeLink';" onclick="showProfileImage()" class="rounded-circle uploaded-image" />
+                                    <div class="upload-input" style="cursor:pointer;">
+                                        <div class="overlay">
+                                            <div class="plus-icon">
+                                                <input type="file" id="profile-image" name="profile-image" class="image-upload" accept=".png, .jpg, .jpeg" multiple="multiple" max="1">
+                                                <i class="fa-solid fa-camera"></i>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
-                            <div id="custom-view-profile-image-container-id" class="d-flex justify-content-center align-items-center">
-                                <img src="@link" alt="Image not found" onerror="this.onerror=null;this.src='@alternativeLink';" id="custom-view-profile-image-id" />
-                            </div>
+                                <div id="custom-view-profile-image-container-id" class="d-flex justify-content-center align-items-center">
+                                    <img src="@link" alt="Image not found" onerror="this.onerror=null;this.src='@alternativeLink';" id="custom-view-profile-image-id" />
+                                </div>
+                            }
+                            else
+                            {
+                                <img src="@link" alt="Image not found" onerror="this.onerror=null;this.src='@alternativeLink';" class="rounded-circle uploaded-image" style="width:100px; margin-right: 10px;" />
+                            }
                         }
-                        else
-                        {
-                            <img src="@link" alt="Image not found" onerror="this.onerror=null;this.src='@alternativeLink';" class="rounded-circle uploaded-image" style="width:100px; margin-right: 10px;" />
-                        }
-                    }
-                </div>
-                <div class="col-md-6">
-                    <div class="row" id="following-information">
-                        <div class="col pr-1">
-                            <div class="d-flex justify-content-center">
-                                <span>@Model.PostsTemp.Count()</span>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="row" id="following-information">
+                            <div class="col pr-1">
+                                <div class="d-flex justify-content-center">
+                                    <span>@Model.PostsTemp.Count()</span>
+                                </div>
+                                <div class="d-flex justify-content-center">
+                                    <span>Posts</span>
+                                </div>
                             </div>
-                            <div class="d-flex justify-content-center">
-                                <span>Posts</span>
+                            <div class="col pr-1">
+                                <div class="d-flex justify-content-center">
+                                    <span>@ViewBag.Followers</span>
+                                </div>
+                                <div class="d-flex justify-content-center">
+                                    <span class="text">Followers</span>
+                                </div>
                             </div>
-                        </div>
-                        <div class="col pr-1">
-                            <div class="d-flex justify-content-center">
-                                <span>@ViewBag.Followers</span>
-                            </div>
-                            <div class="d-flex justify-content-center">
-                                <span class="text">Followers</span>
-                            </div>
-                        </div>
-                        <div class="col pr-1">
-                            <div class="d-flex justify-content-center">
-                                <span>@ViewBag.Follows</span>
-                            </div>
-                            <div class="d-flex justify-content-center">
-                                <span class="text">Following</span>
+                            <div class="col pr-1">
+                                <div class="d-flex justify-content-center">
+                                    <span>@ViewBag.Follows</span>
+                                </div>
+                                <div class="d-flex justify-content-center">
+                                    <span class="text">Following</span>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-        <div class="col-7">
-            <div class="d-flex justify-content-around py-3">
-                @if (User!.Identity!.Name == Model.UserTempUsername)
-                {
-                    <a asp-area="Identity" asp-page="/Account/Manage/Index" class="btn btn-secondary col-10" data-username="@Model.UserTempUsername">
-                        Edit Settings
-                    </a>
-                }
-                else
-                {
-                    @if (ViewBag.FollowsThePerson == false)
+        <div class="row justify-content-center">
+            <div class="col-7">
+                <div class="d-flex justify-content-around py-3">
+                    @if (User!.Identity!.Name == Model.UserTempUsername)
                     {
-                        <a href="#" class="btn btn-primary add-following col-5" data-username="@Model.UserTempUsername">
-                            Follow
+                        <a asp-area="Identity" asp-page="/Account/Manage/Index" class="btn btn-secondary col-10" data-username="@Model.UserTempUsername">
+                            Edit Settings
                         </a>
                     }
                     else
                     {
-                        <a href="#" class="btn btn-secondary remove-following col-5" data-username="@Model.UserTempUsername">
-                            Followed
+                        @if (ViewBag.FollowsThePerson == false)
+                        {
+                            <a href="#" class="btn btn-primary add-following col-5" data-username="@Model.UserTempUsername">
+                                Follow
+                            </a>
+                        }
+                        else
+                        {
+                            <a href="#" class="btn btn-secondary remove-following col-5" data-username="@Model.UserTempUsername">
+                                Followed
+                            </a>
+                        }
+                        <a href="@Url.Action("Chat", "Messages", new { userName = Model.UserTempUsername})" class="btn border border-3 col-5" style="text-decoration:none">
+                            Message
                         </a>
                     }
-                    <a href="@Url.Action("Chat", "Messages", new { userName = Model.UserTempUsername})" class="btn border border-3 col-5" style="text-decoration:none">
-                        Message
-                    </a>
-                }
+                </div>
             </div>
-
         </div>
+
         <div class="row justify-content-center pt-4">
             <div class="row justify-content-center" data-user-username="@Model.UserTempUsername">
                 <div class="liked-comments-from-temp" data-comments-list="@TempData["UserLikedComments"]"></div>
