@@ -4,7 +4,6 @@
 @inject IAuthorizationService AuthorizationService
 @section Styles {
     <link href="@Url.Content("~/css/custom/CustomPostIndex.css")" rel="stylesheet" type="text/css" />
-    <link href="@Url.Content("~/css/custom/PostStyling.css")" rel="stylesheet" type="text/css" />
     <link href="@Url.Content("~/css/custom/CustomUserAccount.css")" rel="stylesheet" type="text/css" />
 }
 @section Scripts{
@@ -28,7 +27,7 @@
                                     <img src="@link" alt="Image not found" onerror="this.onerror=null;this.src='@alternativeLink';" onclick="showProfileImage()" class="rounded-circle uploaded-image" />
                                     <div class="upload-input" style="cursor:pointer;">
                                         <div class="overlay">
-                                            <div class="plus-icon">
+                                            <div class="plus-icon" style="cursor:pointer;">
                                                 <input type="file" id="profile-image" name="profile-image" class="image-upload" accept=".png, .jpg, .jpeg" multiple="multiple" max="1">
                                                 <i class="fa-solid fa-camera"></i>
                                             </div>
@@ -107,8 +106,8 @@
             </div>
         </div>
 
-        <div class="row justify-content-center pt-4">
-            <div class="row justify-content-center" data-user-username="@Model.UserTempUsername">
+        <div class="pt-4">
+            <div class="post-container" data-user-username="@Model.UserTempUsername">
                 <div class="liked-comments-from-temp" data-comments-list="@TempData["UserLikedComments"]"></div>
                 @if (Model != null)
                 {

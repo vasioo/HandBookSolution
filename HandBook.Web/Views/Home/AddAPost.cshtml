@@ -1,20 +1,26 @@
 ﻿@using HandBook.Models;
 @model Post
+@section Styles {
+    <link href="@Url.Content("~/css/custom/AddAPost.css")" rel="stylesheet" type="text/css" />
+}
+
 <div class="container">
-    <div class="row justify-content-center">
+    <div class="row justify-content-center pt-5 mt-2">
         <div class="col-md-6">
-            <div id="imagePreview" class="mt-3">
-                <img id="previewImage" class="border" style="width:500px; height:500px;">
-            </div>
             <div class="row">
                 <form id="uploadForm" method="post" enctype="multipart/form-data" asp-action="AddAPost">
-                    <div class="form-group">
-                        <label for="ImageUrl" class="form-label">Image</label>
-                        <div class="custom-file">
-                            <input for="ImageUrl" name="ImageUrl" id="imageInput" type="file" class="custom-file-input" accept=".jpg,.jpeg,.png,.gif" required>
+                    <div class="row justify-content-center">
+                        <div class="upload-input col-md-10 m-0 p-0 position-relative">
+                            <input name="ImageUrl"  id="imageInput" type="file" class="image-upload custom-file-input" accept=".png, .jpg, .jpeg" multiple="multiple" max="1" style="cursor:pointer;z-index: 10000;">
+                            <label for="imageInput" class="text-center content" style="width: 100%; height: 100%; margin: 0; padding: 0; position: absolute; top: 0; left: 0;">
+                                <span class="text">
+                                    <span class="mb-15 plus-icon"><i class="fa fa-plus"></i></span>
+                                </span>
+                            </label>
+                            <img class="uploaded-image" id="previewImage" style="width: 100%; height: 100%; object-fit: cover;" />
                         </div>
-                        <span for="ImageUrl" class="small text-danger"></span>
                     </div>
+
                     <div class="row mt-4">
                         <button id="confirmationButton" class="btn btn-dark" type="button">Submit</button>
                     </div>

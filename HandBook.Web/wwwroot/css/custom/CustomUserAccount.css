@@ -63,3 +63,10 @@
     overflow: hidden;
     display:none !important;
 }
+.post-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+}
