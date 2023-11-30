@@ -167,6 +167,7 @@ namespace HandBook.Web.Controllers
                     {
                         tfm.CreatorUserName = username!;
 
+                        ntf.Post = tfm;
                         ntf.AppUser = user!;
                         ntf.CreatorUserName = user!.UserName!;
                         ntf.Time = DateTime.Now;

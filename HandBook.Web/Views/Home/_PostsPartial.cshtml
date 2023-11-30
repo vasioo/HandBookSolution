@@ -50,7 +50,7 @@
     }
     TempData.Keep();
 }
-<div class="card col-7 mt-3" data-post-id="@item.Id">
+<div class="card col-lg-7 col-md-8 col-sm-10 col-12 mt-3" data-post-id="@item.Id" style="width: 100%; max-width: 600px;">
     <div class="card-header border-bottom mb-2">
         <div class="row justify-content-between w-100">
             <div class="profile-column-post d-flex align-items-center">
@@ -71,7 +71,9 @@
     </div>
 
     @{
-        <img src="@item.image" style="border-radius:6px; height:500px" alt="Image" class="fit-image">
+        <div class="d-flex align-items-center justify-content-center" style="height: 100%;">
+            <img src="@item.image" style="border-radius: 6px; max-height: 100%; max-width: 100%;" alt="Image" class="fit-image">
+        </div>
         var commentsCount = item.AmountOfComments;
     }
     <div class="card-body p-0 m-0">

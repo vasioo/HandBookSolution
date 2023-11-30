@@ -10,18 +10,17 @@
 <div class="container mb-5">
     <br />
     <br />
-    <div class="row justify-content-center ">
-        <div class="row justify-content-center post-container" data-user-username="@TempData["UserUsername"]">
-            <div class="liked-comments-from-temp" data-comments-list="@TempData["UserLikedComments"]"></div>
-            @if (Model != null)
+    <div class=" post-container" data-user-username="@TempData["UserUsername"]">
+        <div class="liked-comments-from-temp" data-comments-list="@TempData["UserLikedComments"]"></div>
+        @if (Model != null)
+        {
+            TempData.Keep();
+            @foreach (var item in Model)
             {
-                TempData.Keep();
-                @foreach (var item in Model)
-                {
-                    @await Html.PartialAsync("_PostsPartial", item);
-                }
+                @await Html.PartialAsync("_PostsPartial", item)
+                ;
             }
-        </div>
+        }
     </div>
 </div>
 
