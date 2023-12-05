@@ -2,16 +2,22 @@
 @using Messenger.Models;
 @model RegisterModel
 @inject SignInManager<AppUser> SignInManager
-
+@section Styles {
+    <link href="@Url.Content("~/css/custom/AddAPost.css")" rel="stylesheet" type="text/css" />
+}
 <style>
-    ﻿.facebook-button {
-        background-color: dodgerblue;
+    .facebook-button {
+        background-color: dodgerblue !important;
         border-radius: 8px;
     }
 
     .google-button {
-        background-color: indianred;
+        background-color: indianred !important;
         border-radius: 8px;
+    }
+
+    .form-floating input::placeholder {
+        color: #6c757d; /* Customize the color as needed */
     }
 </style>
 <div class="row-fluid pt-5 mt-5">
@@ -44,10 +50,18 @@
                 <span asp-validation-for="Input.Username" class="text-danger"></span>
             </div>
 
-            <div class="form-group pb-4">
-                <label asp-for="Input.ImageUrl" class="form-label"></label>
-                <input asp-for="Input.ImageUrl" type="file" class="form-control" accept="image/*" onchange="previewImage(this)" />
-                <span asp-validation-for="Input.ImageUrl" class="text-danger"></span>
+            <div class="form-group pb-4 row justify-content-center">
+                <label class="form-label row justify-content-center text-lg">Profile Image</label>
+                <div class="upload-input col-md-10 m-0 p-0 position-relative">
+                    <input name="ProfileImage" id="imageInput" type="file" class="image-upload custom-file-input" accept=".png, .jpg, .jpeg" multiple="multiple" max="1" style="cursor:pointer;z-index: 10000;">
+                    <label for="imageInput" class="text-center content" style="width: 100%; height: 100%; margin: 0; padding: 0; position: absolute; top: 0; left: 0;">
+                        <span class="text">
+                            <span class="mb-15 plus-icon"><i class="fa fa-plus"></i></span>
+                        </span>
+                    </label>
+                    <img class="uploaded-image" id="previewImage" style="width: 100%; height: 100%; object-fit: cover;" />
+                </div>
+                <span asp-validation-for="Input.ProfileImage" class="text-danger"></span>
                 <img id="imagePreview" src="#" alt="Image Preview" style="display:none; max-width: 100%; height: auto;" />
             </div>
 
@@ -131,18 +145,18 @@
     document.getElementById('googleLink').addEventListener('click', function () {
         document.getElementById('googleInput').click();
     });
-    function previewImage(input) {
-        var preview = document.getElementById('imagePreview');
-        var file = input.files[0];
-        var reader = new FileReader();
+    document.getElementById('imageInput').addEventListener('change', function (e) {
+        const previewImage = document.getElementById('previewImage');
+        const fileInput = e.target;
 
-        reader.onload = function (e) {
-            preview.src = e.target.result;
-            preview.style.display = 'block';
-        };
+        if (fileInput.files && fileInput.files[0]) {
+            const reader = new FileReader();
 
-        if (file) {
-            reader.readAsDataURL(file);
+            reader.onload = function (e) {
+                previewImage.src = e.target.result;
+            };
+
+            reader.readAsDataURL(fileInput.files[0]);
         }
-    }
+    });
 </script>

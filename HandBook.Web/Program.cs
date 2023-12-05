@@ -20,7 +20,7 @@ namespace HandBook.Web
             builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
             builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
-
+                
             builder.Services.AddDefaultIdentity<AppUser>(options =>
             {
                 options.SignIn.RequireConfirmedAccount = false;
@@ -33,6 +33,25 @@ namespace HandBook.Web
                    .AddEntityFrameworkStores<ApplicationDbContext>();
             builder.Services.AddControllersWithViews();
             builder.Services.AddSignalR();
+
+
+            var facebookAppId = builder.Configuration.GetSection("Facebook:AppId").Get<string>() ?? "";
+            var facebookAppSecret = builder.Configuration.GetSection("Facebook:AppSecret").Get<string>() ?? "";
+            var googleClientId = builder.Configuration.GetSection("Google:ClientId").Get<string>() ?? "";
+            var googleClientSecret = builder.Configuration.GetSection("Google:ClientSecret").Get<string>() ?? "";
+
+
+            builder.Services.AddAuthentication()
+                        .AddFacebook(options =>
+                        {
+                            options.AppId = facebookAppId;
+                            options.AppSecret = facebookAppSecret;
+                        })
+                        .AddGoogle(options =>
+                        {
+                            options.ClientId = googleClientId;
+                            options.ClientSecret = googleClientSecret;
+                        });
 
             var app = builder.Build();
 

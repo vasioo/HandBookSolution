@@ -98,7 +98,7 @@ namespace HandBook.Web.Areas.Identity.Pages.Account
             [Display(Name = "Gender")]
             public string Gender { get; set; }
 
-            public string ImageUrl { get; set; }
+            public string ProfileImage { get; set; }
         }
 
 
@@ -140,9 +140,9 @@ namespace HandBook.Web.Areas.Identity.Pages.Account
                 user.Email = Input.Email;
                 user.Gender = Input.Gender;
                 var photo = new Photo();
-                if (Input.ImageUrl != null && Input.ImageUrl != "")
+                if (Input.ProfileImage != null && Input.ProfileImage != "")
                 {
-                    photo.Image = Input.ImageUrl;
+                    photo.Image = Input.ProfileImage;
                     photo.ImageName = $"profile-image-for-{user.UserName}";
                     photo.PublicId = $"profile-image-for-{user.UserName}";
                 }
