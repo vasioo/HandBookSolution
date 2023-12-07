@@ -13,6 +13,7 @@
     <PackageReference Include="Microsoft.AspNetCore.Authentication.Facebook" Version="7.0.14" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.Google" Version="7.0.14" />
     <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="7.0.13" />
+    <PackageReference Include="Microsoft.AspNetCore.Identity" Version="2.1.39" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="7.0.13" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="7.0.13" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="7.0.12" />
@@ -30,6 +31,7 @@
   <ItemGroup>
     <ProjectReference Include="..\HandBook.DataAccess\HandBook.DataAccess.csproj" />
     <ProjectReference Include="..\HandBook.Models\HandBook.Models.csproj" />
+    <ProjectReference Include="..\HandBook.Services\HandBook.Services.csproj" />
   </ItemGroup>
 
 </Project>

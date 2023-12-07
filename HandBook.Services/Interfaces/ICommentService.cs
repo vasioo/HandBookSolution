@@ -2,7 +2,7 @@
 
 namespace HandBook.Services.Interfaces
 {
-    internal interface ICommentService : IBaseService<Comment>
+    public interface ICommentService : IBaseService<Comment>
     {
     }
 }

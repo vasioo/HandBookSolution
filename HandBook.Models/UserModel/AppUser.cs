@@ -1,5 +1,5 @@
 ﻿using HandBook.Models.BaseModels.Interfaces;
-using Microsoft.AspNet.Identity.EntityFramework;
+using Microsoft.AspNetCore.Identity;
 
 namespace Messenger.Models
 {

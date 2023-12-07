@@ -3,7 +3,8 @@ using Messenger.Models;
 
 namespace HandBook.Services.Interfaces
 {
-    internal interface IMessageService : IBaseService<Messages>
+    public interface IMessageService : IBaseService<Messages>
     {
+        List<string> UsersThatAreInMessagesList(string userId);
     }
 }

@@ -1,6 +1,8 @@
-﻿namespace HandBook.Services.Interfaces
+﻿using HandBook.Models;
+
+namespace HandBook.Services.Interfaces
 {
-    internal interface IPostService
+    public interface IPostService : IBaseService<Post>
     {
     }
 }

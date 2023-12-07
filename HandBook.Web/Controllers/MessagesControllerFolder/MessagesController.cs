@@ -2,8 +2,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using ServiceStack;
 using System.Diagnostics;
 
 namespace HandBook.Web.Controllers.MessagesControllerFolder
@@ -32,55 +30,12 @@ namespace HandBook.Web.Controllers.MessagesControllerFolder
                 currentPage = 1;
             }
 
-            List<UserMassageDTO> userMsgDTOList = new List<UserMassageDTO>();
+            
             var username = HttpContext.User?.Identity?.Name ?? "";
             var sender = await _userManager.FindByNameAsync(username);
             if (sender != null)
             {
-                var neededUsers = GetUsersSentMessagesTo(sender.Id);
-
-                foreach (var item in neededUsers)
-                {
-                    UserMassageDTO userMsgDto = new UserMassageDTO();
-
-                    userMsgDto.UserData = item;
-
-                    var specUserNeeded = _context.Users.Where(u => u.UserName == item).FirstOrDefault();
-
-                    if (specUserNeeded != null)
-                    {
-                        var messages = GetUnreadMessagesForUser(sender.Id, specUserNeeded.Id);
-
-                        if (messages.Count == 1)
-                        {
-                            userMsgDto.Message = messages!.FirstOrDefault()!.Text;
-                        }
-                        else if (messages.Count > 0)
-                        {
-                            int neededCountNumber = messages.Count();
-                            if (neededCountNumber > 4)
-                            {
-                                userMsgDto.Message = $"4+ unopened messages";
-                            }
-                            else
-                            {
-                                userMsgDto.Message = $"{messages.Count()} unopened messages";
-                            }
-                        }
-                        else
-                        {
-                            var lastMessage = _context.Messages
-                   .Where(m => m.SenderMessageId == sender.Id && m.MessageReceiverId == specUserNeeded.Id || m.SenderMessageId == specUserNeeded.Id && m.MessageReceiverId == sender.Id)
-                   .OrderByDescending(m => m.TimeSent)
-                   .FirstOrDefault();
-
-                            userMsgDto.Message = lastMessage!.Text!;
-
-                        }
-                    }
-                    userMsgDTOList.Add(userMsgDto);
-                }
-
+                var userMsgDTOList = await _helper.GetUsersWithMessages(sender.Id);
                 return View("~/MessengerViews/Messages/Index.cshtml", userMsgDTOList.Take(20).Skip((currentPage - 1) * 20));
             }
             return View("~/MessengerViews/Messages/Index.cshtml");
@@ -89,24 +44,17 @@ namespace HandBook.Web.Controllers.MessagesControllerFolder
         [Authorize]
         public async Task<IActionResult> Chat(int currentPage, string userName)
         {
-            if (currentPage <= 0)
-            {
-                currentPage = 1;
-            }
             if (User!.Identity!.IsAuthenticated)
             {
-                var currentUser = await _userManager.GetUserAsync(User);
-                var specUserNeeded = _context.Users.Where(u => u.UserName == userName).FirstOrDefault();
-                ViewBag.CurrentUserName = currentUser.UserName;
+                var username = HttpContext.User?.Identity?.Name ?? "";
+                var currentUser = await _userManager.FindByNameAsync(username);
 
-                var otherUserId = specUserNeeded!.Id;
-                var messages = await _context.Messages
-                    .Where(m => m.SenderMessageId == currentUser.Id && m.MessageReceiverId == otherUserId || m.SenderMessageId == otherUserId && m.MessageReceiverId == currentUser.Id)
-                    .OrderBy(m => m.TimeSent)
-                    .ToListAsync();
+                var users = _userManager.Users;
+                var specUserNeeded = users.Where(u => u.UserName == userName).FirstOrDefault();
 
+                ViewBag.CurrentUserName = currentUser!.UserName;
 
-                await _context.SaveChangesAsync();
+                var messages = _helper.GetCurrentChatMessages(currentUser.Id, specUserNeeded!.Id);
 
                 return View("~/MessengerViews/Messages/Chat.cshtml", messages);
             }
@@ -117,7 +65,9 @@ namespace HandBook.Web.Controllers.MessagesControllerFolder
         [Authorize]
         public async Task Create(Messages message)
         {
-            await _helper.CreateMessage(message,User);
+            var username = HttpContext.User?.Identity?.Name ?? "";
+            var user = await _userManager.FindByNameAsync(username);
+            await _helper.CreateMessage(message, user!);
         }
 
         #region Helpers

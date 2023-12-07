@@ -1,7 +1,7 @@
 ﻿using CloudinaryDotNet;
 using CloudinaryDotNet.Actions;
 using HandBook.Models;
-using HandBook.Web.Data;
+using HandBook.Web.Controllers.MessagesControllerFolder;
 using HandBook.Web.Models;
 using Messenger.Models;
 using Microsoft.AspNetCore.Authorization;
@@ -19,18 +19,18 @@ namespace HandBook.Web.Controllers.HomeControllerFolder
     public class HomeController : Controller
     {
         private readonly UserManager<AppUser> _userManager;
+        public IHCHelper _helper { get; set; }
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly ILogger<HomeController> _logger;
-        private readonly ApplicationDbContext _dbc;
         public IConfiguration Configuration;
         private CloudinarySettings _cloudinarySettings;
         private Cloudinary _cloudinary;
-        public HomeController(ILogger<HomeController> logger, ApplicationDbContext dbc,
+        public HomeController(ILogger<HomeController> logger, 
             IConfiguration configuration, UserManager<AppUser> userManager,
-            IHttpContextAccessor httpContextAccessor)
+            IHttpContextAccessor httpContextAccessor, IHCHelper  helper)
         {
             _logger = logger;
-            _dbc = dbc;
+            _helper = helper;
             _userManager = userManager;
             _httpContextAccessor = httpContextAccessor;
             Configuration = configuration;
@@ -91,8 +91,6 @@ namespace HandBook.Web.Controllers.HomeControllerFolder
                 throw;
             }
         }
-
-
 
         [Authorize]
         public async Task<IActionResult> DesiredPost(int modelData)
@@ -583,19 +581,7 @@ namespace HandBook.Web.Controllers.HomeControllerFolder
         {
             try
             {
-                var cards = _dbc.Posts.OrderByDescending(x => x.Time).Skip(offset).Take(20);
-
-                var posts = await cards.Select(post => new CardDTO
-                {
-                    Id = post.Id,
-                    CreatorUserName = post.CreatorUserName,
-                    AmountOfComments = post.Comments.Count(),
-                    AmountOfLikes = post.AmountOfLikes,
-                    image = post.ImageLink,
-                    Time = post.Time
-                }).ToListAsync();
-
-                return Json(JsonConvert.SerializeObject(posts));
+                return Json(JsonConvert.SerializeObject(await _helper.LoadMorePostsHelper(offset)));
             }
             catch (Exception ex)
             {
@@ -610,14 +596,7 @@ namespace HandBook.Web.Controllers.HomeControllerFolder
         {
             try
             {
-                var comments = _dbc.Comments.OrderByDescending(x => x.DateOfCreation)
-                                 .Where(x => x.Post.Id == postId && x.CommentDeriveFromId == derivingFrom)
-                                 .Skip(offset)
-                                 .Take(20)
-                                 .Include(x => x.AppUser)
-                                 .ToList();
-
-                return Json(JsonConvert.SerializeObject(comments));
+                return Json(JsonConvert.SerializeObject(_helper.LoadMoreCommentsHelper(offset,derivingFrom,postId)));
             }
             catch (Exception ex)
             {
