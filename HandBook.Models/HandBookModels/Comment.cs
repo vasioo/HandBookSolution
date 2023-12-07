@@ -2,13 +2,12 @@
 using Messenger.Models;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
+using HandBook.Models.BaseModels.Interfaces;
 
 namespace HandBook.Web.Models
 {
-    public class Comment
+    public class Comment:IEntity
     {
-        [Key]
-        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
 
         public string UniqueIdentifier{ get; set; }

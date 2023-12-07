@@ -1,19 +1,12 @@
-﻿using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
+﻿using HandBook.Models.BaseModels.Interfaces;
 using HandBook.Web.Models;
-using Messenger.Models;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using ServiceStack.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace HandBook.Models
 {
-    public class Post
+    public class Post:IEntity
     {
-        [Key]
-        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        [Unique]
         public int Id { get; set; }
 
         [System.ComponentModel.DataAnnotations.Required]

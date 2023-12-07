@@ -2,23 +2,9 @@
 @using Messenger.Models;
 @inject SignInManager<AppUser> SignInManager
 @model LoginModel
-<style>
-    .facebook-button {
-        background-color: dodgerblue !important;
-        border-radius: 8px;
-    }
-
-    .google-button {
-        background-color: indianred !important;
-        border-radius: 8px;
-    }
-
-    .form-floating input::placeholder {
-        color: #6c757d; /* Customize the color as needed */
-    }
-</style>
-
-
+@section Styles {
+    <link href="@Url.Content("~/css/custom/IdentityPages.css")" rel="stylesheet" type="text/css" />
+}
 <div class="row pt-5 mt-5">
     <div class="col-md-6 offset-md-3">
         <section>

@@ -1,9 +1,10 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using HandBook.Models.BaseModels.Interfaces;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Messenger.Models
 {
-    public class Messages
+    public class Messages:IEntity
     {
         public int Id { get; set; }
 

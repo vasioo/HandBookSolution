@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net7.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\HandBook.DataAccess\HandBook.DataAccess.csproj" />
+    <ProjectReference Include="..\HandBook.Models\HandBook.Models.csproj" />
+  </ItemGroup>
+
+</Project>

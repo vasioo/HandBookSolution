@@ -1,16 +1,10 @@
-﻿using ServiceStack.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
-using Microsoft.AspNetCore.Mvc;
-using System.ComponentModel.DataAnnotations;
+﻿using HandBook.Models.BaseModels.Interfaces;
 using Messenger.Models;
 
 namespace HandBook.Models
 {
-    public class Notification
+    public class Notification:IEntity
     {
-        [Key]
-        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        [Unique]
         public int Id { get; set; }
 
         [System.ComponentModel.DataAnnotations.Required]

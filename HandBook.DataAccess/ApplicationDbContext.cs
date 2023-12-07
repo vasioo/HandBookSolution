@@ -1,12 +1,10 @@
-﻿
-using HandBook.Models;
+﻿using HandBook.Models;
 using HandBook.Web.Models;
 using Messenger.Models;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using System.Reflection.Emit;
 
-namespace HandBook.Web.Data
+namespace HandBook.DataAccess
 {
     public class ApplicationDbContext : IdentityDbContext<AppUser>
     {

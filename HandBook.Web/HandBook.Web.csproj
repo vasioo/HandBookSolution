@@ -24,8 +24,12 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Data\Migrations\" />
     <Folder Include="Migrations\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\HandBook.DataAccess\HandBook.DataAccess.csproj" />
+    <ProjectReference Include="..\HandBook.Models\HandBook.Models.csproj" />
   </ItemGroup>
 
 </Project>

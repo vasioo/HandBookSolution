@@ -1,6 +1,5 @@
-﻿
+﻿using CloudinaryDotNet;
 using CloudinaryDotNet.Actions;
-using CloudinaryDotNet;
 using HandBook.Models;
 using HandBook.Web.Data;
 using HandBook.Web.Models;
@@ -8,18 +7,13 @@ using Messenger.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.ModelBinding;
-using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.AspNetCore.Mvc.ViewEngines;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using ServiceStack;
 using System.Diagnostics;
-using System.Configuration;
-using ServiceStack.Html;
 using System.Text;
 
-namespace HandBook.Web.Controllers
+namespace HandBook.Web.Controllers.HomeControllerFolder
 {
     [Authorize]
     public class HomeController : Controller
@@ -41,7 +35,7 @@ namespace HandBook.Web.Controllers
             _httpContextAccessor = httpContextAccessor;
             Configuration = configuration;
             _cloudinarySettings = Configuration.GetSection("CloudinarySettings").Get<CloudinarySettings>() ?? new CloudinarySettings();
-            CloudinaryDotNet.Account account = new CloudinaryDotNet.Account(
+            Account account = new Account(
               _cloudinarySettings.CloudName,
               _cloudinarySettings.ApiKey,
               _cloudinarySettings.ApiSecret);
@@ -98,11 +92,7 @@ namespace HandBook.Web.Controllers
             }
         }
 
-        [Authorize]
-        public IActionResult Privacy()
-        {
-            return View("~/Views/Home/Privacy.cshtml");
-        }
+
 
         [Authorize]
         public async Task<IActionResult> DesiredPost(int modelData)
@@ -486,18 +476,18 @@ namespace HandBook.Web.Controllers
             return View(new Models.ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
 
-        public async Task<IActionResult> SearchUsers()
+        public IActionResult SearchUsers()
         {
             return View("~/Views/Home/SearchUsers.cshtml");
         }
 
-        public async Task<IActionResult> SearchUsersFilter(string searchString)
+        public IActionResult SearchUsersFilter(string searchString)
         {
             ViewData["CurrentFilter"] = searchString;
 
             var users = _userManager.Users;
 
-            if (!String.IsNullOrEmpty(searchString))
+            if (!string.IsNullOrEmpty(searchString))
             {
                 users = users.Where(usr => usr.UserName.Contains(searchString));
             }
@@ -521,7 +511,7 @@ namespace HandBook.Web.Controllers
                 var follow = await _userManager.FindByNameAsync(username);
                 var follower = await _userManager.FindByNameAsync(usernamefollower);
 
-                if (follow != null && follower != null&&usernamefollower!=username)
+                if (follow != null && follower != null && usernamefollower != username)
                 {
                     var followerrelation = new Followers();
 
@@ -616,7 +606,7 @@ namespace HandBook.Web.Controllers
 
         [HttpPost]
         [Authorize]
-        public async Task<JsonResult> LoadMoreComments(int offset, int derivingFrom, int postId)
+        public JsonResult LoadMoreComments(int offset, int derivingFrom, int postId)
         {
             try
             {
@@ -634,6 +624,12 @@ namespace HandBook.Web.Controllers
                 Console.WriteLine($"Error occurred: {ex.Message}");
                 return Json("Error occurred while adding newer posts.");
             }
+        }
+
+        [Authorize]
+        public IActionResult Privacy()
+        {
+            return View("~/Views/Home/Privacy.cshtml");
         }
     }
 }

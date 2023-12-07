@@ -1,16 +1,12 @@
-﻿using HandBook.Web.Models;
+﻿using HandBook.Models.BaseModels.Interfaces;
 using Messenger.Models;
-using ServiceStack.DataAnnotations;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 
 namespace HandBook.Models
 {
-    public class Likes
+    public class Likes:IEntity
     {
-        [Key]
-        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
+
         public DateTime LikedDate { get; set; }
 
         // Navigation properties

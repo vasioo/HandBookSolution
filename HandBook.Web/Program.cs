@@ -1,4 +1,6 @@
+using HandBook.DataAccess;
 using HandBook.Web.Data;
+using HandBook.Web.Extensions;
 using Messenger.Hubs;
 using Messenger.Models;
 using Microsoft.AspNetCore.Identity;
@@ -52,6 +54,8 @@ namespace HandBook.Web
                             options.ClientId = googleClientId;
                             options.ClientSecret = googleClientSecret;
                         });
+
+            builder.Services.AddApplication();
 
             var app = builder.Build();
 

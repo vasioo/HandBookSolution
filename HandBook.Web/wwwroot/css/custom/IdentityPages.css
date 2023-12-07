@@ -1,0 +1,13 @@
+﻿.facebook-button {
+    background-color: dodgerblue !important;
+    border-radius: 8px;
+}
+
+.google-button {
+    background-color: indianred !important;
+    border-radius: 8px;
+}
+
+.form-floating input::placeholder {
+    color: #6c757d; /* Customize the color as needed */
+}
