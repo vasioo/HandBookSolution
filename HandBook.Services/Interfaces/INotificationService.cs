@@ -2,7 +2,7 @@
 
 namespace HandBook.Services.Interfaces
 {
-    internal interface INotificationService:IBaseService<Notification>
+    public interface INotificationService:IBaseService<Notification>
     {
     }
 }

@@ -2,7 +2,7 @@
 
 namespace HandBook.Services.Interfaces
 {
-    internal interface ILikesService : IBaseService<Likes>
+    public interface ILikesService : IBaseService<Likes>
     {
     }
 }

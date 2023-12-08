@@ -3,7 +3,7 @@ using HandBook.Web.Models;
 
 namespace HandBook.Services.Interfaces
 {
-    internal interface IFollowerService : IBaseService<Followers>
+    public interface IFollowerService : IBaseService<Followers>
     {
     }
 }

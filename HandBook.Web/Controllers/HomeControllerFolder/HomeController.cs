@@ -22,24 +22,14 @@ namespace HandBook.Web.Controllers.HomeControllerFolder
         public IHCHelper _helper { get; set; }
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly ILogger<HomeController> _logger;
-        public IConfiguration Configuration;
-        private CloudinarySettings _cloudinarySettings;
-        private Cloudinary _cloudinary;
-        public HomeController(ILogger<HomeController> logger, 
-            IConfiguration configuration, UserManager<AppUser> userManager,
-            IHttpContextAccessor httpContextAccessor, IHCHelper  helper)
+
+        public HomeController(ILogger<HomeController> logger, UserManager<AppUser> userManager,
+            IHttpContextAccessor httpContextAccessor, IHCHelper helper)
         {
             _logger = logger;
             _helper = helper;
             _userManager = userManager;
             _httpContextAccessor = httpContextAccessor;
-            Configuration = configuration;
-            _cloudinarySettings = Configuration.GetSection("CloudinarySettings").Get<CloudinarySettings>() ?? new CloudinarySettings();
-            Account account = new Account(
-              _cloudinarySettings.CloudName,
-              _cloudinarySettings.ApiKey,
-              _cloudinarySettings.ApiSecret);
-            _cloudinary = new Cloudinary(account);
         }
 
         [Authorize]
@@ -49,40 +39,8 @@ namespace HandBook.Web.Controllers.HomeControllerFolder
             {
                 var username = HttpContext.User?.Identity?.Name ?? "";
                 var user = await _userManager.FindByNameAsync(username);
-                var cards = _dbc.Posts.OrderByDescending(x => x.Time).Include(p => p.Comments).Take(20);
-
-                var posts = cards.Select(post => new CardDTO
-                {
-                    Id = post.Id,
-                    CreatorUserName = post.CreatorUserName,
-                    AmountOfComments = post.Comments.Count(),
-                    AmountOfLikes = post.AmountOfLikes,
-                    Time = post.Time,
-                    image = post.ImageLink
-                }).ToList();
-
-
-                if (user != null)
-                {
-                    var userLikedCards = _dbc.Likes.Where(like => like.UserId == user!.Id && like.CommentId == 0);
-                    var userLikedComments = _dbc.Likes.Where(com => com.AppUser.Id == user!.Id && com.CommentId != 0);
-
-                    if (userLikedCards != null && userLikedCards.Count() > 0)
-                    {
-                        TempData["UserLikedCards"] = userLikedCards.Select(x => x.PostId).ToList();
-                    }
-
-                    if (userLikedComments != null && userLikedComments.Count() > 0)
-                    {
-                        string commentIdsString = string.Join(",", userLikedComments.Select(x => x.CommentId));
-
-                        TempData["UserLikedComments"] = commentIdsString;
-
-                    }
-                }
-
                 ViewBag.UserUsername = username;
-
+                var posts = _helper.IndexHelper(user!);
                 return View("~/Views/Home/Index.cshtml", posts);
             }
             catch (Exception)
@@ -95,7 +53,8 @@ namespace HandBook.Web.Controllers.HomeControllerFolder
         [Authorize]
         public async Task<IActionResult> DesiredPost(int modelData)
         {
-            var item = await _dbc.Posts.Where(x => x.Id == modelData).FirstOrDefaultAsync();
+            var item = await _helper.DesiredPostHelper(modelData);
+
             return View("~/Views/Home/DesiredPost.cshtml", item);
         }
 
@@ -104,36 +63,17 @@ namespace HandBook.Web.Controllers.HomeControllerFolder
         {
             var username = HttpContext.User?.Identity?.Name ?? "";
             var user = await _userManager.FindByNameAsync(username);
-            var followers = _dbc.Followers.Where(f => f.FollowedUserId == user.Id).Select(f => f.FollowerUserId);
 
-            var cards = await _dbc.Notifications
-                .Where(card => followers.Contains(card.UserId))
-                .OrderBy(x => x.Time)
-                .ToListAsync();
-
-            cards.Reverse();
+            var notifications = await _helper.NotificationsHelper(user!);
             ViewBag.CurrentUserUsername = user!.UserName;
-            return View("~/Views/Home/Notifications.cshtml", cards);
+
+            return View("~/Views/Home/Notifications.cshtml", notifications);
         }
 
         [Authorize]
         public IActionResult AddAPost()
         {
             return View("~/Views/Home/AddAPost.cshtml");
-        }
-
-        static string GenerateRandomId(int length, Random random)
-        {
-            const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-            StringBuilder idBuilder = new StringBuilder();
-
-            for (int i = 0; i < length; i++)
-            {
-                int index = random.Next(chars.Length);
-                idBuilder.Append(chars[index]);
-            }
-
-            return idBuilder.ToString();
         }
 
         [HttpPost]
@@ -143,70 +83,15 @@ namespace HandBook.Web.Controllers.HomeControllerFolder
         {
             var username = HttpContext.User?.Identity?.Name ?? "";
             var user = await _userManager.FindByNameAsync(username);
-            Random random = new Random();
-            string randomId = GenerateRandomId(8, random);
 
-            // Declare the transaction outside the try block
-            using (var transaction = await _dbc.Database.BeginTransactionAsync())
+            try
             {
-                try
-                {
-                    if (user != null)
-                    {
-                        tfm.CreatorUserName = username!;
-
-                        ntf.Post = tfm;
-                        ntf.AppUser = user!;
-                        ntf.CreatorUserName = user!.UserName!;
-                        ntf.Time = DateTime.Now;
-                        ntf.MainText = "added a new post";
-
-                        if (ImageUrl != null && ImageUrl.Length > 0)
-                        {
-                            tfm.ImageLink = await UploadToCloudinaryAsync(ImageUrl, $"post-{randomId}", $"post-{randomId}");
-                        }
-
-                        if (tfm != null)
-                        {
-                            // Database operations (e.g., SaveChangesAsync)
-                            await _dbc.Posts.AddAsync(tfm);
-                            await _dbc.Notifications.AddAsync(ntf);
-                            await _dbc.SaveChangesAsync();
-
-                            // Commit the transaction if everything is successful
-                            await transaction.CommitAsync();
-
-                            return RedirectToAction("Index");
-                        }
-                    }
-                }
-                catch (Exception ex)
-                {
-                    // Handle the exception, log it, and/or return an appropriate response
-                    // Rollback the transaction to avoid partial updates
-                    await transaction.RollbackAsync();
-                    return Error();
-                }
+                await _helper.AddAPostHelper(tfm, ImageUrl, ntf, user);
+                return RedirectToAction("Index");
             }
-
-            return Error();
-        }
-
-        private async Task<string> UploadToCloudinaryAsync(IFormFile file, string imageName, string publicId)
-        {
-            using (var stream = file.OpenReadStream())
+            catch (Exception)
             {
-                var uploadParams = new ImageUploadParams
-                {
-                    File = new FileDescription(imageName, stream),
-                    DisplayName = imageName,
-                    PublicId = publicId,
-                    Overwrite = false,
-                    // You can add more parameters as needed
-                };
-
-                var uploadResult = await _cloudinary.UploadAsync(uploadParams);
-                return uploadResult.SecureUrl.AbsoluteUri;
+                return Error();
             }
         }
 
@@ -216,70 +101,9 @@ namespace HandBook.Web.Controllers.HomeControllerFolder
         {
             try
             {
-                var item = await _dbc.Posts.FirstOrDefaultAsync(i => i.Id == commentsDTO.PostId);
                 var username = HttpContext.User?.Identity?.Name ?? "";
                 var user = await _userManager.FindByNameAsync(username);
-
-                var existingComment = await _dbc.Comments.FirstOrDefaultAsync(x => x.Id == commentsDTO.Id);
-
-                // Add logging
-                Guid randomGuid = Guid.NewGuid();
-                string randomGuidString = randomGuid.ToString();
-
-                if (existingComment != null)
-                {
-                    var existingNotif = await _dbc.Notifications.FirstOrDefaultAsync(x => x.UserId == user!.Id && x.PostId == commentsDTO.PostId && x.MainText == "commented on your post");
-
-                    _dbc.Comments.Remove(existingComment);
-
-                    if (existingNotif != null)
-                    {
-                        _dbc.Notifications.Remove(existingNotif);
-                    }
-                }
-                else
-                {
-                    var comment = new Comment
-                    {
-                        DateOfCreation = DateTime.Now,
-                        Post = item,
-                        AppUser = user,
-                        CommentDeriveFromId = commentsDTO.CommentDeriveFromId,
-                        CommentContent = commentsDTO.CommentContent,
-                        UniqueIdentifier = randomGuidString
-                    };
-                    if (item!.CreatorUserName != user!.UserName)
-                    {
-                        Notification ntf = new Notification
-                        {
-                            AppUser = user!,
-                            CreatorUserName = user!.UserName!,
-                            Post = item!,
-                            Time = DateTime.Now,
-                            MainText = "commented on your post"
-                        };
-
-                        await _dbc.AddAsync(ntf);
-                    }
-                    await _dbc.Comments.AddAsync(comment);
-                }
-
-                await _dbc.SaveChangesAsync();
-
-                var neededComment = await _dbc.Comments.FirstOrDefaultAsync(x => x.UniqueIdentifier.Equals(randomGuidString));
-
-                var commentDto = new CommentsDTO
-                {
-                    Id = neededComment.Id,
-                    UserUsername = username,
-                    CommentContent = neededComment.CommentContent,
-                    CommentDeriveFromId = neededComment.CommentDeriveFromId,
-                    DateOfCreation = neededComment.DateOfCreation,
-                    PostId = neededComment.Post.Id,
-                };
-
-                var jsonResult = JsonConvert.SerializeObject(commentDto);
-
+                var jsonResult = await _helper.AddOrRemoveACommentHelper(commentsDTO, user));
                 return Json(jsonResult);
             }
             catch (Exception ex)
@@ -297,50 +121,12 @@ namespace HandBook.Web.Controllers.HomeControllerFolder
         {
             try
             {
-                var item = await _dbc.Posts.FirstOrDefaultAsync(i => i.Id == itemId);
-                int likeCount = item!.AmountOfLikes;
                 var username = HttpContext.User?.Identity?.Name ?? "";
                 var user = await _userManager.FindByNameAsync(username);
 
-                var existingLike = await _dbc.Likes.FirstOrDefaultAsync(x => x.UserId == user!.Id && x.PostId == itemId);
+                var item = await _helper.IncrementOrDecrementLikeCountHelper(itemId, user);
 
-                if (existingLike != null)
-                {
-                    var existingNotif = await _dbc.Notifications.FirstOrDefaultAsync(x => x.UserId == user!.Id && x.PostId == itemId && x.MainText == "liked your post");
-
-                    item.AmountOfLikes--;
-                    _dbc.Likes.Remove(existingLike);
-                    if (existingNotif != null)
-                    {
-                        _dbc.Notifications.Remove(existingNotif);
-                    }
-                }
-                else
-                {
-                    item.AmountOfLikes++;
-                    var like = new Likes
-                    {
-                        Post = item,
-                        AppUser = user!,
-                        LikedDate = DateTime.Now
-                    };
-
-                    if (item.CreatorUserName != user.UserName)
-                    {
-                        Notification ntf = new Notification();
-                        ntf.AppUser = user!;
-                        ntf.CreatorUserName = user!.UserName!;
-                        ntf.Post = item!;
-                        ntf.Time = DateTime.Now;
-                        ntf.MainText = "liked your post";
-                        await _dbc.AddAsync(ntf);
-                    }
-                    await _dbc.Likes.AddAsync(like);
-                }
-
-                await _dbc.SaveChangesAsync();
-
-                return Json(item.AmountOfLikes);
+                return Json(item);
             }
             catch (Exception)
             {
@@ -354,51 +140,12 @@ namespace HandBook.Web.Controllers.HomeControllerFolder
         {
             try
             {
-                var item = await _dbc.Comments.FirstOrDefaultAsync(i => i.Id == itemId);
-                int likeCount = item!.AmountOfLikes;
                 var username = HttpContext.User?.Identity?.Name ?? "";
                 var user = await _userManager.FindByNameAsync(username);
 
-                var existingLike = await _dbc.Likes.FirstOrDefaultAsync(x => x.AppUser.Id == user!.Id && x.CommentId == itemId);
+                var item = _helper.IncrementOrDecrementCommentLikeCountHelper(itemId, user!);
 
-                if (existingLike != null)
-                {
-                    var existingNotif = await _dbc.Notifications.FirstOrDefaultAsync(x => x.UserId == user!.Id && x.PostId == itemId && x.MainText == "liked your comment");
-
-                    item.AmountOfLikes--;
-                    _dbc.Likes.Remove(existingLike);
-                    if (existingNotif != null)
-                    {
-                        _dbc.Notifications.Remove(existingNotif);
-                    }
-                }
-                else
-                {
-                    item.AmountOfLikes++;
-                    var like = new Likes
-                    {
-                        Post = item.Post,
-                        AppUser = user!,
-                        LikedDate = DateTime.Now,
-                        CommentId = item.Id
-                    };
-
-                    if (item.AppUser.UserName != user.UserName)
-                    {
-                        Notification ntf = new Notification();
-                        ntf.AppUser = user!;
-                        ntf.CreatorUserName = user!.UserName!;
-                        ntf.Post = item!.Post;
-                        ntf.Time = DateTime.Now;
-                        ntf.MainText = "liked your comment";
-                        await _dbc.AddAsync(ntf);
-                    }
-                    await _dbc.Likes.AddAsync(like);
-                }
-
-                await _dbc.SaveChangesAsync();
-
-                return Json(item.AmountOfLikes);
+                return Json(item);
             }
             catch (Exception)
             {
@@ -409,61 +156,19 @@ namespace HandBook.Web.Controllers.HomeControllerFolder
         [Authorize]
         public async Task<IActionResult> Account(string username)
         {
-            var useraccdto = new UserAccountDTO();
-
             if (string.IsNullOrEmpty(username))
             {
                 username = "[Error]";
-                return View("~/Views/Home/Account.cshtml", useraccdto);
+                return View("~/Views/Home/Account.cshtml", new UserAccountDTO());
             }
 
             username = username.Trim();
 
             var user = await _userManager.FindByNameAsync(username);
-            useraccdto.UserTempUsername = user?.UserName;
-
-            var posts = _dbc.Posts
-                .Where(x => x.CreatorUserName == username)
-                .OrderByDescending(x => x.Time)
-                .Take(20)
-                .Select(post => new CardDTO
-                {
-                    Id = post.Id,
-                    CreatorUserName = post.CreatorUserName,
-                    AmountOfLikes = post.AmountOfLikes,
-                    image = post.ImageLink,
-                    Time = post.Time,
-                    AmountOfComments = post.Comments.Count()
-                });
-
-            useraccdto.PostsTemp = posts.ToList();
             var currusername = HttpContext.User?.Identity?.Name ?? "";
-            var curruser = await _userManager.FindByNameAsync(username);
+            var curruser = await _userManager.FindByNameAsync(currusername);
 
-            if (user != null)
-            {
-                var userLikedCards = _dbc.Likes.Where(like => like.UserId == user!.Id);
-                var userLikedComments = _dbc.Likes.Where(com => com.AppUser.Id == user!.Id && com.CommentId != 0);
-                if (userLikedCards != null && userLikedCards.Count() > 0)
-                {
-                    TempData["UserLikedCards"] = userLikedCards.Select(x => x.PostId).ToList();
-                }
-
-                if (userLikedComments != null && userLikedComments.Count() > 0)
-                {
-                    string commentIdsString = string.Join(",", userLikedComments.Select(x => x.CommentId));
-
-                    TempData["UserLikedComments"] = commentIdsString;
-                }
-            }
-            bool isConnected = _dbc.Followers.Any(f => f.FollowerUserId == curruser.Id && f.FollowedUserId == user.Id);
-            var countOfFollows = _dbc.Followers.Where(p => p.FollowedUserId == curruser!.Id).Count();
-            var countOfFollowers = _dbc.Followers.Where(p => p.FollowerUserId == user!.Id).Count();
-
-            ViewBag.Follows = countOfFollows;
-            ViewBag.Followers = countOfFollowers;
-            ViewBag.FollowsThePerson = isConnected;
-            ViewBag.IsTheSamePerson = isConnected;
+            var useraccdto = await _helper.AccountHelper(user!, curruser!);
 
             return View("~/Views/Home/Account.cshtml", useraccdto);
         }
@@ -506,29 +211,7 @@ namespace HandBook.Web.Controllers.HomeControllerFolder
                 }
                 var usernamefollower = HttpContext.User?.Identity?.Name ?? "";
 
-                var follow = await _userManager.FindByNameAsync(username);
-                var follower = await _userManager.FindByNameAsync(usernamefollower);
-
-                if (follow != null && follower != null && usernamefollower != username)
-                {
-                    var followerrelation = new Followers();
-
-                    followerrelation.Follower = follower;
-                    followerrelation.Followed = follow;
-
-                    await _dbc.Followers.AddAsync(followerrelation);
-
-                    Notification ntf = new Notification
-                    {
-                        AppUser = follow!,
-                        CreatorUserName = follow!.UserName!,
-                        Time = DateTime.Now,
-                        MainText = "started followed you"
-                    };
-
-                    await _dbc.AddAsync(ntf);
-                }
-                await _dbc.SaveChangesAsync();
+                await _helper.AddFollowerRelationshipHelper(username, usernamefollower);
                 return Json("Success");
             }
             catch (Exception)
@@ -548,25 +231,7 @@ namespace HandBook.Web.Controllers.HomeControllerFolder
                 }
                 var usernamefollower = HttpContext.User?.Identity?.Name ?? "";
 
-                var follow = await _userManager.FindByNameAsync(username);
-                var follower = await _userManager.FindByNameAsync(usernamefollower);
-
-                if (follow != null && follower != null && usernamefollower != username)
-                {
-                    var followerrelation = new Followers();
-
-                    followerrelation.Follower = follower;
-                    followerrelation.Followed = follow;
-
-                    _dbc.Followers.Remove(followerrelation);
-
-                    var existingNotif = await _dbc.Notifications.FirstOrDefaultAsync(x => x.UserId == follow!.Id && x.MainText == "started followed you");
-                    if (existingNotif != null)
-                    {
-                        _dbc.Notifications.Remove(existingNotif);
-                    }
-                }
-                await _dbc.SaveChangesAsync();
+                await _helper.RemoveFollowerRelationshipHelper(username,usernamefollower);
                 return Json("Success");
             }
             catch (Exception)
@@ -596,7 +261,7 @@ namespace HandBook.Web.Controllers.HomeControllerFolder
         {
             try
             {
-                return Json(JsonConvert.SerializeObject(_helper.LoadMoreCommentsHelper(offset,derivingFrom,postId)));
+                return Json(JsonConvert.SerializeObject(_helper.LoadMoreCommentsHelper(offset, derivingFrom, postId)));
             }
             catch (Exception ex)
             {
