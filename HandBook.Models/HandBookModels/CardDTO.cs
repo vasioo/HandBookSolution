@@ -1,4 +1,6 @@
-﻿namespace HandBook.Web.Models
+﻿using HandBook.Models;
+
+namespace HandBook.Web.Models
 {
     public class CardDTO
     {
@@ -13,5 +15,8 @@
         public DateTime Time { get; set; } = DateTime.Now;
 
         public int AmountOfComments { get; set; }
+
+        public List<int> UserLikedCards { get; set; }= new List<int>();
+        public string UserLikedComments { get; set; } = "";
     }
 }

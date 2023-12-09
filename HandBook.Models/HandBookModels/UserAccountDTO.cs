@@ -9,7 +9,7 @@ namespace HandBook.Web.Models
 
         public IEnumerable<CardDTO> PostsTemp { get; set; }
 
-        public IEnumerable<Likes>UserLikedCards { get; set; }
+        public IEnumerable<int>UserLikedCards { get; set; }
         public string UserLikedComments{ get; set; }
     }
 }

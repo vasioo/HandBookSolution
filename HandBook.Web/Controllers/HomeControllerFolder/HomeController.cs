@@ -40,7 +40,14 @@ namespace HandBook.Web.Controllers.HomeControllerFolder
                 var username = HttpContext.User?.Identity?.Name ?? "";
                 var user = await _userManager.FindByNameAsync(username);
                 ViewBag.UserUsername = username;
-                var posts = _helper.IndexHelper(user!);
+                var posts = await _helper.IndexHelper(user!);
+
+                if (posts.Count > 0)
+                {
+                    TempData["UserLikedCards"] = posts[0].UserLikedCards;
+                    TempData["UserLikedComments"] = posts[0].UserLikedComments;
+                }
+
                 return View("~/Views/Home/Index.cshtml", posts);
             }
             catch (Exception)
@@ -231,7 +238,7 @@ namespace HandBook.Web.Controllers.HomeControllerFolder
                 }
                 var usernamefollower = HttpContext.User?.Identity?.Name ?? "";
 
-                await _helper.RemoveFollowerRelationshipHelper(username,usernamefollower);
+                await _helper.RemoveFollowerRelationshipHelper(username, usernamefollower);
                 return Json("Success");
             }
             catch (Exception)

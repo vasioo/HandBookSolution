@@ -11,13 +11,13 @@ using HandBook.DataAccess;
 using System.Configuration;
 using Newtonsoft.Json;
 using System.Web.Mvc;
+using System.Data.Entity;
 
 namespace HandBook.Web.Controllers.HomeControllerFolder
 {
     public class HCHelper : IHCHelper
     {
         public readonly UserManager<AppUser> _userManager;
-        private readonly ApplicationDbContext _context;
 
         private readonly ICommentService _commentService;
         private readonly INotificationService _notificationService;
@@ -28,12 +28,11 @@ namespace HandBook.Web.Controllers.HomeControllerFolder
         public IConfiguration Configuration;
         private Cloudinary _cloudinary;
 
-        public HCHelper(UserManager<AppUser> userManager, IConfiguration configuration, IFollowerService followerService, ILikesService likeService, ICommentService commentService, IPostService postService, ApplicationDbContext context, INotificationService notificationService)
+        public HCHelper(UserManager<AppUser> userManager, IConfiguration configuration, IFollowerService followerService, ILikesService likeService, ICommentService commentService, IPostService postService,  INotificationService notificationService)
         {
             _userManager = userManager;
             _commentService = commentService;
             _postService = postService;
-            _context = context;
             _notificationService = notificationService;
             Configuration = configuration;
             _cloudinarySettings = Configuration.GetSection("CloudinarySettings").Get<CloudinarySettings>() ?? new CloudinarySettings();
@@ -295,9 +294,8 @@ namespace HandBook.Web.Controllers.HomeControllerFolder
             var useraccdto = new UserAccountDTO();
             useraccdto.UserTempUsername = user?.UserName;
 
-            var posts = _context.Posts
-                .Where(x => x.CreatorUserName == user.UserName)
-                .OrderByDescending(x => x.Time)
+            var posts =await _postService.FindAsync(x => x.CreatorUserName == user.UserName);
+            var cardDTO = posts.OrderByDescending(x => x.Time)
                 .Take(20)
                 .Select(post => new CardDTO
                 {
@@ -309,13 +307,13 @@ namespace HandBook.Web.Controllers.HomeControllerFolder
                     AmountOfComments = post.Comments.Count()
                 });
 
-            useraccdto.PostsTemp = posts.ToList();
+            useraccdto.PostsTemp = cardDTO;
 
 
             if (user != null)
             {
-                var userLikedCards = _likeService.Where(like => like.UserId == user!.Id);
-                var userLikedComments = _likeService.Where(com => com.AppUser.Id == user!.Id && com.CommentId != 0);
+                var userLikedCards = await _likeService.FindAsync(like => like.UserId == user!.Id);
+                var userLikedComments =await _likeService.FindAsync(com => com.AppUser.Id == user!.Id && com.CommentId != 0);
                 if (userLikedCards != null && userLikedCards.Count() > 0)
                 {
                     useraccdto.UserLikedCards = userLikedCards.Select(x => x.PostId).ToList();
@@ -328,7 +326,7 @@ namespace HandBook.Web.Controllers.HomeControllerFolder
                     useraccdto.UserLikedComments = commentIdsString;
                 }
             }
-            bool isConnected = _context.Followers.Any(f => f.FollowerUserId == currUser.Id && f.FollowedUserId == user.Id);
+            bool isConnected = _followerService.Any(f => f.FollowerUserId == currUser.Id && f.FollowedUserId == user.Id);
             var countOfFollows = _context.Followers.Where(p => p.FollowedUserId == currUser!.Id).Count();
             var countOfFollowers = _context.Followers.Where(p => p.FollowerUserId == user!.Id).Count();
 
@@ -388,15 +386,15 @@ namespace HandBook.Web.Controllers.HomeControllerFolder
             }
         }
 
-        public async Task<List<CardDTO>> NotificationsHelper(AppUser user)
+        public async Task<IEnumerable<Notification>> NotificationsHelper(AppUser user)
         {
-            var followers = _followerService.FindAsync(f => f.FollowedUserId == user.Id).Select(f => f.FollowerUserId);
+            var followers = await _followerService.FindAsync(f => f.FollowedUserId == user.Id);
 
-            var cards = await _notificationService.FindAsync(card => followers.Contains(card.UserId))
-                .OrderBy(x => x.Time)
-                .ToListAsync();
+            var followersId = followers.Select(f => f.FollowerUserId);
 
-            cards.Reverse();
+            var cards = await _notificationService.FindAsync(card => followersId.Contains(card.UserId));
+
+            cards.OrderBy(x=>x.Time).ToList().Reverse();
 
             return cards;
         }
@@ -428,14 +426,14 @@ namespace HandBook.Web.Controllers.HomeControllerFolder
 
                 if (userLikedCards != null && userLikedCards.Count() > 0)
                 {
-                    TempData["UserLikedCards"] = userLikedCards.Select(x => x.PostId).ToList();
+                    posts[0].UserLikedCards = userLikedCards.Select(x => x.PostId).ToList();
                 }
 
                 if (userLikedComments != null && userLikedComments.Count() > 0)
                 {
                     string commentIdsString = string.Join(",", userLikedComments.Select(x => x.CommentId));
 
-                    TempData["UserLikedComments"] = commentIdsString;
+                    posts[0].UserLikedComments = commentIdsString;
 
                 }
             }
