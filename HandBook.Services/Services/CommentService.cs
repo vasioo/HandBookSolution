@@ -9,12 +9,19 @@ using System.Threading.Tasks;
 
 namespace HandBook.Services.Services
 {
-    internal class CommentService:BaseService<Comment>,IFollowerService
+    public class CommentService:BaseService<Comment>,ICommentService
     {
         private readonly ApplicationDbContext _dataContext;
         public CommentService(ApplicationDbContext context) : base(context)
         {
             _dataContext = context;
+        }
+
+        public Comment GetCommentBasedOnRandomGuid(string randomGuid)
+        {
+            var neededComment = _dataContext.Comments.Where(x => x.UniqueIdentifier.Equals(randomGuid)).FirstOrDefault();
+
+            return neededComment;
         }
     }
 }

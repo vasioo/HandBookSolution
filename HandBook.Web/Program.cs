@@ -1,5 +1,4 @@
 using HandBook.DataAccess;
-using HandBook.Web.Data;
 using HandBook.Web.Extensions;
 using Messenger.Hubs;
 using Messenger.Models;

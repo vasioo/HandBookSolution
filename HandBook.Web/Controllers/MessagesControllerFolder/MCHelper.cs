@@ -7,7 +7,7 @@ using System.Data.Entity;
 
 namespace HandBook.Web.Controllers.MessagesControllerFolder
 {
-    public class MCHelper
+    public class MCHelper:IMCHelper
     {
         public readonly UserManager<AppUser> _userManager;
 

@@ -15,7 +15,7 @@ namespace HandBook.Web.Controllers.HomeControllerFolder
         Task<UserAccountDTO> AccountHelper(AppUser user, AppUser currUser);
         Task AddFollowerRelationshipHelper(string username, string usernamefollower);
         Task RemoveFollowerRelationshipHelper(string username, string usernamefollower);
-        Task<List<CardDTO>> NotificationsHelper(AppUser user);
+        Task<IOrderedQueryable<Notification>> NotificationsHelper(AppUser user);
         Task<Post> DesiredPostHelper(int desiredPostId);
         Task<List<CardDTO>> IndexHelper(AppUser user);
     }

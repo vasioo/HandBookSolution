@@ -56,7 +56,7 @@
                             </div>
                             <div class="col pr-1">
                                 <div class="d-flex justify-content-center">
-                                    <span>@ViewBag.Followers</span>
+                                    <span>@Model.Followers</span>
                                 </div>
                                 <div class="d-flex justify-content-center">
                                     <span class="text">Followers</span>
@@ -64,7 +64,7 @@
                             </div>
                             <div class="col pr-1">
                                 <div class="d-flex justify-content-center">
-                                    <span>@ViewBag.Follows</span>
+                                    <span>@Model.Follows</span>
                                 </div>
                                 <div class="d-flex justify-content-center">
                                     <span class="text">Following</span>
@@ -86,7 +86,7 @@
                     }
                     else
                     {
-                        @if (ViewBag.FollowsThePerson == false)
+                        @if (Model.FollowsThePerson == false)
                         {
                             <a href="#" class="btn btn-primary add-following col-5" data-username="@Model.UserTempUsername">
                                 Follow

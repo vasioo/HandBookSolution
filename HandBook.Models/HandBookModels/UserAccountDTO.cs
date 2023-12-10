@@ -11,5 +11,10 @@ namespace HandBook.Web.Models
 
         public IEnumerable<int>UserLikedCards { get; set; }
         public string UserLikedComments{ get; set; }
+
+        public int Follows { get; set; }
+        public int Followers { get; set; }
+        public bool FollowsThePerson { get; set; }
+        public bool IsTheSamePerson { get; set; }
     }
 }

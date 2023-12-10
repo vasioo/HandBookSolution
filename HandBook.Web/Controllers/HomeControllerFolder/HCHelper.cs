@@ -28,7 +28,7 @@ namespace HandBook.Web.Controllers.HomeControllerFolder
         public IConfiguration Configuration;
         private Cloudinary _cloudinary;
 
-        public HCHelper(UserManager<AppUser> userManager, IConfiguration configuration, IFollowerService followerService, ILikesService likeService, ICommentService commentService, IPostService postService,  INotificationService notificationService)
+        public HCHelper(UserManager<AppUser> userManager, IConfiguration configuration, IFollowerService followerService, ILikesService likeService, ICommentService commentService, IPostService postService, INotificationService notificationService)
         {
             _userManager = userManager;
             _commentService = commentService;
@@ -147,13 +147,13 @@ namespace HandBook.Web.Controllers.HomeControllerFolder
 
             if (existingComment != null)
             {
-                var existingNotif = await _notificationService.FindAsync(x => x.UserId == user!.Id && x.PostId == commentsDTO.PostId && x.MainText == "commented on your post");
+                var existingNotif = await _notificationService.GetExistingNotification(user.Id, commentsDTO.PostId, "commented on your post");
 
                 await _commentService.RemoveAsync(existingComment.Id);
 
                 if (existingNotif != null)
                 {
-                    await _notificationService.RemoveAsync(existingNotif!.FirstOrDefault()!.Id);
+                    await _notificationService.RemoveAsync(existingNotif!.Id);
                 }
             }
             else
@@ -182,18 +182,17 @@ namespace HandBook.Web.Controllers.HomeControllerFolder
                 }
                 await _commentService.AddAsync(comment);
             }
-            var neededComment = await _commentService.FindAsync(x => x.UniqueIdentifier.Equals(randomGuidString));
 
-            var nedCm = neededComment.FirstOrDefault();
+            var neededComment = _commentService.GetCommentBasedOnRandomGuid(randomGuidString);
 
             var commentDto = new CommentsDTO
             {
-                Id = nedCm!.Id,
+                Id = neededComment!.Id,
                 UserUsername = user!.UserName!,
-                CommentContent = nedCm.CommentContent,
-                CommentDeriveFromId = nedCm.CommentDeriveFromId,
-                DateOfCreation = nedCm.DateOfCreation,
-                PostId = nedCm.Post.Id,
+                CommentContent = neededComment.CommentContent,
+                CommentDeriveFromId = neededComment.CommentDeriveFromId,
+                DateOfCreation = neededComment.DateOfCreation,
+                PostId = neededComment.Post.Id,
             };
 
             var jsonResult = JsonConvert.SerializeObject(commentDto);
@@ -204,19 +203,18 @@ namespace HandBook.Web.Controllers.HomeControllerFolder
         public async Task<int> IncrementOrDecrementLikeCountHelper(int itemId, AppUser user)
         {
             var item = await _postService.GetByIdAsync(itemId);
-            int likeCount = item!.AmountOfLikes;
 
-            var existingLike = await _likeService.FindAsync(x => x.UserId == user!.Id && x.PostId == itemId);
+            var existingLike = _likeService.GetLikeEntityForUserAndPostInfo(user.Id, itemId);
 
             if (existingLike != null)
             {
-                var existingNotif = await _notificationService.FindAsync(x => x.UserId == user!.Id && x.PostId == itemId && x.MainText == "liked your post");
+                var existingNotif = await _notificationService.GetExistingNotification(user.Id, itemId, "liked your post");
 
                 item.AmountOfLikes--;
-                await _likeService.RemoveAsync(existingLike);
+                await _likeService.RemoveAsync(existingLike!.Id);
                 if (existingNotif != null)
                 {
-                    await _notificationService.RemoveAsync(existingNotif!.FirstOrDefault()!.Id);
+                    await _notificationService.RemoveAsync(existingNotif!.Id);
                 }
             }
             else
@@ -247,19 +245,17 @@ namespace HandBook.Web.Controllers.HomeControllerFolder
         public async Task<int> IncrementOrDecrementCommentLikeCountHelper(int itemId, AppUser user)
         {
             var item = await _commentService.GetByIdAsync(itemId);
-            int likeCount = item!.AmountOfLikes;
 
-            var existingLike = await _likeService.FindAsync(x => x.AppUser.Id == user!.Id && x.CommentId == itemId);
+            var existingLike = _likeService.GetLikeEntityForUserAndCommentInfo(user.Id, itemId);
 
             if (existingLike != null)
             {
-                var existingNotif = await _notificationService.FindAsync(x => x.UserId == user!.Id && x.PostId == itemId && x.MainText == "liked your comment");
-
+                var existingNotif = await _notificationService.GetExistingNotification(user.Id, itemId, "liked your comment");
                 item.AmountOfLikes--;
-                await _likeService.RemoveAsync(existingLike);
+                await _likeService.RemoveAsync(existingLike!.Id);
                 if (existingNotif != null)
                 {
-                    await _notificationService.RemoveAsync(existingNotif!.FirstOrDefault()!.Id);
+                    await _notificationService.RemoveAsync(existingNotif!.Id);
                 }
             }
             else
@@ -294,26 +290,14 @@ namespace HandBook.Web.Controllers.HomeControllerFolder
             var useraccdto = new UserAccountDTO();
             useraccdto.UserTempUsername = user?.UserName;
 
-            var posts =await _postService.FindAsync(x => x.CreatorUserName == user.UserName);
-            var cardDTO = posts.OrderByDescending(x => x.Time)
-                .Take(20)
-                .Select(post => new CardDTO
-                {
-                    Id = post.Id,
-                    CreatorUserName = post.CreatorUserName,
-                    AmountOfLikes = post.AmountOfLikes,
-                    image = post.ImageLink,
-                    Time = post.Time,
-                    AmountOfComments = post.Comments.Count()
-                });
 
-            useraccdto.PostsTemp = cardDTO;
+            useraccdto.PostsTemp = _postService.GetPostsBasedOnCreatorUser(user!.UserName!);
 
 
             if (user != null)
             {
-                var userLikedCards = await _likeService.FindAsync(like => like.UserId == user!.Id);
-                var userLikedComments =await _likeService.FindAsync(com => com.AppUser.Id == user!.Id && com.CommentId != 0);
+                var userLikedCards = await _likeService.GetUserLikedPosts(user.Id);
+                var userLikedComments = await _likeService.GetUserLikedPosts(user.Id);
                 if (userLikedCards != null && userLikedCards.Count() > 0)
                 {
                     useraccdto.UserLikedCards = userLikedCards.Select(x => x.PostId).ToList();
@@ -326,14 +310,14 @@ namespace HandBook.Web.Controllers.HomeControllerFolder
                     useraccdto.UserLikedComments = commentIdsString;
                 }
             }
-            bool isConnected = _followerService.Any(f => f.FollowerUserId == currUser.Id && f.FollowedUserId == user.Id);
-            var countOfFollows = _context.Followers.Where(p => p.FollowedUserId == currUser!.Id).Count();
-            var countOfFollowers = _context.Followers.Where(p => p.FollowerUserId == user!.Id).Count();
+            bool isConnected = await _followerService.FindIfUserIsFollowed(user!.Id, currUser.Id);
+            var countOfFollows = await _followerService.GetFollowedCount(currUser.Id);
+            var countOfFollowers = await _followerService.GetFollowerCount(user!.Id);
 
-            ViewBag.Follows = countOfFollows;
-            ViewBag.Followers = countOfFollowers;
-            ViewBag.FollowsThePerson = isConnected;
-            ViewBag.IsTheSamePerson = isConnected;
+            useraccdto.Follows = countOfFollows;
+            useraccdto.Followers = countOfFollowers;
+            useraccdto.FollowsThePerson = isConnected;
+            useraccdto.IsTheSamePerson = isConnected;
 
             return useraccdto;
         }
@@ -378,23 +362,17 @@ namespace HandBook.Web.Controllers.HomeControllerFolder
 
                 await _followerService.RemoveAsync(followerrelation.Id);
 
-                var existingNotif = await _notificationService.FindAsync(x => x.UserId == follow!.Id && x.MainText == "started followed you");
+                var existingNotif = await _notificationService.GetExistingNotification(follow.Id,0, "started followed you");
                 if (existingNotif != null)
                 {
-                    await _notificationService.RemoveAsync(existingNotif!.FirstOrDefault()!.Id);
+                    await _notificationService.RemoveAsync(existingNotif!.Id);
                 }
             }
         }
 
-        public async Task<IEnumerable<Notification>> NotificationsHelper(AppUser user)
+        public async Task<IOrderedQueryable<Notification>> NotificationsHelper(AppUser user)
         {
-            var followers = await _followerService.FindAsync(f => f.FollowedUserId == user.Id);
-
-            var followersId = followers.Select(f => f.FollowerUserId);
-
-            var cards = await _notificationService.FindAsync(card => followersId.Contains(card.UserId));
-
-            cards.OrderBy(x=>x.Time).ToList().Reverse();
+            var cards = await _notificationService.GetNotificationsByUserId(user.Id);
 
             return cards;
         }
@@ -421,8 +399,8 @@ namespace HandBook.Web.Controllers.HomeControllerFolder
 
             if (user != null)
             {
-                var userLikedCards = await _likeService.FindAsync(like => like.UserId == user!.Id && like.CommentId == 0);
-                var userLikedComments = await _likeService.FindAsync(com => com.AppUser.Id == user!.Id && com.CommentId != 0);
+                var userLikedCards = await _likeService.GetUserLikedPosts(user.Id);
+                var userLikedComments = await _likeService.GetUserLikedComments(user.Id);
 
                 if (userLikedCards != null && userLikedCards.Count() > 0)
                 {

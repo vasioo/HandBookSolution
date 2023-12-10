@@ -110,7 +110,7 @@ namespace HandBook.Web.Controllers.HomeControllerFolder
             {
                 var username = HttpContext.User?.Identity?.Name ?? "";
                 var user = await _userManager.FindByNameAsync(username);
-                var jsonResult = await _helper.AddOrRemoveACommentHelper(commentsDTO, user));
+                var jsonResult = await _helper.AddOrRemoveACommentHelper(commentsDTO, user);
                 return Json(jsonResult);
             }
             catch (Exception ex)
