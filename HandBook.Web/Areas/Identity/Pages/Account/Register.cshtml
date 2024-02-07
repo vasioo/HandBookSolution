@@ -9,61 +9,65 @@
 <div class="row-fluid pt-5 mt-5">
     <div class="col-md-6 offset-md-3">
         <h1 class=" d-flex align-items-center justify-content-center">Register</h1>
-        <form id="registerForm" asp-route-returnUrl="@Model.ReturnUrl" method="post" class="p-2">
-            <h2 class="d-flex align-items-center justify-content-center">Create a new account.</h2>
-            <hr />
-            <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
+            <form id="account" method="post" class="p-2" enctype="multipart/form-data">
+                <h2 class="d-flex align-items-center justify-content-center">Create a new account.</h2>
+                <hr />
+                <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
 
 
-            <div class="form-group">
-                <label asp-for="Input.Email" class="form-label"></label>
-                <input asp-for="Input.Email" class="form-control" />
-                <span asp-validation-for="Input.Email" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Input.Password" class="form-label"></label>
-                <input asp-for="Input.Password" class="form-control" />
-                <span asp-validation-for="Input.Password" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Input.ConfirmPassword" class="form-label"></label>
-                <input asp-for="Input.ConfirmPassword" class="form-control" />
-                <span asp-validation-for="Input.ConfirmPassword" class="text-danger"></span>
-            </div>
-            <div class="form-group pb-4">
-                <label asp-for="Input.Username" class="form-label"></label>
-                <input asp-for="Input.Username" class="form-control" />
-                <span asp-validation-for="Input.Username" class="text-danger"></span>
-            </div>
-
+                <div class="form-group">
+                    <label asp-for="Input.Email" class="form-label"></label>
+                    <input asp-for="Input.Email" autocomplete="username" class="form-control" />
+                    <span asp-validation-for="Input.Email" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="Input.Password" class="form-label"></label>
+                    <input asp-for="Input.Password" autocomplete="current-password" class="form-control" />
+                    <span asp-validation-for="Input.Password" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="Input.ConfirmPassword" class="form-label"></label>
+                    <input asp-for="Input.ConfirmPassword" autocomplete="current-password" class="form-control" />
+                    <span asp-validation-for="Input.ConfirmPassword" class="text-danger"></span>
+                </div>
+                <div class="form-group pb-4">
+                    <label asp-for="Input.Username" class="form-label"></label>
+                    <input asp-for="Input.Username" autocomplete="username" class="form-control" />
+                    <span asp-validation-for="Input.Username" class="text-danger"></span>
+                </div>
             <div class="form-group pb-4 row justify-content-center">
                 <label class="form-label row justify-content-center text-lg">Profile Image</label>
                 <div class="upload-input col-md-10 m-0 p-0 position-relative">
-                    <input name="ProfileImage" id="imageInput" type="file" class="image-upload custom-file-input" accept=".png, .jpg, .jpeg" multiple="multiple" max="1" style="cursor:pointer;z-index: 10000;">
+                    <input type="file" asp-for="Input.ProfileImage" class="image-upload imageInput custom-file-input" accept=".png, .jpg, .jpeg" multiple="multiple"  style="cursor:pointer;z-index: 10000;">
                     <label for="imageInput" class="text-center content" style="width: 100%; height: 100%; margin: 0; padding: 0; position: absolute; top: 0; left: 0;">
                         <span class="text">
                             <span class="mb-15 plus-icon"><i class="fa fa-plus"></i></span>
                         </span>
                     </label>
-                    <img class="uploaded-image" id="previewImage" style="width: 100%; height: 100%; object-fit: cover;" />
+                    <img class="uploaded-image" id="previewImage" style="width: 100%; height: 100%; object-fit: cover;" /> 
                 </div>
                 <span asp-validation-for="Input.ProfileImage" class="text-danger"></span>
-                <img id="imagePreview" src="#" alt="Image Preview" style="display:none; max-width: 100%; height: auto;" />
+            </div>
+
+            <div class="form-group pb-4">
+                <label asp-for="Input.Gender" class="form-label"></label>
+                <select asp-for="Input.Gender" class="form-control">
+                    <option value="0">Male</option>
+                    <option value="1">Female</option>
+                </select>
+                <span asp-validation-for="Input.Gender" class="text-danger"></span>
             </div>
 
 
-            <input type="hidden" asp-for="Input.Gender" value="0">
-            <span asp-validation-for="Input.Gender" class="text-danger"></span>
-
-            <button id="registerSubmit" type="submit" class="w-100 btn btn-lg btn-dark">Register</button>
-            <div class="col-md-6 offset-md-3">
-                <br />
-                <h5 class="text-center">Already a member:</h5>
-                <p class="text-center">
-                    <a asp-page="./Login" asp-route-returnUrl="@Model.ReturnUrl">Use your account</a>
-                </p>
-            </div>
-        </form>
+                <button type="submit" class="w-100 btn btn-lg btn-dark">Register</button>
+                <div class="col-md-6 offset-md-3">
+                    <br />
+                    <h5 class="text-center">Already a member:</h5>
+                    <p class="text-center">
+                        <a asp-page="./Login" asp-route-returnUrl="@Model.ReturnUrl">Use your account</a>
+                    </p>
+                </div>
+            </form>
         <br />
         <section>
             <h3 class="d-flex align-items-center justify-content-center">Register with:</h3>
@@ -127,22 +131,29 @@
     document.getElementById('facebookLink').addEventListener('click', function () {
         document.getElementById('facebookInput').click();
     });
-
+     
     document.getElementById('googleLink').addEventListener('click', function () {
         document.getElementById('googleInput').click();
     });
-    document.getElementById('imageInput').addEventListener('change', function (e) {
-        const previewImage = document.getElementById('previewImage');
-        const fileInput = e.target;
 
-        if (fileInput.files && fileInput.files[0]) {
-            const reader = new FileReader();
 
-            reader.onload = function (e) {
-                previewImage.src = e.target.result;
-            };
+    const imageInputs = document.getElementsByClassName("imageInput");
 
-            reader.readAsDataURL(fileInput.files[0]);
-        }
-    });
+    for (let i = 0; i < imageInputs.length; i++) {
+        imageInputs[i].addEventListener('change', function (e) {
+            const previewImage = document.getElementById('previewImage');
+            const fileInput = e.target;
+
+            if (fileInput.files && fileInput.files[0]) {
+                const reader = new FileReader();
+
+                reader.onload = function (e) {
+                    previewImage.src = e.target.result;
+                };
+
+                reader.readAsDataURL(fileInput.files[0]);
+            }
+        });
+    }
+
 </script>

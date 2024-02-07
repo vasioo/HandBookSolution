@@ -14,25 +14,39 @@ namespace HandBook.Web
             var builder = WebApplication.CreateBuilder(args);
 
             // Add services to the container.
-            var connectionString = builder.Configuration
-                .GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+            var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+
+
             builder.Services.AddDbContext<ApplicationDbContext>(options =>
-                options.UseSqlServer(connectionString));
+            {
+                options.UseSqlServer(connectionString, sqlServerOptionsAction: sqlOptions =>
+                {
+                    sqlOptions.EnableRetryOnFailure();
+                });
+            });
+
             builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
+
             builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
-                
-            builder.Services.AddDefaultIdentity<AppUser>(options =>
-            {
-                options.SignIn.RequireConfirmedAccount = false;
-                options.Password.RequireDigit = false;
-                options.Password.RequireLowercase = false;
-                options.Password.RequireNonAlphanumeric = false;
-                options.Password.RequireUppercase = false;
-            })
-                    .AddRoles<IdentityRole>()
-                   .AddEntityFrameworkStores<ApplicationDbContext>();
-            builder.Services.AddControllersWithViews();
+
+            builder.Services.AddDefaultIdentity<AppUser>(
+              options =>
+              {
+                  options.SignIn.RequireConfirmedAccount = false;
+                  options.Password.RequireDigit = false;
+                  options.Password.RequireLowercase = false;
+                  options.Password.RequireNonAlphanumeric = false;
+                  options.Password.RequireUppercase = false;
+              })
+                 .AddRoles<IdentityRole>()
+                 .AddEntityFrameworkStores<ApplicationDbContext>()
+                 .AddDefaultTokenProviders()
+                 .AddDefaultUI()
+                 .AddSignInManager<SignInManager<AppUser>>()
+                 .AddUserManager<UserManager<AppUser>>()
+                 .AddRoleManager<RoleManager<IdentityRole>>()
+                 .AddEntityFrameworkStores<ApplicationDbContext>();
             builder.Services.AddSignalR();
 
 
@@ -53,12 +67,12 @@ namespace HandBook.Web
                             options.ClientId = googleClientId;
                             options.ClientSecret = googleClientSecret;
                         });
+            builder.Services.AddControllersWithViews();
 
             builder.Services.AddApplication();
 
             var app = builder.Build();
 
-            // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
             {
                 app.UseMigrationsEndPoint();
@@ -66,7 +80,6 @@ namespace HandBook.Web
             else
             {
                 app.UseExceptionHandler("/Home/Error");
-                // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }
 

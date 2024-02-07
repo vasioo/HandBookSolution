@@ -47,3 +47,13 @@
     top: 0;
     left: 0;
 }
+.custom-textbox {
+    border-color: #ced4da; /* Bootstrap default border color */
+    border-radius: 5px;
+    font-size: 16px;
+}
+
+    .custom-textbox:focus {
+        border-color: dodgerblue;
+        box-shadow: 0 0 0 0.25rem rgba(0, 123, 255, 0.25); /* Bootstrap focus style */
+    }

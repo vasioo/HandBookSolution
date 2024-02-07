@@ -27,5 +27,9 @@ namespace HandBook.Models
         [NotMapped]
         public bool IsLiked { get; set; } = false;
 
+        //if using a # it is counted as a tag which can be clicked onto and it shows other posts with similar items
+        public string Description { get; set; } = "";
+        
+
     }
 }

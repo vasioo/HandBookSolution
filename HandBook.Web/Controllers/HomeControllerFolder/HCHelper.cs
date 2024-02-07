@@ -1,17 +1,13 @@
-﻿using CloudinaryDotNet.Actions;
-using CloudinaryDotNet;
+﻿using CloudinaryDotNet;
+using CloudinaryDotNet.Actions;
 using HandBook.Models;
 using HandBook.Services.Interfaces;
 using HandBook.Web.Models;
 using Messenger.Models;
 using Microsoft.AspNetCore.Identity;
-using System;
-using System.Text;
-using HandBook.DataAccess;
-using System.Configuration;
 using Newtonsoft.Json;
-using System.Web.Mvc;
 using System.Data.Entity;
+using System.Text;
 
 namespace HandBook.Web.Controllers.HomeControllerFolder
 {
@@ -393,7 +389,8 @@ namespace HandBook.Web.Controllers.HomeControllerFolder
                 AmountOfComments = post.Comments.Count(),
                 AmountOfLikes = post.AmountOfLikes,
                 Time = post.Time,
-                image = post.ImageLink
+                image = post.ImageLink,
+                Description=post.Description
             }).ToList();
 
 

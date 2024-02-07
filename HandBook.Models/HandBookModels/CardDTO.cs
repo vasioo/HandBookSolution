@@ -18,5 +18,7 @@ namespace HandBook.Web.Models
 
         public List<int> UserLikedCards { get; set; }= new List<int>();
         public string UserLikedComments { get; set; } = "";
+
+        public string Description { get; set; } = "";
     }
 }

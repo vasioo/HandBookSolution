@@ -2,28 +2,20 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 #nullable disable
 
-using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Configuration;
-using System.Diagnostics.Metrics;
-using System.Linq;
-using System.Text;
-using System.Text.Encodings.Web;
-using System.Threading;
-using System.Threading.Tasks;
 using CloudinaryDotNet;
 using CloudinaryDotNet.Actions;
 using HandBook.Web.Models;
 using Messenger.Models;
 using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.WebUtilities;
-using Microsoft.Extensions.Logging;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+using System.Text;
+using System.Text.Encodings.Web;
 
 namespace HandBook.Web.Areas.Identity.Pages.Account
 {
@@ -38,13 +30,15 @@ namespace HandBook.Web.Areas.Identity.Pages.Account
         public IConfiguration Configuration;
         private CloudinarySettings _cloudinarySettings;
         private Cloudinary _cloudinary;
+        private Microsoft.AspNetCore.Hosting.IHostingEnvironment _environment;
+
 
         public RegisterModel(
             UserManager<AppUser> userManager,
             IUserStore<AppUser> userStore,
             SignInManager<AppUser> signInManager,
             ILogger<RegisterModel> logger,
-            IEmailSender emailSender, IConfiguration configuration)
+            IEmailSender emailSender, IConfiguration configuration, Microsoft.AspNetCore.Hosting.IHostingEnvironment environment)
         {
             Configuration = configuration;
             _cloudinarySettings = Configuration.GetSection("CloudinarySettings").Get<CloudinarySettings>() ?? new CloudinarySettings();
@@ -59,6 +53,7 @@ namespace HandBook.Web.Areas.Identity.Pages.Account
                 _cloudinarySettings.ApiKey,
                 _cloudinarySettings.ApiSecret);
             _cloudinary = new Cloudinary(account);
+            _environment = environment;
         }
 
 
@@ -76,29 +71,24 @@ namespace HandBook.Web.Areas.Identity.Pages.Account
         {
             [Required]
             [EmailAddress]
-            [Display(Name = "Email")]
             public string Email { get; set; }
 
             [Required]
-            [RegularExpression(@"^[\w@-]*$", ErrorMessage = "The {0} must contain letters, numbers, and special characters (@ and -).")]
             [DataType(DataType.Password)]
-            [Display(Name = "Password")]
             public string Password { get; set; }
 
             [Required]
             [DataType(DataType.Password)]
-            [Display(Name = "Confirm password")]
             [Compare("Password", ErrorMessage = "The password and confirmation password do not match.")]
             public string ConfirmPassword { get; set; }
 
 
-            [Display(Name = "Username")]
             public string Username { get; set; }
 
-            [Display(Name = "Gender")]
             public string Gender { get; set; }
 
-            public string ProfileImage { get; set; }
+            [BindProperty]
+            public IFormFile ProfileImage { get; set; }
         }
 
 
@@ -124,25 +114,34 @@ namespace HandBook.Web.Areas.Identity.Pages.Account
             }
             catch (Exception)
             {
-                // log error
                 return false;
             }
         }
 
         public async Task<IActionResult> OnPostAsync(string returnUrl = null)
         {
+
             returnUrl ??= Url.Content("~/");
             ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
             if (ModelState.IsValid)
             {
+
+                var existingUser = await _userManager.FindByNameAsync(Input.Username);
+                if (existingUser != null)
+                {
+                    ModelState.AddModelError("Input.Username", "Username is already in use.");
+                    return Page();
+                }
+
                 var user = new AppUser();
                 user.UserName = Input.Username;
                 user.Email = Input.Email;
                 user.Gender = Input.Gender;
                 var photo = new Photo();
-                if (Input.ProfileImage != null && Input.ProfileImage != "")
+
+                if (Input.ProfileImage != null)
                 {
-                    photo.Image = Input.ProfileImage;
+                    photo.Image = await GetBase64StringAsync(Input.ProfileImage);
                     photo.ImageName = $"profile-image-for-{user.UserName}";
                     photo.PublicId = $"profile-image-for-{user.UserName}";
                 }
@@ -186,6 +185,18 @@ namespace HandBook.Web.Areas.Identity.Pages.Account
             }
 
             return Page();
+        }
+        public async Task<string> GetBase64StringAsync(IFormFile file)
+        {
+            using (var memoryStream = new MemoryStream())
+            {
+                await file.CopyToAsync(memoryStream);
+                byte[] imageDataBytes = memoryStream.ToArray();
+
+                string base64String = $"data:{file.ContentType};base64,{Convert.ToBase64String(imageDataBytes)}";
+
+                return base64String;
+            }
         }
         private IUserEmailStore<AppUser> GetEmailStore()
         {
