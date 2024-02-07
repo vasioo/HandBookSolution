@@ -58,9 +58,9 @@ namespace HandBook.Web.Controllers.HomeControllerFolder
         }
 
         [Authorize]
-        public async Task<IActionResult> DesiredPost(int modelData)
+        public async Task<IActionResult> DesiredPost(int postId)
         {
-            var item = await _helper.DesiredPostHelper(modelData);
+            var item = await _helper.DesiredPostHelper(postId);
 
             return View("~/Views/Home/DesiredPost.cshtml", item);
         }

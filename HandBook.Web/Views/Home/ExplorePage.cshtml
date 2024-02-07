@@ -1,14 +1,16 @@
-﻿@using Messenger.Models;
+﻿@using HandBook.Models.ViewModels;
+@using Messenger.Models;
 @using Microsoft.AspNetCore.Identity;
 @inject UserManager<AppUser> UserManager
-
+@model ExplorePageViewModel
 <style>
     .user-link, .user-link:hover {
         text-decoration: none;
         color: black;
     }
-    .user-information{
-        background:white;
+
+    .user-information {
+        background: white;
     }
 </style>
 <div class="pt-5">
@@ -19,9 +21,24 @@
             </div>
         </div>
     </form>
+    <div id="explore-page">
+        <div class="container-fluid">
+            <div class="row">
+                @foreach (var item in Model.Posts)
+                {
+                    <div class="col-sm-6 col-md-4 col-lg-4">
+                        <div class="explore-item">
+                            @await Html.PartialAsync("~/Views/Home/_ExplorePagePartial.cshtml", item)
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
 </div>
 
-<div id="searchResults">
+<div id="searchResults" style="z-index:1">
 </div>
 
 @section Scripts {
@@ -51,7 +68,7 @@
                         users.forEach(function (user) {
                             var usernameLink = 'https://res.cloudinary.com/dzaicqbce/image/upload/v1695818842/profile-image-for-' + user.userName + '.png';
                             var alternativeLink = 'https://res.cloudinary.com/dzaicqbce/image/upload/v1700160046/azgysbpf8xpcxpfclb9i.jpg';
-                            var imgTag = '<img src="' + usernameLink + '" alt="Image not found" onerror="this.onerror=null;this.src=\'' + alternativeLink + '\';" style="border-radius:30px; width:50px; margin-right:10px;" />';
+                            var imgTag = '<img src="' + usernameLink + '" alt="Image not found" onerror="this.onerror=null;this.src=\'' + alternativeLink + '\';" style="border-radius:30px;height:60px; width:60px; margin-right:10px;" />';
 
                             var userDiv = document.createElement('div');
                             userDiv.innerHTML =
