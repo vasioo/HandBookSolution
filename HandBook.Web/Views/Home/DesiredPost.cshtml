@@ -1,21 +1,21 @@
 ﻿@using HandBook.Models;
-@model Post
-
+@model CardDTO
+@section Scripts{
+    <script src="@Url.Content("~/js/custom/postJs.js")" type="text/javascript" asp-append-version="true"></script>
+}
 @{
     ViewData["Title"] = "DesiredPost";
+    TempData.Keep();
 }
 <div>
     <div class="justify-content-center row">
         @await Html.PartialAsync("_PostsPartial",Model);
-        @*<partial name= model="@Model" />*@
     </div>
 </div>
 <script>
     var button = document.getElementById('myButton');
 
-    // Add a click event listener to the button
     button.addEventListener('click', function () {
-        // Change the location to the desired page
         window.location.href = '@Url.Action("Notifications", "Home")';
     });
 </script>

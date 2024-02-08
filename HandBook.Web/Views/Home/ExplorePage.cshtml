@@ -22,8 +22,8 @@
         </div>
     </form>
     <div id="explore-page">
-        <div class="container-fluid">
-            <div class="row">
+        <div class="row justify-content-center">
+            <div class="col-8 p-0 m-0">
                 @foreach (var item in Model.Posts)
                 {
                     <div class="col-sm-6 col-md-4 col-lg-4">
@@ -42,12 +42,24 @@
 </div>
 
 @section Scripts {
+    <script src="@Url.Content("~/js/custom/postJs.js")" type="text/javascript" asp-append-version="true"></script>
+
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             var searchInput = document.getElementById('searchInput');
+            var explorePage = document.getElementById("explore-page");
+
             searchInput.addEventListener('input', function () {
                 var searchString = searchInput.value;
                 searchUsers(searchString);
+            });
+
+            searchInput.addEventListener("input", function () {
+                if (searchInput.value.trim() !== "") {
+                    explorePage.style.display = "none";
+                } else {
+                    explorePage.style.display = "block";
+                }
             });
         });
 
@@ -67,7 +79,7 @@
                         resultsContainer.innerHTML = '';
                         users.forEach(function (user) {
                             var usernameLink = 'https://res.cloudinary.com/dzaicqbce/image/upload/v1695818842/profile-image-for-' + user.userName + '.png';
-                            var alternativeLink = 'https://res.cloudinary.com/dzaicqbce/image/upload/v1700160046/azgysbpf8xpcxpfclb9i.jpg';
+                            var alternativeLink = '/handbook/images/anonymousUser.png';
                             var imgTag = '<img src="' + usernameLink + '" alt="Image not found" onerror="this.onerror=null;this.src=\'' + alternativeLink + '\';" style="border-radius:30px;height:60px; width:60px; margin-right:10px;" />';
 
                             var userDiv = document.createElement('div');
@@ -105,5 +117,8 @@
             xhr.open('GET', '/Home/SearchUsersFilter?searchString=' + query, true);
             xhr.send();
         }
+
+    
+
     </script>
 }

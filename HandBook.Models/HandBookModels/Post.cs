@@ -1,6 +1,5 @@
 ﻿using HandBook.Models.BaseModels.Interfaces;
 using HandBook.Web.Models;
-using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace HandBook.Models
@@ -16,7 +15,6 @@ namespace HandBook.Models
         public DateTime Time { get; set; } = DateTime.Now;
 
         [System.ComponentModel.DataAnnotations.Required]
-        //counting the amount of likes and one person can only like once
         public int AmountOfLikes { get; set; } = 0;
 
         public List<Comment> Comments { get; set; } = new List<Comment>();

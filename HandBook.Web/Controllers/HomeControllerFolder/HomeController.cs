@@ -1,17 +1,13 @@
-﻿using CloudinaryDotNet;
-using CloudinaryDotNet.Actions;
-using HandBook.Models;
-using HandBook.Web.Controllers.MessagesControllerFolder;
+﻿using HandBook.Models;
 using HandBook.Web.Models;
 using Messenger.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Hosting;
 using Newtonsoft.Json;
 using ServiceStack;
 using System.Diagnostics;
-using System.Text;
 
 namespace HandBook.Web.Controllers.HomeControllerFolder
 {
@@ -31,7 +27,6 @@ namespace HandBook.Web.Controllers.HomeControllerFolder
             _userManager = userManager;
             _httpContextAccessor = httpContextAccessor;
         }
-
         [Authorize]
         public async Task<IActionResult> Index()
         {
@@ -60,9 +55,26 @@ namespace HandBook.Web.Controllers.HomeControllerFolder
         [Authorize]
         public async Task<IActionResult> DesiredPost(int postId)
         {
-            var item = await _helper.DesiredPostHelper(postId);
+            try
+            {
+                var username = HttpContext.User?.Identity?.Name ?? "";
+                var user = await _userManager.FindByNameAsync(username);
 
-            return View("~/Views/Home/DesiredPost.cshtml", item);
+                var item = await _helper.DesiredPostHelper(postId, user!);
+
+                if (item!=null)
+                {
+                    TempData["UserLikedComments"] = item.UserLikedComments;
+                }
+
+                return View("~/Views/Home/DesiredPost.cshtml", item);
+            }
+            catch (Exception)
+            {
+                return View();
+                throw;
+            }
+            
         }
 
         [Authorize]
@@ -281,6 +293,17 @@ namespace HandBook.Web.Controllers.HomeControllerFolder
         public IActionResult Privacy()
         {
             return View("~/Views/Home/Privacy.cshtml");
+        }
+
+        [Authorize]
+        public async Task<IActionResult> ExplorePage()
+        {
+            var username = HttpContext.User?.Identity?.Name ?? "";
+            var user = await _userManager.FindByNameAsync(username);
+
+            var viewModel =await _helper.GetExplorePageAttributes(user!);
+
+            return View("~/Views/Home/ExplorePage.cshtml",viewModel);
         }
     }
 }

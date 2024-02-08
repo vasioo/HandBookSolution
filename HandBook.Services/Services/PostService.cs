@@ -2,6 +2,7 @@
 using HandBook.Models;
 using HandBook.Services.Interfaces;
 using HandBook.Web.Models;
+using Messenger.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace HandBook.Services.Services
 {
-    public class PostService: BaseService<Post>, IPostService
+    public class PostService : BaseService<Post>, IPostService
     {
         private readonly ApplicationDbContext _dataContext;
         public PostService(ApplicationDbContext context) : base(context)
@@ -24,6 +25,24 @@ namespace HandBook.Services.Services
 
             var cardDTO = posts.OrderByDescending(x => x.Time)
                 .Take(20)
+                .Select(post => new CardDTO
+                {
+                    Id = post.Id,
+                    CreatorUserName = post.CreatorUserName,
+                    AmountOfLikes = post.AmountOfLikes,
+                    image = post.ImageLink,
+                    Time = post.Time,
+                    AmountOfComments = post.Comments.Count()
+                });
+
+            return cardDTO;
+        }
+
+        public IQueryable<CardDTO> GetPostsBasedOnUserFavouritism(AppUser user)
+        {
+            var posts = _dataContext.Posts;
+
+            var cardDTO = posts.OrderByDescending(x => x.Time)
                 .Select(post => new CardDTO
                 {
                     Id = post.Id,

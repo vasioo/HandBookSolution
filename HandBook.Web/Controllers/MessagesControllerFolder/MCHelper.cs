@@ -2,12 +2,11 @@
 using Messenger.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using NuGet.Protocol.Plugins;
 using System.Data.Entity;
 
 namespace HandBook.Web.Controllers.MessagesControllerFolder
 {
-    public class MCHelper:IMCHelper
+    public class MCHelper : IMCHelper
     {
         public readonly UserManager<AppUser> _userManager;
 
@@ -38,16 +37,16 @@ namespace HandBook.Web.Controllers.MessagesControllerFolder
             await _messageService.AddAsync(message);
         }
 
-        public async Task<List<Messages>> GetCurrentChatMessages(string currentUserId, string otherUserId)
+        public IOrderedQueryable<Messages> GetCurrentChatMessages(string currentUserId, string otherUserId)
         {
-            var allMessages = _messageService.IQueryableGetAllAsync();
-            var messages = await allMessages
-                .Where(m => m.SenderMessageId == currentUserId && m.MessageReceiverId == otherUserId || m.SenderMessageId == otherUserId && m.MessageReceiverId == currentUserId)
-                .OrderBy(m => m.TimeSent)
-                .ToListAsync();
+            var messages = _messageService.IQueryableGetAllAsync()
+                .Where(m => (m.SenderMessageId == currentUserId && m.MessageReceiverId == otherUserId) 
+                || (m.SenderMessageId == otherUserId && m.MessageReceiverId == currentUserId))
+                .OrderBy(m => m.TimeSent);
 
             return messages;
         }
+
 
         public async Task<List<UserMassageDTO>> GetUsersWithMessages(string senderId)
         {
@@ -87,11 +86,11 @@ namespace HandBook.Web.Controllers.MessagesControllerFolder
                     {
                         var allMessages = _messageService.IQueryableGetAllAsync();
 
-                        var lastMessage = await allMessages
+                        var lastMessage = allMessages
                             .Where(m => m.SenderMessageId == senderId && m.MessageReceiverId == specUserNeeded.Id
                             || m.SenderMessageId == specUserNeeded.Id && m.MessageReceiverId == senderId)
                             .OrderByDescending(m => m.TimeSent)
-                            .FirstOrDefaultAsync();
+                            .FirstOrDefault();
 
                         userMsgDto.Message = lastMessage!.Text!;
 

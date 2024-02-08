@@ -1,6 +1,7 @@
 ﻿using CloudinaryDotNet;
 using CloudinaryDotNet.Actions;
 using HandBook.Models;
+using HandBook.Models.ViewModels;
 using HandBook.Services.Interfaces;
 using HandBook.Web.Models;
 using Messenger.Models;
@@ -358,7 +359,7 @@ namespace HandBook.Web.Controllers.HomeControllerFolder
 
                 await _followerService.RemoveAsync(followerrelation.Id);
 
-                var existingNotif = await _notificationService.GetExistingNotification(follow.Id,0, "started followed you");
+                var existingNotif = await _notificationService.GetExistingNotification(follow.Id, 0, "started followed you");
                 if (existingNotif != null)
                 {
                     await _notificationService.RemoveAsync(existingNotif!.Id);
@@ -373,9 +374,39 @@ namespace HandBook.Web.Controllers.HomeControllerFolder
             return cards;
         }
 
-        public async Task<Post> DesiredPostHelper(int desiredPostId)
+        public async Task<CardDTO> DesiredPostHelper(int desiredPostId, AppUser user)
         {
-            return await _postService.GetByIdAsync(desiredPostId);
+            var post = await _postService.GetByIdAsync(desiredPostId);
+
+            var cardDto = new CardDTO();
+
+            cardDto.Id = post.Id;
+            cardDto.CreatorUserName = post.CreatorUserName;
+            cardDto.AmountOfLikes = post.AmountOfLikes;
+            cardDto.image = post.ImageLink;
+            cardDto.Time= post.Time;
+            cardDto.AmountOfComments= post.Comments.Count();
+            cardDto.Description = post.Description;
+
+            if (user != null)
+            {
+                var userLikedCards = await _likeService.GetUserLikedPosts(user.Id);
+                var userLikedComments = await _likeService.GetUserLikedComments(user.Id);
+
+                if (userLikedCards != null && userLikedCards.Count() > 0)
+                {
+                    cardDto.IsCurrentPostLiked = userLikedCards.Where(x=>x.Id==cardDto.Id).Any();
+                }
+
+                if (userLikedComments != null && userLikedComments.Count() > 0)
+                {
+                    string commentIdsString = string.Join(",", userLikedComments.Where(x=>x.Post.Id==cardDto.Id).Select(x => x.CommentId));
+
+                    cardDto.UserLikedComments = commentIdsString;
+
+                }
+            }
+            return cardDto;
         }
 
         public async Task<List<CardDTO>> IndexHelper(AppUser user)
@@ -390,7 +421,7 @@ namespace HandBook.Web.Controllers.HomeControllerFolder
                 AmountOfLikes = post.AmountOfLikes,
                 Time = post.Time,
                 image = post.ImageLink,
-                Description=post.Description
+                Description = post.Description
             }).ToList();
 
 
@@ -414,6 +445,15 @@ namespace HandBook.Web.Controllers.HomeControllerFolder
             }
 
             return posts;
+        }
+
+        public async Task<ExplorePageViewModel> GetExplorePageAttributes(AppUser user)
+        {
+            var viewModel = new ExplorePageViewModel();
+
+            viewModel.Posts = _postService.GetPostsBasedOnUserFavouritism(user);
+
+            return viewModel;
         }
     }
 }

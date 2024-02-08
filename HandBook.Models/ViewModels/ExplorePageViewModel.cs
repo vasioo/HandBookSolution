@@ -1,13 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using HandBook.Web.Models;
 
 namespace HandBook.Models.ViewModels
 {
     public class ExplorePageViewModel
     {
-        public IQueryable<Post> Posts { get; set; }
+        public IQueryable<CardDTO> Posts { get; set; }
     }
 }

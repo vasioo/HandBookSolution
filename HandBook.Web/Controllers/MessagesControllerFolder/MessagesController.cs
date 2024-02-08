@@ -53,6 +53,7 @@ namespace HandBook.Web.Controllers.MessagesControllerFolder
                 var specUserNeeded = users.Where(u => u.UserName == userName).FirstOrDefault();
 
                 ViewBag.CurrentUserName = currentUser!.UserName;
+                ViewBag.TargetedUserId = specUserNeeded!.Id;
 
                 var messages = _helper.GetCurrentChatMessages(currentUser.Id, specUserNeeded!.Id);
 

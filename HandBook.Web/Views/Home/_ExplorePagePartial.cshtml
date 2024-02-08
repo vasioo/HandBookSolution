@@ -1,8 +1,8 @@
 ﻿@using HandBook.Models;
-@model Post
+@model CardDTO
 
 <div>
     <a href="~/Home/DesiredPost?postId=@Model.Id">
-        <img src="@Model.ImageLink" />
+        <img src="@Model.image" style="width:100%; max-width:300px; height:auto;" />
     </a>
 </div>

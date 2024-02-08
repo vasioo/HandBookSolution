@@ -1,4 +1,5 @@
 ﻿using HandBook.Models;
+using HandBook.Models.ViewModels;
 using HandBook.Web.Models;
 using Messenger.Models;
 
@@ -16,7 +17,8 @@ namespace HandBook.Web.Controllers.HomeControllerFolder
         Task AddFollowerRelationshipHelper(string username, string usernamefollower);
         Task RemoveFollowerRelationshipHelper(string username, string usernamefollower);
         Task<IOrderedQueryable<Notification>> NotificationsHelper(AppUser user);
-        Task<Post> DesiredPostHelper(int desiredPostId);
+        Task<CardDTO> DesiredPostHelper(int desiredPostId, AppUser user);
         Task<List<CardDTO>> IndexHelper(AppUser user);
+        Task<ExplorePageViewModel> GetExplorePageAttributes(AppUser user);
     }
 }

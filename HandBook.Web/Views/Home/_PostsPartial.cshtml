@@ -44,9 +44,14 @@
     }
 
     List<int> userLikedCards = (List<int>)TempData["UserLikedCards"];
+    
     if (userLikedCards == null)
     {
         userLikedCards = new List<int>();
+    }
+    if (item.IsCurrentPostLiked)
+    {
+        userLikedCards.Add(item.Id);
     }
     TempData.Keep();
 }
@@ -55,10 +60,10 @@
         <div class="row justify-content-between w-100">
             <div class="profile-column-post d-flex align-items-center">
                 @{
-                    var link = "https://res.cloudinary.com/dzaicqbce/image/upload/v1695818842/profile-image-for-" + item.CreatorUserName + ".png";
+                    var link = $"https://res.cloudinary.com/dzaicqbce/image/upload/v1695818842/profile-image-for-{item.CreatorUserName}.png";
                 }
                 <a class="" asp-controller="Home" asp-action="Account" asp-route-username="@item.CreatorUserName">
-                    <img src="@link" class="profile-image-class" alt="Image not found" style="border-radius:30px; width:50px; margin-right:10px;" />
+                    <img src="@link" class="profile-image-class" alt="Image not found" style="border-radius:30px; width:60px;height:60px; margin-right:10px;" />
                 </a>
                 <div>
                     <a class="card-title h5 cr-us-name" asp-controller="Home" asp-action="Account" asp-route-username="@item.CreatorUserName">

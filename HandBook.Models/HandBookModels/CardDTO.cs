@@ -20,5 +20,7 @@ namespace HandBook.Web.Models
         public string UserLikedComments { get; set; } = "";
 
         public string Description { get; set; } = "";
+
+        public bool IsCurrentPostLiked { get; set; }
     }
 }

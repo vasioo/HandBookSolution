@@ -1,7 +1,8 @@
-﻿@model IEnumerable<Messenger.Models.Messages>
+﻿@model IOrderedQueryable<Messenger.Models.Messages>
 
 @{
     var userName = User!.Identity!.Name!;
+    var targetUser = ViewBag.TargetedUserId!;
 }
 
 <style>
@@ -34,7 +35,7 @@
 
 <div class="bg-light vh-100 row align-items-end" id="content">
     <div data-username="@userName" id="current-user-username" hidden></div>
-    <div data-targetusername="" id="target-user-username" hidden></div>
+    <div data-targetusername="@targetUser" id="target-user-username" hidden></div>
     <div class="row" id="mainChatContainer">
         <div class="row" id="chat">
             @if (Model != null)
@@ -86,7 +87,7 @@
                 </div>
             </div>
             <input type="hidden" value="@userName" name="username" id="username" />
-            <input type="hidden" value="4ea68000-5d23-47f3-918a-75707be31cd4" name="targetusername" id="targetusername" />
+            <input type="hidden" value="@targetUser" name="targetusername" id="targetusername" />
         </div>
     </div>
 </div>
@@ -125,5 +126,4 @@
             console.error('Error loading older chat messages:', error);
         }
     }
-
 </script>
