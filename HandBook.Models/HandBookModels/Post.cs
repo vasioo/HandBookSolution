@@ -6,7 +6,7 @@ namespace HandBook.Models
 {
     public class Post:IEntity
     {
-        public int Id { get; set; }
+        public Guid Id { get; set; }
 
         [System.ComponentModel.DataAnnotations.Required]
         public string CreatorUserName { get; set; } = "";

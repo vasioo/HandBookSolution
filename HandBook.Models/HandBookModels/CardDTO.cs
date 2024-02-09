@@ -4,7 +4,7 @@ namespace HandBook.Web.Models
 {
     public class CardDTO
     {
-        public int Id { get; set; }
+        public Guid Id { get; set; }
 
         public string CreatorUserName { get; set; } = "";
 
@@ -16,7 +16,7 @@ namespace HandBook.Web.Models
 
         public int AmountOfComments { get; set; }
 
-        public List<int> UserLikedCards { get; set; }= new List<int>();
+        public IQueryable<Guid> UserLikedCards { get; set; }
         public string UserLikedComments { get; set; } = "";
 
         public string Description { get; set; } = "";

@@ -4,7 +4,6 @@ using Messenger.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Hosting;
 using Newtonsoft.Json;
 using ServiceStack;
 using System.Diagnostics;
@@ -27,7 +26,6 @@ namespace HandBook.Web.Controllers.HomeControllerFolder
             _userManager = userManager;
             _httpContextAccessor = httpContextAccessor;
         }
-        [Authorize]
         public async Task<IActionResult> Index()
         {
             try
@@ -35,12 +33,12 @@ namespace HandBook.Web.Controllers.HomeControllerFolder
                 var username = HttpContext.User?.Identity?.Name ?? "";
                 var user = await _userManager.FindByNameAsync(username);
                 ViewBag.UserUsername = username;
-                var posts = await _helper.IndexHelper(user!);
+                var posts = _helper.IndexHelper(user!);
 
-                if (posts.Count > 0)
+                if (posts.Count() > 0)
                 {
-                    TempData["UserLikedCards"] = posts[0].UserLikedCards;
-                    TempData["UserLikedComments"] = posts[0].UserLikedComments;
+                    TempData["UserLikedCards"] = posts.First().UserLikedCards;
+                    TempData["UserLikedComments"] = posts.First().UserLikedComments;
                 }
 
                 return View("~/Views/Home/Index.cshtml", posts);
@@ -52,8 +50,7 @@ namespace HandBook.Web.Controllers.HomeControllerFolder
             }
         }
 
-        [Authorize]
-        public async Task<IActionResult> DesiredPost(int postId)
+        public async Task<IActionResult> DesiredPost(Guid postId)
         {
             try
             {
@@ -77,7 +74,6 @@ namespace HandBook.Web.Controllers.HomeControllerFolder
             
         }
 
-        [Authorize]
         public async Task<IActionResult> Notifications()
         {
             var username = HttpContext.User?.Identity?.Name ?? "";
@@ -89,7 +85,6 @@ namespace HandBook.Web.Controllers.HomeControllerFolder
             return View("~/Views/Home/Notifications.cshtml", notifications);
         }
 
-        [Authorize]
         public IActionResult AddAPost()
         {
             return View("~/Views/Home/AddAPost.cshtml");
@@ -97,7 +92,6 @@ namespace HandBook.Web.Controllers.HomeControllerFolder
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [Authorize]
         public async Task<IActionResult> AddAPost(Post tfm, IFormFile ImageUrl, Notification ntf)
         {
             var username = HttpContext.User?.Identity?.Name ?? "";
@@ -135,8 +129,7 @@ namespace HandBook.Web.Controllers.HomeControllerFolder
         }
 
         [HttpPost]
-        [Authorize]
-        public async Task<IActionResult> IncrementOrDecrementLikeCount(int itemId)
+        public async Task<IActionResult> IncrementOrDecrementLikeCount(Guid itemId)
         {
             try
             {
@@ -154,8 +147,7 @@ namespace HandBook.Web.Controllers.HomeControllerFolder
         }
 
         [HttpPost]
-        [Authorize]
-        public async Task<IActionResult> IncrementOrDecrementCommentLikeCount(int itemId)
+        public async Task<IActionResult> IncrementOrDecrementCommentLikeCount(Guid itemId)
         {
             try
             {
@@ -172,7 +164,6 @@ namespace HandBook.Web.Controllers.HomeControllerFolder
             }
         }
 
-        [Authorize]
         public async Task<IActionResult> Account(string username)
         {
             if (string.IsNullOrEmpty(username))
@@ -219,7 +210,6 @@ namespace HandBook.Web.Controllers.HomeControllerFolder
             return Json(userResults);
         }
 
-        [Authorize]
         public async Task<IActionResult> AddFollowerRelationship(string username)
         {
             try
@@ -239,7 +229,6 @@ namespace HandBook.Web.Controllers.HomeControllerFolder
             }
         }
 
-        [Authorize]
         public async Task<IActionResult> RemoveFollowerRelationship(string username)
         {
             try
@@ -260,7 +249,6 @@ namespace HandBook.Web.Controllers.HomeControllerFolder
         }
 
         [HttpPost]
-        [Authorize]
         public async Task<JsonResult> LoadMorePosts(int offset)
         {
             try
@@ -275,8 +263,7 @@ namespace HandBook.Web.Controllers.HomeControllerFolder
         }
 
         [HttpPost]
-        [Authorize]
-        public JsonResult LoadMoreComments(int offset, int derivingFrom, int postId)
+        public JsonResult LoadMoreComments(int offset, Guid derivingFrom, Guid postId)
         {
             try
             {
@@ -289,13 +276,11 @@ namespace HandBook.Web.Controllers.HomeControllerFolder
             }
         }
 
-        [Authorize]
         public IActionResult Privacy()
         {
             return View("~/Views/Home/Privacy.cshtml");
         }
 
-        [Authorize]
         public async Task<IActionResult> ExplorePage()
         {
             var username = HttpContext.User?.Identity?.Name ?? "";

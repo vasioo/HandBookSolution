@@ -42,7 +42,7 @@ namespace HandBook.Web.Controllers.HomeControllerFolder
             _followerService = followerService;
         }
 
-        public async Task<IQueryable<Comment>> LoadMoreCommentsHelper(int offset, int derivingFrom, int postId)
+        public async Task<IQueryable<Comment>> LoadMoreCommentsHelper(int offset, Guid derivingFrom, Guid postId)
         {
             var allComments = _commentService.IQueryableGetAllAsync();
 
@@ -140,7 +140,6 @@ namespace HandBook.Web.Controllers.HomeControllerFolder
 
             // Add logging
             Guid randomGuid = Guid.NewGuid();
-            string randomGuidString = randomGuid.ToString();
 
             if (existingComment != null)
             {
@@ -162,7 +161,6 @@ namespace HandBook.Web.Controllers.HomeControllerFolder
                     AppUser = user,
                     CommentDeriveFromId = commentsDTO.CommentDeriveFromId,
                     CommentContent = commentsDTO.CommentContent,
-                    UniqueIdentifier = randomGuidString
                 };
                 if (item!.CreatorUserName != user!.UserName)
                 {
@@ -180,7 +178,7 @@ namespace HandBook.Web.Controllers.HomeControllerFolder
                 await _commentService.AddAsync(comment);
             }
 
-            var neededComment = _commentService.GetCommentBasedOnRandomGuid(randomGuidString);
+            var neededComment =await _commentService.GetByIdAsync(randomGuid);
 
             var commentDto = new CommentsDTO
             {
@@ -197,7 +195,7 @@ namespace HandBook.Web.Controllers.HomeControllerFolder
             return jsonResult;
         }
 
-        public async Task<int> IncrementOrDecrementLikeCountHelper(int itemId, AppUser user)
+        public async Task<int> IncrementOrDecrementLikeCountHelper(Guid itemId, AppUser user)
         {
             var item = await _postService.GetByIdAsync(itemId);
 
@@ -239,7 +237,7 @@ namespace HandBook.Web.Controllers.HomeControllerFolder
             return item.AmountOfLikes;
         }
 
-        public async Task<int> IncrementOrDecrementCommentLikeCountHelper(int itemId, AppUser user)
+        public async Task<int> IncrementOrDecrementCommentLikeCountHelper(Guid itemId, AppUser user)
         {
             var item = await _commentService.GetByIdAsync(itemId);
 
@@ -293,8 +291,8 @@ namespace HandBook.Web.Controllers.HomeControllerFolder
 
             if (user != null)
             {
-                var userLikedCards = await _likeService.GetUserLikedPosts(user.Id);
-                var userLikedComments = await _likeService.GetUserLikedPosts(user.Id);
+                var userLikedCards = _likeService.GetUserLikedPosts(user.Id);
+                var userLikedComments = _likeService.GetUserLikedPosts(user.Id);
                 if (userLikedCards != null && userLikedCards.Count() > 0)
                 {
                     useraccdto.UserLikedCards = userLikedCards.Select(x => x.PostId).ToList();
@@ -359,7 +357,8 @@ namespace HandBook.Web.Controllers.HomeControllerFolder
 
                 await _followerService.RemoveAsync(followerrelation.Id);
 
-                var existingNotif = await _notificationService.GetExistingNotification(follow.Id, 0, "started followed you");
+                var tempGuid = Guid.Empty;
+                var existingNotif = await _notificationService.GetExistingNotification(follow.Id, tempGuid, "started followed you");
                 if (existingNotif != null)
                 {
                     await _notificationService.RemoveAsync(existingNotif!.Id);
@@ -374,7 +373,7 @@ namespace HandBook.Web.Controllers.HomeControllerFolder
             return cards;
         }
 
-        public async Task<CardDTO> DesiredPostHelper(int desiredPostId, AppUser user)
+        public async Task<CardDTO> DesiredPostHelper(Guid desiredPostId, AppUser user)
         {
             var post = await _postService.GetByIdAsync(desiredPostId);
 
@@ -390,8 +389,8 @@ namespace HandBook.Web.Controllers.HomeControllerFolder
 
             if (user != null)
             {
-                var userLikedCards = await _likeService.GetUserLikedPosts(user.Id);
-                var userLikedComments = await _likeService.GetUserLikedComments(user.Id);
+                var userLikedCards =  _likeService.GetUserLikedPosts(user.Id);
+                var userLikedComments =  _likeService.GetUserLikedComments(user.Id);
 
                 if (userLikedCards != null && userLikedCards.Count() > 0)
                 {
@@ -409,42 +408,49 @@ namespace HandBook.Web.Controllers.HomeControllerFolder
             return cardDto;
         }
 
-        public async Task<List<CardDTO>> IndexHelper(AppUser user)
+        public IQueryable<CardDTO> IndexHelper(AppUser user)
         {
-            var cards = _postService.IQueryableGetAllAsync().OrderByDescending(x => x.Time).Include(p => p.Comments).Take(20);
-
-            var posts = cards.Select(post => new CardDTO
+            try
             {
-                Id = post.Id,
-                CreatorUserName = post.CreatorUserName,
-                AmountOfComments = post.Comments.Count(),
-                AmountOfLikes = post.AmountOfLikes,
-                Time = post.Time,
-                image = post.ImageLink,
-                Description = post.Description
-            }).ToList();
+                var cards = _postService.IQueryableGetAllAsync().OrderByDescending(x => x.Time).Include(p => p.Comments).Take(20);
 
-
-            if (user != null)
-            {
-                var userLikedCards = await _likeService.GetUserLikedPosts(user.Id);
-                var userLikedComments = await _likeService.GetUserLikedComments(user.Id);
-
-                if (userLikedCards != null && userLikedCards.Count() > 0)
+                var posts = cards.Select(post => new CardDTO
                 {
-                    posts[0].UserLikedCards = userLikedCards.Select(x => x.PostId).ToList();
-                }
+                    Id = post.Id,
+                    CreatorUserName = post.CreatorUserName,
+                    AmountOfComments = post.Comments.Count(),
+                    AmountOfLikes = post.AmountOfLikes,
+                    Time = post.Time,
+                    image = post.ImageLink,
+                    Description = post.Description
+                });
 
-                if (userLikedComments != null && userLikedComments.Count() > 0)
+
+                if (user != null)
                 {
-                    string commentIdsString = string.Join(",", userLikedComments.Select(x => x.CommentId));
+                    var userLikedCards = _likeService.GetUserLikedPosts(user.Id);
+                    var userLikedComments = _likeService.GetUserLikedComments(user.Id);
 
-                    posts[0].UserLikedComments = commentIdsString;
+                    if (userLikedCards != null && userLikedCards.Count() > 0)
+                    {
+                        posts.First().UserLikedCards = userLikedCards.Select(x => x.PostId);
+                    }
 
+                    if (userLikedComments != null && userLikedComments.Count() > 0)
+                    {
+                        string commentIdsString = string.Join(",", userLikedComments.Select(x => x.CommentId));
+
+                        posts.First().UserLikedComments = commentIdsString;
+
+                    }
                 }
+                return posts;
             }
-
-            return posts;
+            catch (Exception)
+            {
+                throw;
+            }
+            
         }
 
         public async Task<ExplorePageViewModel> GetExplorePageAttributes(AppUser user)

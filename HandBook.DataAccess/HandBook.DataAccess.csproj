@@ -15,4 +15,8 @@
     <ProjectReference Include="..\HandBook.Models\HandBook.Models.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Migrations\" />
+  </ItemGroup>
+
 </Project>

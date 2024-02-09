@@ -1,20 +1,16 @@
 ﻿using HandBook.Models;
-using Messenger.Models;
-using System.ComponentModel.DataAnnotations.Schema;
-using System.ComponentModel.DataAnnotations;
 using HandBook.Models.BaseModels.Interfaces;
+using Messenger.Models;
 
 namespace HandBook.Web.Models
 {
     public class Comment:IEntity
     {
-        public int Id { get; set; }
-
-        public string UniqueIdentifier{ get; set; }
+        public Guid Id { get; set; }
 
         public DateTime DateOfCreation { get; set; }
 
-        public string CommentContent { get; set; }
+        public string CommentContent { get; set; } = "";
 
         // Navigation properties
         public AppUser AppUser { get; set; } = new AppUser();
@@ -22,6 +18,6 @@ namespace HandBook.Web.Models
 
         public int AmountOfLikes { get; set; }
 
-        public int CommentDeriveFromId { get; set; }
+        public Guid CommentDeriveFromId { get; set; }
     }
 }

@@ -1,8 +1,6 @@
 ﻿using HandBook.Services.Interfaces;
 using Messenger.Models;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
-using System.Data.Entity;
 
 namespace HandBook.Web.Controllers.MessagesControllerFolder
 {

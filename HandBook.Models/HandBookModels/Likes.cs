@@ -5,7 +5,7 @@ namespace HandBook.Models
 {
     public class Likes:IEntity
     {
-        public int Id { get; set; }
+        public Guid Id { get; set; }
 
         public DateTime LikedDate { get; set; }
 
@@ -14,10 +14,10 @@ namespace HandBook.Models
         public string UserId { get; set; } = "";
 
         [System.ComponentModel.DataAnnotations.Schema.ForeignKey("Post")]
-        public int PostId { get; set; }
+        public Guid PostId { get; set; }
 
         [System.ComponentModel.DataAnnotations.Schema.ForeignKey("Comment")]
-        public int CommentId { get; set; }
+        public Guid CommentId { get; set; }
 
         [System.ComponentModel.DataAnnotations.Schema.ForeignKey("UserId")]
         public virtual AppUser AppUser { get; set; } = new AppUser();

@@ -6,7 +6,7 @@
     string alternativeLink = $"https://res.cloudinary.com/dzaicqbce/image/upload/v1700160046/azgysbpf8xpcxpfclb9i.jpg";
 
     string tempdata = TempData["UserLikedComments"] as string;
-    List<int> userLikedComments = tempdata.Split(',').Select(int.Parse).ToList();
+    List<Guid> userLikedComments = tempdata.Split(',').Select(Guid.Parse).ToList();
 }
 <div class="comment-container pt-2" data-comment-id="@comment.CommentDeriveFromId">
     <div class="profile-column">

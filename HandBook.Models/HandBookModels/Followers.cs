@@ -7,7 +7,7 @@ namespace HandBook.Web.Models
 {
     public class Followers:IEntity
     {
-        public int Id { get; set; }
+        public Guid Id { get; set; }
 
         public string FollowerUserId { get; set; } = "";
         public string FollowedUserId { get; set; } = "";

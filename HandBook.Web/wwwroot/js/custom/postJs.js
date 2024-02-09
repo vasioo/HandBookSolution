@@ -144,71 +144,71 @@
     }
 
     function toggleComments(itemId, element) {
-        const card = element.closest('.card');
-        const cardId = `card-overlay-${itemId}`;
+            const card = element.closest('.card');
+            const cardId = `card-overlay-${itemId}`;
 
-        var postId = $(card).data('post-id');
+            var postId = $(card).data('post-id');
 
-        loadMoreComments(0, postId);
+            loadMoreComments(0, postId);
 
-        const existingOverlay = document.getElementById(cardId);
+            const existingOverlay = document.getElementById(cardId);
 
-        if (existingOverlay) {
-            existingOverlay.remove();
-            const commentSection = card.querySelector('.comment-section');
-            commentSection.style.display = 'none';
-
-            card.style.zIndex = '';
-            card.style.position = '';
-
-            $('.comment-section-regulation-div').empty();
-
-            document.removeEventListener('click', handleClickOutside);
-            return;
-        }
-
-        const overlay = document.createElement('div');
-        overlay.id = cardId;
-
-        function handleClickOutside(event) {
-            if (event.target === overlay) {
-                card.style.zIndex = '';
-                card.style.position = ''; // Reset card position
-                overlay.remove();
-
+            if (existingOverlay) {
+                existingOverlay.remove();
                 const commentSection = card.querySelector('.comment-section');
                 commentSection.style.display = 'none';
 
+                card.style.zIndex = '';
+                card.style.position = '';
+
+                $('.comment-section-regulation-div').empty();
+
                 document.removeEventListener('click', handleClickOutside);
+                return;
             }
+
+            const overlay = document.createElement('div');
+            overlay.id = cardId;
+
+            function handleClickOutside(event) {
+                if (event.target === overlay) {
+                    card.style.zIndex = '';
+                    card.style.position = ''; // Reset card position
+                    overlay.remove();
+
+                    const commentSection = card.querySelector('.comment-section');
+                    commentSection.style.display = 'none';
+
+                    document.removeEventListener('click', handleClickOutside);
+                }
+            }
+
+            card.style.zIndex = 1000;
+            card.style.position = 'relative'; // Adjust card position to maintain its layout in the document flow
+
+            overlay.style.position = 'fixed';
+            overlay.style.top = '0';
+            overlay.style.left = '0';
+            overlay.style.width = '100%';
+            overlay.style.height = '100%';
+            overlay.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
+            overlay.style.backdropFilter = 'blur(5px)'; // Apply a blur effect to the backdrop
+
+            const commentSection = card.querySelector('.comment-section');
+
+            if (commentSection.style.display === 'none' || commentSection.style.display === '') {
+                commentSection.style.display = 'block';
+
+                // Scroll to the top of the card
+                card.scrollIntoView({ behavior: 'smooth', block: 'start', inline: 'nearest' });
+            } else {
+                commentSection.style.display = 'none';
+            }
+
+            document.body.appendChild(overlay);
+
+            document.addEventListener('click', handleClickOutside);
         }
-
-        card.style.zIndex = 1000;
-        card.style.position = 'relative'; // Adjust card position to maintain its layout in the document flow
-
-        overlay.style.position = 'fixed';
-        overlay.style.top = '0';
-        overlay.style.left = '0';
-        overlay.style.width = '100%';
-        overlay.style.height = '100%';
-        overlay.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
-        overlay.style.backdropFilter = 'blur(5px)'; // Apply a blur effect to the backdrop
-
-        const commentSection = card.querySelector('.comment-section');
-
-        if (commentSection.style.display === 'none' || commentSection.style.display === '') {
-            commentSection.style.display = 'block';
-
-            // Scroll to the top of the card
-            card.scrollIntoView({ behavior: 'smooth', block: 'start', inline: 'nearest' });
-        } else {
-            commentSection.style.display = 'none';
-        }
-
-        document.body.appendChild(overlay);
-
-        document.addEventListener('click', handleClickOutside);
-    }
 
     function like(button, Id) {
         var card = button.closest(".card");
@@ -300,6 +300,20 @@
 
     var offsetPost = 0;
     var loadingPost = false;
+
+    document.querySelectorAll('.commentButton').forEach(button => {
+        button.addEventListener('click', function () {
+            var itemId = this.id; 
+            toggleComments(itemId, this);
+        });
+    });
+
+    document.querySelectorAll('.likeButton').forEach(button => {
+        button.addEventListener('click', function () {
+            var itemId = this.id;
+            like(this,itemId);
+        });
+    });
 
     var offset = 0;
     var loading = false;

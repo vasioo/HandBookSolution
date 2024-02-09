@@ -1,5 +1,5 @@
 ﻿@using HandBook.Models;
-@model IEnumerable<CardDTO>
+@model IQueryable<CardDTO>
 
 @section Styles {
     <link href="@Url.Content("~/css/custom/CustomPostIndex.css")" rel="stylesheet" type="text/css" />
@@ -7,11 +7,21 @@
 @section Scripts{
     <script src="@Url.Content("~/js/custom/postJs.js")" type="text/javascript" asp-append-version="true"></script>
 }
+
+@{
+
+    string userLikedComments = (string)TempData["UserLikedComments"];
+
+    if (userLikedComments == null)
+    {
+        userLikedComments = "";
+    }
+}
 <div class="container mb-5">
     <br />
     <br />
-    <div class=" post-container" data-user-username="@TempData["UserUsername"]">
-        <div class="liked-comments-from-temp" data-comments-list="@TempData["UserLikedComments"]"></div>
+    <div class=" post-container" data-user-username=@User.Identity.Name>
+        <div class="liked-comments-from-temp" data-comments-list="@userLikedComments"></div>
         @if (Model != null)
         {
             TempData.Keep();

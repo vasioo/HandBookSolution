@@ -4,9 +4,9 @@ namespace HandBook.Services.Interfaces
 {
     public interface ILikesService : IBaseService<Likes>
     {
-        Task<IQueryable<Likes>> GetUserLikedPosts(string userId);
-        Task<IQueryable<Likes>> GetUserLikedComments(string userId);
-        Likes GetLikeEntityForUserAndPostInfo(string userId, int itemId);
-        Likes GetLikeEntityForUserAndCommentInfo(string userId, int itemId);
+        IQueryable<Likes> GetUserLikedPosts(string userId);
+        IQueryable<Likes> GetUserLikedComments(string userId);
+        Likes GetLikeEntityForUserAndPostInfo(string userId, Guid itemId);
+        Likes GetLikeEntityForUserAndCommentInfo(string userId, Guid itemId);
     }
 }

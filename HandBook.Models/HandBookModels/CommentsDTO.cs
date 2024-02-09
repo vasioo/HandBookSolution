@@ -1,15 +1,12 @@
-﻿using HandBook.Models;
-using Messenger.Models;
-
-namespace HandBook.Web.Models
+﻿namespace HandBook.Web.Models
 {
     public class CommentsDTO
     {
-        public int Id { get; set; } = 0;
-        public int PostId { get; set; } = 0;
+        public Guid Id { get; set; } = Guid.NewGuid();
+        public Guid PostId { get; set; } = Guid.NewGuid();
         public string UserUsername { get; set; } = "";
         public string CommentContent { get; set; } = "";
         public DateTime DateOfCreation { get; set; } = DateTime.Now;
-        public int CommentDeriveFromId { get; set; } = 0;
+        public Guid CommentDeriveFromId { get; set; }= Guid.NewGuid();
     }
 }

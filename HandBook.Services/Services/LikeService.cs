@@ -18,25 +18,25 @@ namespace HandBook.Services.Services
             _dataContext = context;
         }
 
-        public Task<IQueryable<Likes>> GetUserLikedComments(string userId)
+        public IQueryable<Likes> GetUserLikedComments(string userId)
         {
-            var data = _dataContext.Likes.Where(com => com.AppUser.Id == userId && com.CommentId != 0);
-            return Task.FromResult(data);
+            var data = _dataContext.Likes.Where(com => com.AppUser.Id == userId && com.CommentId != Guid.Empty);
+            return data;
         }
 
-        public Task<IQueryable<Likes>> GetUserLikedPosts(string userId)
+        public IQueryable<Likes> GetUserLikedPosts(string userId)
         {
-            var data = _dataContext.Likes.Where(like => like.UserId == userId && like.CommentId == 0);
-            return Task.FromResult(data);
+            var data = _dataContext.Likes.Where(like => like.UserId == userId && like.CommentId == Guid.Empty);
+            return data;
         }
 
-        public Likes GetLikeEntityForUserAndCommentInfo(string userId,int itemId)
+        public Likes GetLikeEntityForUserAndCommentInfo(string userId, Guid itemId)
         {
             var data = _dataContext.Likes.Where(x => x.AppUser.Id == userId&& x.CommentId == itemId).FirstOrDefault();
             return data;
         }
 
-        public Likes GetLikeEntityForUserAndPostInfo(string userId, int itemId)
+        public Likes GetLikeEntityForUserAndPostInfo(string userId, Guid itemId)
         {
             var data = _dataContext.Likes.Where(x => x.AppUser.Id == userId && x.Post.Id == itemId).FirstOrDefault();
             return data;

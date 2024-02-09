@@ -21,12 +21,11 @@ namespace HandBook.Services.Services
             _context = context;
         }
 
-        public async Task<int> AddAsync(T entity)
+        public async Task<Guid> AddAsync(T entity)
         {
             _context.Set<T>().Add(entity);
             await _context.SaveChangesAsync();
 
-            // Access the primary key value and return it
             return entity.Id;
         }
 
@@ -54,23 +53,14 @@ namespace HandBook.Services.Services
             return _context.Set<T>();
         }
 
-        public async Task<T> GetByIdAsync(int id)
+        public async Task<T> GetByIdAsync(Guid id)
         {
-            try
+            var entity = await _context.Set<T>().FindAsync(id);
+            if (entity == null)
             {
-                var entity = await _context.Set<T>().FindAsync(id);
-                if (entity == null)
-                {
-                    throw new ArgumentException("No entity was found with that id");
-                }
-                return entity;
-
+                return Activator.CreateInstance<T>();
             }
-            catch (Exception)
-            {
-
-                throw;
-            }
+            return entity;
         }
 
         public async Task<int> GetCountOfAllItems()
@@ -78,7 +68,7 @@ namespace HandBook.Services.Services
             return await _context.Set<T>().CountAsync();
         }
 
-        public async Task<int> RemoveAsync(int id)
+        public async Task<int> RemoveAsync(Guid id)
         {
             var entity = await _context.Set<T>().FindAsync(id);
             if (entity == null)

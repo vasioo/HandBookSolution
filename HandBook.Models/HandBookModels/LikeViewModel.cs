@@ -2,6 +2,6 @@
 {
     public class LikeViewModel
     {
-        public int ItemId { get; set; }
+        public Guid ItemId { get; set; }
     }
 }

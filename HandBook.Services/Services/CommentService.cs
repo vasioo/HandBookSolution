@@ -17,11 +17,5 @@ namespace HandBook.Services.Services
             _dataContext = context;
         }
 
-        public Comment GetCommentBasedOnRandomGuid(string randomGuid)
-        {
-            var neededComment = _dataContext.Comments.Where(x => x.UniqueIdentifier.Equals(randomGuid)).FirstOrDefault();
-
-            return neededComment;
-        }
     }
 }

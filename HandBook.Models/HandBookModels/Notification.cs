@@ -5,7 +5,7 @@ namespace HandBook.Models
 {
     public class Notification:IEntity
     {
-        public int Id { get; set; }
+        public Guid Id { get; set; }
 
         [System.ComponentModel.DataAnnotations.Required]
         public string CreatorUserName { get; set; } = "";
@@ -14,7 +14,7 @@ namespace HandBook.Models
         public DateTime Time { get; set; } = DateTime.Now;
 
         [System.ComponentModel.DataAnnotations.Schema.ForeignKey("Post")]
-        public int? PostId { get; set; }
+        public Guid? PostId { get; set; }
 
         public string MainText { get; set; } = "";
 

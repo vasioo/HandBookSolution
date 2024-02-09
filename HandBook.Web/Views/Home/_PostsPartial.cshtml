@@ -1,7 +1,6 @@
 ﻿@using HandBook.Models;
 @model CardDTO
 
-
 @{
     var item = Model;
     string GetTimeDisplay(DateTime postDate)
@@ -43,16 +42,8 @@
         return displayString;
     }
 
-    List<int> userLikedCards = (List<int>)TempData["UserLikedCards"];
-    
-    if (userLikedCards == null)
-    {
-        userLikedCards = new List<int>();
-    }
-    if (item.IsCurrentPostLiked)
-    {
-        userLikedCards.Add(item.Id);
-    }
+    IQueryable<Guid> userLikedCards = (IQueryable<Guid>)TempData["UserLikedCards"];
+
     TempData.Keep();
 }
 <div class="card col-lg-7 col-md-8 col-sm-10 col-12 mt-3" data-post-id="@item.Id" style="width: 100%; max-width: 600px;">
@@ -111,10 +102,18 @@
         <div class="row">
             <div class="col-12 d-flex justify-content-around">
                 <div class="col-1 pt-2 text-center pb-3">
-                    <button class="likeButton" onclick="like(this,@item.Id)" data-count="@item.AmountOfLikes">
-                        @if (userLikedCards.Contains(item.Id))
+                    <button class="likeButton" data-count="@item.AmountOfLikes" id="@item.Id">
+                        @if (userLikedCards != null)
                         {
-                            <i class="fa-solid fa-heart liked fa-xl" style="color: #ff0000;"></i>
+                            @if (userLikedCards.Contains(item.Id))
+                            {
+                                <i class="fa-solid fa-heart liked fa-xl" style="color: #ff0000;"></i>
+                            }
+                            else
+                            {
+
+                                <i class="fa-regular fa-heart fa-xl" style="color: #000;"></i>
+                            }
                         }
                         else
                         {
@@ -125,7 +124,7 @@
                     <br>
                 </div>
                 <div class="col-1 pt-2 text-center pb-3">
-                    <button class="commentButton" onclick="toggleComments(@item.Id, this)">
+                    <button class="commentButton" id="@item.Id">
                         <i class="fa-regular fa-comment fa-xl"></i>
                     </button>
                     <br>
@@ -150,14 +149,14 @@
                 </div>
             </div>
             <div class="comment-section-regulation-div">
-                @if (TempData["UserLikedComments"] == null)
+                @if (TempData["UserLikedComments"] == "")
                 {
                     TempData["UserLikedComments"] = new List<int>();
                 }
 
             </div>
             <div class="">
-                <a class="load-more-comments">Load More Comments</a>
+                <a class="load-more-comments btn">Load More Comments</a>
             </div>
         </div>
     </div>

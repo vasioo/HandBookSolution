@@ -28,9 +28,9 @@ namespace HandBook.Services.Services
             return Task.FromResult(data);
         }
 
-        public Task<Notification> GetExistingNotification(string userId, int postId, string reason)
+        public Task<Notification> GetExistingNotification(string userId, Guid postId, string reason)
         {
-            if (postId>0)
+            if (postId!=Guid.Empty)
             {
                 var tempdata = _dataContext.Notifications.Where(x => x.UserId == userId && x.MainText == reason && x.Post.Id == postId).FirstOrDefault();
 

@@ -5,6 +5,6 @@ namespace HandBook.Models.BaseModels.Interfaces
     public interface IEntity
     {
         [Key]
-        int Id { get; set; }
+        Guid Id { get; set; }
     }
 }
