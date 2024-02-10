@@ -1,8 +1,10 @@
 ﻿@using HandBook.Models;
 @model CardDTO
 
-<div>
-    <a href="~/Home/DesiredPost?postId=@Model.Id">
+
+<div class="explore-page-item">
+    <a class="explore-link btn" data-explore-id="@Model.Id">
         <img src="@Model.image" style="width:100%; max-width:300px; height:auto;" />
     </a>
 </div>
+

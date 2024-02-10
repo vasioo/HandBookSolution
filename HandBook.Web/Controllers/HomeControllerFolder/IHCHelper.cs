@@ -20,5 +20,6 @@ namespace HandBook.Web.Controllers.HomeControllerFolder
         Task<CardDTO> DesiredPostHelper(Guid desiredPostId, AppUser user);
         IQueryable<CardDTO> IndexHelper(AppUser user);
         Task<ExplorePageViewModel> GetExplorePageAttributes(AppUser user);
+        IQueryable<CardDTO> GetSpecificExplorePageItemsByProvidedItemHelper(Guid itemId);
     }
 }

@@ -17,10 +17,10 @@
         userLikedComments = "";
     }
 }
-<div class="container mb-5">
+<div class="mb-5">
     <br />
     <br />
-    <div class=" post-container" data-user-username=@User.Identity.Name>
+    <div class="post-container" data-user-username=@User.Identity.Name>
         <div class="liked-comments-from-temp" data-comments-list="@userLikedComments"></div>
         @if (Model != null)
         {

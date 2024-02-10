@@ -1,12 +1,16 @@
 ﻿using HandBook.Models;
+using HandBook.Models.BaseModels.ViewRender;
 using HandBook.Web.Models;
 using Messenger.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
+using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Newtonsoft.Json;
 using ServiceStack;
 using System.Diagnostics;
+using System.Text;
 
 namespace HandBook.Web.Controllers.HomeControllerFolder
 {
@@ -15,16 +19,18 @@ namespace HandBook.Web.Controllers.HomeControllerFolder
     {
         private readonly UserManager<AppUser> _userManager;
         public IHCHelper _helper { get; set; }
+        public ViewRenderer _viewRenderer { get; set; }
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly ILogger<HomeController> _logger;
 
         public HomeController(ILogger<HomeController> logger, UserManager<AppUser> userManager,
-            IHttpContextAccessor httpContextAccessor, IHCHelper helper)
+            IHttpContextAccessor httpContextAccessor, IHCHelper helper, ViewRenderer  viewRenderer)
         {
             _logger = logger;
             _helper = helper;
             _userManager = userManager;
             _httpContextAccessor = httpContextAccessor;
+            _viewRenderer = viewRenderer;
         }
         public async Task<IActionResult> Index()
         {
@@ -289,6 +295,30 @@ namespace HandBook.Web.Controllers.HomeControllerFolder
             var viewModel =await _helper.GetExplorePageAttributes(user!);
 
             return View("~/Views/Home/ExplorePage.cshtml",viewModel);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetSpecificExplorePageItems(Guid itemId)
+        {
+            try
+            {
+                var itemsQuery = _helper.GetSpecificExplorePageItemsByProvidedItemHelper(itemId);
+
+                StringBuilder responseBuilder = new StringBuilder();
+
+                foreach (var item in itemsQuery)
+                {
+                    var htmlContent = await _viewRenderer.RenderViewToStringAsync("_PostsPartial.cshtml", item, new[] { "Views/Home" }, HttpContext);
+                    responseBuilder.AppendLine(htmlContent);
+                }
+
+                return Content(responseBuilder.ToString());
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error occurred: {ex.Message}");
+                return BadRequest("Error occurred while getting the posts.");
+            }
         }
     }
 }

@@ -184,7 +184,7 @@
             }
 
             card.style.zIndex = 1000;
-            card.style.position = 'relative'; // Adjust card position to maintain its layout in the document flow
+            card.style.position = 'relative'; 
 
             overlay.style.position = 'fixed';
             overlay.style.top = '0';
@@ -192,14 +192,13 @@
             overlay.style.width = '100%';
             overlay.style.height = '100%';
             overlay.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
-            overlay.style.backdropFilter = 'blur(5px)'; // Apply a blur effect to the backdrop
+            overlay.style.backdropFilter = 'blur(5px)'; 
 
             const commentSection = card.querySelector('.comment-section');
 
             if (commentSection.style.display === 'none' || commentSection.style.display === '') {
                 commentSection.style.display = 'block';
 
-                // Scroll to the top of the card
                 card.scrollIntoView({ behavior: 'smooth', block: 'start', inline: 'nearest' });
             } else {
                 commentSection.style.display = 'none';
@@ -657,7 +656,7 @@
     }
 
     $('.profile-image-class').on('error', function () {
-        $(this).off('error').attr('src', '/handbook/images/anonymous.png');
+        $(this).off('error').attr('src', '/handbook/images/anonymousUser.png');
     }).on('load', function () {
     });
 

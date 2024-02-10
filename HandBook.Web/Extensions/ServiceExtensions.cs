@@ -1,5 +1,6 @@
 ﻿using HandBook.DataAccess;
 using HandBook.Models;
+using HandBook.Models.BaseModels.ViewRender;
 using HandBook.Services.Interfaces;
 using HandBook.Services.Services;
 using HandBook.Web.Controllers.HomeControllerFolder;
@@ -34,6 +35,8 @@ namespace HandBook.Web.Extensions
 
             service.AddScoped<IHCHelper, HCHelper>();
             service.AddScoped<IMCHelper, MCHelper>();
+
+            service.AddScoped<ViewRenderer>();
 
         }
     }

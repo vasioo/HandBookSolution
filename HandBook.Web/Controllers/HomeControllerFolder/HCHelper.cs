@@ -6,9 +6,13 @@ using HandBook.Services.Interfaces;
 using HandBook.Web.Models;
 using Messenger.Models;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Newtonsoft.Json;
+using ServiceStack;
 using System.Data.Entity;
 using System.Text;
+using System.Web.Mvc;
 
 namespace HandBook.Web.Controllers.HomeControllerFolder
 {
@@ -460,6 +464,24 @@ namespace HandBook.Web.Controllers.HomeControllerFolder
             viewModel.Posts = _postService.GetPostsBasedOnUserFavouritism(user);
 
             return viewModel;
+        }
+
+        public IQueryable<CardDTO> GetSpecificExplorePageItemsByProvidedItemHelper(Guid itemId)
+        {
+            var items = _postService.IQueryableGetAllAsync();
+
+            var posts = items.Select(post => new CardDTO
+            {
+                Id = post.Id,
+                CreatorUserName = post.CreatorUserName,
+                AmountOfComments = post.Comments.Count(),
+                AmountOfLikes = post.AmountOfLikes,
+                Time = post.Time,
+                image = post.ImageLink,
+                Description = post.Description
+            });
+
+            return posts;
         }
     }
 }

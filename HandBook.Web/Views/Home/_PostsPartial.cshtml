@@ -46,117 +46,119 @@
 
     TempData.Keep();
 }
-<div class="card col-lg-7 col-md-8 col-sm-10 col-12 mt-3" data-post-id="@item.Id" style="width: 100%; max-width: 600px;">
-    <div class="card-header border-bottom mb-2">
-        <div class="row justify-content-between w-100">
-            <div class="profile-column-post d-flex align-items-center">
-                @{
-                    var link = $"https://res.cloudinary.com/dzaicqbce/image/upload/v1695818842/profile-image-for-{item.CreatorUserName}.png";
-                }
-                <a class="" asp-controller="Home" asp-action="Account" asp-route-username="@item.CreatorUserName">
-                    <img src="@link" class="profile-image-class" alt="Image not found" style="border-radius:30px; width:60px;height:60px; margin-right:10px;" />
-                </a>
-                <div>
-                    <a class="card-title h5 cr-us-name" asp-controller="Home" asp-action="Account" asp-route-username="@item.CreatorUserName">
-                        &#64;@item.CreatorUserName
+<div class="row justify-content-center">
+    <div class="card col-lg-7 col-md-8 col-sm-10 col-12 mt-3" data-post-id="@item.Id" style="width: 100%; max-width: 600px;">
+        <div class="card-header border-bottom mb-2">
+            <div class="row justify-content-between w-100">
+                <div class="profile-column-post d-flex align-items-center">
+                    @{
+                        var link = $"https://res.cloudinary.com/dzaicqbce/image/upload/v1695818842/profile-image-for-{item.CreatorUserName}.png";
+                    }
+                    <a class="" asp-controller="Home" asp-action="Account" asp-route-username="@item.CreatorUserName">
+                        <img src="@link" class="profile-image-class" alt="Image not found" style="border-radius:30px; width:60px;height:60px; margin-right:10px;" />
                     </a>
-                    <div class="custom-date">@GetTimeDisplay(item.Time)</div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    @{
-        <div class="d-flex align-items-center justify-content-center" style="height: 100%;">
-            <img src="@item.image" style="border-radius: 6px; max-height: 100%; max-width: 100%;" alt="Image" class="fit-image">
-        </div>
-        var commentsCount = item.AmountOfComments;
-    }
-    <div class="card-body p-0 m-0">
-        <div class="row justify-content-center p-0 m-0">
-            <div class="col-10 pt-3">
-                <div class="d-flex justify-content-between">
                     <div>
-                        <span class="likeCount" data-item-id="@item.Id" style="display: @(item.AmountOfLikes > 0 ? "block" : "none");">
-                            @item.AmountOfLikes <i class="fa-solid fa-heart liked fa-sm" style="color: #ff0000;"></i>
-                        </span>
-                    </div>
-                    <div>
-                        @if (commentsCount == 1)
-                        {
-                            <span class="commentsCount" data-item-id="@item.Id">@commentsCount comment</span>
-                        }
-                        else
-                        {
-                            <span class="commentsCount" data-item-id="@item.Id">@commentsCount comments</span>
-                        }
+                        <a class="card-title h5 cr-us-name" asp-controller="Home" asp-action="Account" asp-route-username="@item.CreatorUserName">
+                            &#64;@item.CreatorUserName
+                        </a>
+                        <div class="custom-date">@GetTimeDisplay(item.Time)</div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="d-flex justify-content-center">
-            <hr class="col-11">
-        </div>
-
-        <div class="row">
-            <div class="col-12 d-flex justify-content-around">
-                <div class="col-1 pt-2 text-center pb-3">
-                    <button class="likeButton" data-count="@item.AmountOfLikes" id="@item.Id">
-                        @if (userLikedCards != null)
-                        {
-                            @if (userLikedCards.Contains(item.Id))
+        @{
+            <div class="d-flex align-items-center justify-content-center" style="height: 100%;">
+                <img src="@item.image" style="border-radius: 6px; max-height: 100%; max-width: 100%;" alt="Image" class="fit-image">
+            </div>
+            var commentsCount = item.AmountOfComments;
+        }
+        <div class="card-body p-0 m-0">
+            <div class="row justify-content-center p-0 m-0">
+                <div class="col-10 pt-3">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <span class="likeCount" data-item-id="@item.Id" style="display: @(item.AmountOfLikes > 0 ? "block" : "none");">
+                                @item.AmountOfLikes <i class="fa-solid fa-heart liked fa-sm" style="color: #ff0000;"></i>
+                            </span>
+                        </div>
+                        <div>
+                            @if (commentsCount == 1)
                             {
-                                <i class="fa-solid fa-heart liked fa-xl" style="color: #ff0000;"></i>
+                                <span class="commentsCount" data-item-id="@item.Id">@commentsCount comment</span>
+                            }
+                            else
+                            {
+                                <span class="commentsCount" data-item-id="@item.Id">@commentsCount comments</span>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="d-flex justify-content-center">
+                <hr class="col-11">
+            </div>
+
+            <div class="row">
+                <div class="col-12 d-flex justify-content-around">
+                    <div class="col-1 pt-2 text-center pb-3">
+                        <button class="likeButton" data-count="@item.AmountOfLikes" id="@item.Id">
+                            @if (userLikedCards != null)
+                            {
+                                @if (userLikedCards.Contains(item.Id))
+                                {
+                                    <i class="fa-solid fa-heart liked fa-xl" style="color: #ff0000;"></i>
+                                }
+                                else
+                                {
+
+                                    <i class="fa-regular fa-heart fa-xl" style="color: #000;"></i>
+                                }
                             }
                             else
                             {
 
                                 <i class="fa-regular fa-heart fa-xl" style="color: #000;"></i>
                             }
-                        }
-                        else
-                        {
-
-                            <i class="fa-regular fa-heart fa-xl" style="color: #000;"></i>
-                        }
-                    </button>
-                    <br>
-                </div>
-                <div class="col-1 pt-2 text-center pb-3">
-                    <button class="commentButton" id="@item.Id">
-                        <i class="fa-regular fa-comment fa-xl"></i>
-                    </button>
-                    <br>
-                </div>
-            </div>
-        </div>
-        <div class="row">
-            @Model.Description
-        </div>
-        <div class="row comment-section" style="display:none" data-post-id="@item.Id">
-            <div class="col">
-                <div class="col">
-                    <div class="input-group">
-                        <div class="border col-10 pl-1 pr-1 m-0">
-                            <textarea class="comments-text w-100" style="max-height:400px" placeholder="Write a comment..."></textarea>
-                        </div>
-
-                        <div class="input-group-append align-self-end col-2">
-                            <button class="btn btn-primary submit-btn" type="button"> <i class="fas fa-right-long"></i></button>
-                        </div>
+                        </button>
+                        <br>
+                    </div>
+                    <div class="col-1 pt-2 text-center pb-3">
+                        <button class="commentButton" id="@item.Id">
+                            <i class="fa-regular fa-comment fa-xl"></i>
+                        </button>
+                        <br>
                     </div>
                 </div>
             </div>
-            <div class="comment-section-regulation-div">
-                @if (TempData["UserLikedComments"] == "")
-                {
-                    TempData["UserLikedComments"] = new List<int>();
-                }
-
+            <div class="row">
+                @Model.Description
             </div>
-            <div class="">
-                <a class="load-more-comments btn">Load More Comments</a>
+            <div class="row comment-section" style="display:none" data-post-id="@item.Id">
+                <div class="col">
+                    <div class="col">
+                        <div class="input-group">
+                            <div class="border col-10 pl-1 pr-1 m-0">
+                                <textarea class="comments-text w-100" style="max-height:400px" placeholder="Write a comment..."></textarea>
+                            </div>
+
+                            <div class="input-group-append align-self-end col-2">
+                                <button class="btn btn-primary submit-btn" type="button"> <i class="fas fa-right-long"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="comment-section-regulation-div">
+                    @if (TempData["UserLikedComments"] == "")
+                    {
+                        TempData["UserLikedComments"] = new List<int>();
+                    }
+
+                </div>
+                <div class="">
+                    <a class="load-more-comments btn">Load More Comments</a>
+                </div>
             </div>
         </div>
     </div>
