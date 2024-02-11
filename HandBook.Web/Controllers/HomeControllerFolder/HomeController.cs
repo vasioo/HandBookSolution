@@ -5,8 +5,6 @@ using Messenger.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.ModelBinding;
-using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Newtonsoft.Json;
 using ServiceStack;
 using System.Diagnostics;
@@ -17,6 +15,7 @@ namespace HandBook.Web.Controllers.HomeControllerFolder
     [Authorize]
     public class HomeController : Controller
     {
+        #region FieldsAndConstructor
         private readonly UserManager<AppUser> _userManager;
         public IHCHelper _helper { get; set; }
         public ViewRenderer _viewRenderer { get; set; }
@@ -32,14 +31,18 @@ namespace HandBook.Web.Controllers.HomeControllerFolder
             _httpContextAccessor = httpContextAccessor;
             _viewRenderer = viewRenderer;
         }
-        public async Task<IActionResult> Index()
+#endregion
+
+        #region Feed
+
+        public async Task<IActionResult> Feed()
         {
             try
             {
                 var username = HttpContext.User?.Identity?.Name ?? "";
                 var user = await _userManager.FindByNameAsync(username);
                 ViewBag.UserUsername = username;
-                var posts = _helper.IndexHelper(user!);
+                var posts = _helper.FeedHelper(user!);
 
                 if (posts.Count() > 0)
                 {
@@ -47,7 +50,7 @@ namespace HandBook.Web.Controllers.HomeControllerFolder
                     TempData["UserLikedComments"] = posts.First().UserLikedComments;
                 }
 
-                return View("~/Views/Home/Index.cshtml", posts);
+                return View("~/Views/Home/Feed.cshtml", posts);
             }
             catch (Exception)
             {
@@ -56,6 +59,22 @@ namespace HandBook.Web.Controllers.HomeControllerFolder
             }
         }
 
+        #endregion
+
+        #region Notifications
+        public async Task<IActionResult> Notifications()
+        {
+            var username = HttpContext.User?.Identity?.Name ?? "";
+            var user = await _userManager.FindByNameAsync(username);
+
+            var notifications = await _helper.NotificationsHelper(user!);
+            ViewBag.CurrentUserUsername = user!.UserName;
+
+            return View("~/Views/Home/Notifications.cshtml", notifications);
+        }
+        #endregion
+
+        #region DesiredPost
         public async Task<IActionResult> DesiredPost(Guid postId)
         {
             try
@@ -65,7 +84,7 @@ namespace HandBook.Web.Controllers.HomeControllerFolder
 
                 var item = await _helper.DesiredPostHelper(postId, user!);
 
-                if (item!=null)
+                if (item != null)
                 {
                     TempData["UserLikedComments"] = item.UserLikedComments;
                 }
@@ -77,25 +96,12 @@ namespace HandBook.Web.Controllers.HomeControllerFolder
                 return View();
                 throw;
             }
-            
+
         }
 
-        public async Task<IActionResult> Notifications()
-        {
-            var username = HttpContext.User?.Identity?.Name ?? "";
-            var user = await _userManager.FindByNameAsync(username);
+        #endregion
 
-            var notifications = await _helper.NotificationsHelper(user!);
-            ViewBag.CurrentUserUsername = user!.UserName;
-
-            return View("~/Views/Home/Notifications.cshtml", notifications);
-        }
-
-        public IActionResult AddAPost()
-        {
-            return View("~/Views/Home/AddAPost.cshtml");
-        }
-
+        #region AddAPost
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> AddAPost(Post tfm, IFormFile ImageUrl, Notification ntf)
@@ -114,26 +120,52 @@ namespace HandBook.Web.Controllers.HomeControllerFolder
             }
         }
 
-        [HttpPost]
-        [Authorize]
-        public async Task<JsonResult> AddOrRemoveAComment(CommentsDTO commentsDTO)
+        public IActionResult AddAPost()
         {
-            try
-            {
-                var username = HttpContext.User?.Identity?.Name ?? "";
-                var user = await _userManager.FindByNameAsync(username);
-                var jsonResult = await _helper.AddOrRemoveACommentHelper(commentsDTO, user);
-                return Json(jsonResult);
-            }
-            catch (Exception ex)
-            {
-                // Add logging
-                Console.WriteLine($"Error occurred: {ex.Message}");
-
-                return Json("Error occurred while processing the like/unlike action.");
-            }
+            return View("~/Views/Home/AddAPost.cshtml");
         }
+        #endregion
 
+        #region HelperMethods
+
+            #region Comments
+
+            [HttpPost]
+                [Authorize]
+                public async Task<JsonResult> AddOrRemoveAComment(CommentsDTO commentsDTO)
+                {
+                    try
+                    {
+                        var username = HttpContext.User?.Identity?.Name ?? "";
+                        var user = await _userManager.FindByNameAsync(username);
+                        var jsonResult = await _helper.AddOrRemoveACommentHelper(commentsDTO, user);
+                        return Json(jsonResult);
+                    }
+                    catch (Exception ex)
+                    {
+                        // Add logging
+                        Console.WriteLine($"Error occurred: {ex.Message}");
+
+                        return Json("Error occurred while processing the like/unlike action.");
+                    }
+                }
+
+                [HttpPost]
+                public JsonResult LoadMoreComments(int offset, Guid derivingFrom, Guid postId)
+                {
+                    try
+                    {
+                        return Json(JsonConvert.SerializeObject(_helper.LoadMoreCommentsHelper(offset, derivingFrom, postId)));
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"Error occurred: {ex.Message}");
+                        return Json("Error occurred while adding newer posts.");
+                    }
+                }
+                #endregion
+
+            #region Likes
         [HttpPost]
         public async Task<IActionResult> IncrementOrDecrementLikeCount(Guid itemId)
         {
@@ -170,6 +202,78 @@ namespace HandBook.Web.Controllers.HomeControllerFolder
             }
         }
 
+        #endregion
+
+            #region Followers
+            public async Task<IActionResult> AddFollowerRelationship(string username)
+            {
+                try
+                {
+                    if (username == null || username == "")
+                    {
+                        return View("~/Views/Home/Index.cshtml");
+                    }
+                    var usernamefollower = HttpContext.User?.Identity?.Name ?? "";
+
+                    await _helper.AddFollowerRelationshipHelper(username, usernamefollower);
+                    return Json("Success");
+                }
+                catch (Exception)
+                {
+                    return Json("Error occurred while processing the relation.");
+                }
+            }
+
+            public async Task<IActionResult> RemoveFollowerRelationship(string username)
+            {
+                try
+                {
+                    if (username == null || username == "")
+                    {
+                        return View("~/Views/Home/Index.cshtml");
+                    }
+                    var usernamefollower = HttpContext.User?.Identity?.Name ?? "";
+
+                    await _helper.RemoveFollowerRelationshipHelper(username, usernamefollower);
+                    return Json("Success");
+                }
+                catch (Exception)
+                {
+                    return Json("Error occurred while processing the relation.");
+                }
+            }
+
+        #endregion
+
+            #region Posts
+            [HttpPost]
+            public async Task<JsonResult> LoadMorePosts(int offset)
+            {
+                try
+                {
+                    return Json(JsonConvert.SerializeObject(await _helper.LoadMorePostsHelper(offset)));
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Error occurred: {ex.Message}");
+                    return Json("Error occurred while adding newer posts.");
+                }
+            }
+
+            #endregion
+
+            #region Others
+            [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
+            public IActionResult Error()
+            {
+                return View(new Models.ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+            }
+        #endregion
+
+        #endregion
+
+        #region Account
+
         public async Task<IActionResult> Account(string username)
         {
             if (string.IsNullOrEmpty(username))
@@ -189,112 +293,18 @@ namespace HandBook.Web.Controllers.HomeControllerFolder
             return View("~/Views/Home/Account.cshtml", useraccdto);
         }
 
-        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-        public IActionResult Error()
-        {
-            return View(new Models.ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
-        }
+        #endregion
 
-        public IActionResult SearchUsers()
-        {
-            return View("~/Views/Home/SearchUsers.cshtml");
-        }
-
-        public IActionResult SearchUsersFilter(string searchString)
-        {
-            ViewData["CurrentFilter"] = searchString;
-
-            var users = _userManager.Users;
-
-            if (!string.IsNullOrEmpty(searchString))
-            {
-                users = users.Where(usr => usr.UserName.Contains(searchString));
-            }
-
-            var userResults = users.Select(u => new { u.UserName }).ToList(); // Adjust the properties you want to return
-
-            return Json(userResults);
-        }
-
-        public async Task<IActionResult> AddFollowerRelationship(string username)
-        {
-            try
-            {
-                if (username == null || username == "")
-                {
-                    return View("~/Views/Home/Index.cshtml");
-                }
-                var usernamefollower = HttpContext.User?.Identity?.Name ?? "";
-
-                await _helper.AddFollowerRelationshipHelper(username, usernamefollower);
-                return Json("Success");
-            }
-            catch (Exception)
-            {
-                return Json("Error occurred while processing the relation.");
-            }
-        }
-
-        public async Task<IActionResult> RemoveFollowerRelationship(string username)
-        {
-            try
-            {
-                if (username == null || username == "")
-                {
-                    return View("~/Views/Home/Index.cshtml");
-                }
-                var usernamefollower = HttpContext.User?.Identity?.Name ?? "";
-
-                await _helper.RemoveFollowerRelationshipHelper(username, usernamefollower);
-                return Json("Success");
-            }
-            catch (Exception)
-            {
-                return Json("Error occurred while processing the relation.");
-            }
-        }
-
-        [HttpPost]
-        public async Task<JsonResult> LoadMorePosts(int offset)
-        {
-            try
-            {
-                return Json(JsonConvert.SerializeObject(await _helper.LoadMorePostsHelper(offset)));
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error occurred: {ex.Message}");
-                return Json("Error occurred while adding newer posts.");
-            }
-        }
-
-        [HttpPost]
-        public JsonResult LoadMoreComments(int offset, Guid derivingFrom, Guid postId)
-        {
-            try
-            {
-                return Json(JsonConvert.SerializeObject(_helper.LoadMoreCommentsHelper(offset, derivingFrom, postId)));
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error occurred: {ex.Message}");
-                return Json("Error occurred while adding newer posts.");
-            }
-        }
-
-        public IActionResult Privacy()
-        {
-            return View("~/Views/Home/Privacy.cshtml");
-        }
+        #region ExplorePage
 
         public async Task<IActionResult> ExplorePage()
         {
             var username = HttpContext.User?.Identity?.Name ?? "";
             var user = await _userManager.FindByNameAsync(username);
 
-            var viewModel =await _helper.GetExplorePageAttributes(user!);
+            var viewModel = await _helper.GetExplorePageAttributes(user!);
 
-            return View("~/Views/Home/ExplorePage.cshtml",viewModel);
+            return View("~/Views/Home/ExplorePage.cshtml", viewModel);
         }
 
         [HttpGet]
@@ -320,5 +330,26 @@ namespace HandBook.Web.Controllers.HomeControllerFolder
                 return BadRequest("Error occurred while getting the posts.");
             }
         }
+
+            #region SearchUsers
+            public IActionResult SearchUsersFilter(string searchString)
+            {
+                ViewData["CurrentFilter"] = searchString;
+
+                var users = _userManager.Users;
+
+                if (!string.IsNullOrEmpty(searchString))
+                {
+                    users = users.Where(usr => usr.UserName.Contains(searchString));
+                }
+
+                var userResults = users.Select(u => new { u.UserName }).ToList(); // Adjust the properties you want to return
+
+                return Json(userResults);
+            }
+
+            #endregion
+
+        #endregion
     }
 }

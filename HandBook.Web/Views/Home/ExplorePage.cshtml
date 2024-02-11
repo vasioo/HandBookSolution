@@ -30,17 +30,30 @@
         margin: 20px auto; 
         padding: 20px;
     }
+
+
+        #clearSearch:hover,
+        #clearSearch:active,
+        #clearSearch:focus {
+            text-decoration: none; 
+        }
+
 </style>
 
 <div class="container pt-5">
     <form id="searchForm" method="get">
         <div class="form-actions no-color">
-            <div class="row justify-content-center">
-                <input class="col-8 h5 pt-1 pb-1" type="text" placeholder="Search" name="SearchString" autocomplete="off" id="searchInput" value="@ViewData["CurrentFilter"]" />
+            <div class="row justify-content-center position-relative">
+                <input class="col-8 h5 pt-1 pb-1 m-0" type="text" placeholder="Search" name="SearchString" autocomplete="off" id="searchInput" value="@ViewData["CurrentFilter"]" />
+                <div id="clearSearchMainClass" class="position-absolute pt-1  col-8 text-end">
+                    <a href="#" id="clearSearch" class="btn-link col ">Cancel</a>
+                </div>
+                
             </div>
         </div>
     </form>
-    <div id="explore-page">
+
+    <div id="explore-page" class="pt-2">
         <div class="row justify-content-center">
             <div class="col-8 p-0 m-0">
                 @foreach (var item in Model.Posts)
@@ -103,6 +116,7 @@
                             var imgTag = '<img src="' + usernameLink + '" alt="Image not found" onerror="this.onerror=null;this.src=\'' + alternativeLink + '\';" style="border-radius:30px;height:60px; width:60px; margin-right:10px;" />';
 
                             var userDiv = document.createElement('div');
+                            userDiv.classList.add('container');
                             userDiv.innerHTML =
                                 '<div class="row justify-content-center pt-1">' +
                                 '   <div class="col-8 border">' +
@@ -138,7 +152,11 @@
             xhr.send();
         }
 
-
+        document.getElementById('clearSearch').addEventListener('click', function (event) {
+            event.preventDefault();
+            document.getElementById('searchInput').value = '';
+            document.getElementById('searchResults').innerHtml = '';
+        });
 
     </script>
 }

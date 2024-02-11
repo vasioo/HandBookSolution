@@ -6,6 +6,7 @@ namespace HandBook.Web.Controllers.MessagesControllerFolder
 {
     public class MCHelper : IMCHelper
     {
+        #region FieldsAndController
         public readonly UserManager<AppUser> _userManager;
 
         private readonly IMessageService _messageService;
@@ -15,10 +16,20 @@ namespace HandBook.Web.Controllers.MessagesControllerFolder
             _userManager = userManager;
             _messageService = messageService;
         }
+        #endregion
+
+        #region Chat
+        public async Task CreateMessage(Messages message, AppUser user)
+        {
+            message.Username = user!.UserName!;
+            message.SenderMessageId = user!.Id!;
+            await _messageService.AddAsync(message);
+        }
         public List<string> GetUsersSentMessagesTo(string userId)
         {
             return _messageService.UsersThatAreInMessagesList(userId);
         }
+
         public List<Messages> GetUnreadMessagesForUser(string userId, string targetUserId)
         {
             var allMessages = _messageService.IQueryableGetAllAsync();
@@ -28,23 +39,17 @@ namespace HandBook.Web.Controllers.MessagesControllerFolder
                 .ToList();
             return unreadMessages;
         }
-        public async Task CreateMessage(Messages message, AppUser user)
-        {
-            message.Username = user!.UserName!;
-            message.SenderMessageId = user!.Id!;
-            await _messageService.AddAsync(message);
-        }
+
 
         public IOrderedQueryable<Messages> GetCurrentChatMessages(string currentUserId, string otherUserId)
         {
             var messages = _messageService.IQueryableGetAllAsync()
-                .Where(m => (m.SenderMessageId == currentUserId && m.MessageReceiverId == otherUserId) 
+                .Where(m => (m.SenderMessageId == currentUserId && m.MessageReceiverId == otherUserId)
                 || (m.SenderMessageId == otherUserId && m.MessageReceiverId == currentUserId))
                 .OrderBy(m => m.TimeSent);
 
             return messages;
         }
-
 
         public async Task<List<UserMassageDTO>> GetUsersWithMessages(string senderId)
         {
@@ -98,5 +103,7 @@ namespace HandBook.Web.Controllers.MessagesControllerFolder
             }
             return userMsgDTOList;
         }
+        #endregion
+
     }
 }

@@ -92,10 +92,10 @@ namespace HandBook.Web
 
             app.MapControllerRoute(
                 name: "default",
-                pattern: "{controller=Home}/{action=Index}/{id?}");
+                pattern: "{controller=Home}/{action=Feed}/{id?}");
             app.MapControllerRoute(
                 name: "default",
-                pattern: "{controller=Messages}/{action=Index}/{id?}");
+                pattern: "{controller=Messages}/{action=MainPage}/{id?}");
             app.MapRazorPages();
             app.MapHub<ChatHub>("/chatHub");
             app.Run();

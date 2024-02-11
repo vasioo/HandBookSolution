@@ -21,7 +21,7 @@
         <nav class="collapse d-lg-block sidebar collapse bg-white">
             <div class="position-sticky" id="navbarAttributes">
                 <div class="list-group list-group-flush mx-3 mt-4">
-                    <a class="list-group-item list-group-item-action py-2 ripple" asp-area="" asp-controller="Home" asp-action="Index">
+                    <a class="list-group-item list-group-item-action py-2 ripple" asp-area="" asp-controller="Home" asp-action="Feed">
                         <span class="icon"><i class="fas fa-home"></i></span>
                         <span class="label">Home</span>
                     </a>
@@ -47,11 +47,12 @@
                     }
                     else
                     {
-                        <a class="list-group-item list-group-item-action py-2 ripple" asp-area="Identity" asp-page="/Account/Manage/Index">
+                        var username = User.Identity.Name;
+                        <a class="list-group-item list-group-item-action py-2 ripple" href="/Home/Account?username=@username">
                             <span class="icon">
                                 <i class="fa-solid fa-user-gear"></i>
                             </span>
-                            <span class="label">Settings</span>
+                            <span class="label">Account</span>
                         </a>
                     }
                 </div>
@@ -67,7 +68,7 @@
         </main>
     </div>
 
-    <footer class="border-top footer text-muted">
+    <footer class="border-top footer text-muted position-relative">
         <div class="container text-center">
             &copy; 2023 - HandBook.Web - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
         </div>

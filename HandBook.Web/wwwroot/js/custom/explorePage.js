@@ -8,7 +8,17 @@
             var container = $('<div class="container-explorer"></div>').append(response);
             overlay.append(container);
             $('body').append(overlay);
+
+            $(document).on('click', function (event) {
+                if (!$(event.target).closest('.card').length) {
+                    overlay.remove();
+                    $(document).off('click');
+                }
+            });
         });
+        return false;
 
     });
+
+
 });

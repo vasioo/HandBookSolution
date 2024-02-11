@@ -18,7 +18,7 @@ namespace HandBook.Web.Controllers.HomeControllerFolder
         Task RemoveFollowerRelationshipHelper(string username, string usernamefollower);
         Task<IOrderedQueryable<Notification>> NotificationsHelper(AppUser user);
         Task<CardDTO> DesiredPostHelper(Guid desiredPostId, AppUser user);
-        IQueryable<CardDTO> IndexHelper(AppUser user);
+        IQueryable<CardDTO> FeedHelper(AppUser user);
         Task<ExplorePageViewModel> GetExplorePageAttributes(AppUser user);
         IQueryable<CardDTO> GetSpecificExplorePageItemsByProvidedItemHelper(Guid itemId);
     }

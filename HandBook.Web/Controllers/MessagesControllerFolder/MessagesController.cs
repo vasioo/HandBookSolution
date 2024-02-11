@@ -9,6 +9,7 @@ namespace HandBook.Web.Controllers.MessagesControllerFolder
     [Authorize]
     public class MessagesController : Controller
     {
+        #region FieldsAndController
         private readonly ILogger<MessagesController> _logger;
 
         public readonly UserManager<AppUser> _userManager;
@@ -21,9 +22,11 @@ namespace HandBook.Web.Controllers.MessagesControllerFolder
             _userManager = userManager;
             _helper = helper;
         }
+        #endregion
 
+        #region MainPage
         [Authorize]
-        public async Task<IActionResult> Index(int currentPage)
+        public async Task<IActionResult> MainPage(int currentPage)
         {
             if (currentPage <= 0)
             {
@@ -36,11 +39,13 @@ namespace HandBook.Web.Controllers.MessagesControllerFolder
             if (sender != null)
             {
                 var userMsgDTOList = await _helper.GetUsersWithMessages(sender.Id);
-                return View("~/MessengerViews/Messages/Index.cshtml", userMsgDTOList.Take(20).Skip((currentPage - 1) * 20));
+                return View("~/MessengerViews/Messages/MainPage.cshtml", userMsgDTOList.Take(20).Skip((currentPage - 1) * 20));
             }
-            return View("~/MessengerViews/Messages/Index.cshtml");
+            return View("~/MessengerViews/Messages/MainPage.cshtml");
         }
+        #endregion
 
+        #region Chat
         [Authorize]
         public async Task<IActionResult> Chat(int currentPage, string userName)
         {
@@ -59,7 +64,7 @@ namespace HandBook.Web.Controllers.MessagesControllerFolder
 
                 return View("~/MessengerViews/Messages/Chat.cshtml", messages);
             }
-            return View("~/MessengerViews/Messages/Index.cshtml");
+            return View("~/MessengerViews/Messages/MainPage.cshtml");
         }
 
         [HttpPost]
@@ -70,6 +75,8 @@ namespace HandBook.Web.Controllers.MessagesControllerFolder
             var user = await _userManager.FindByNameAsync(username);
             await _helper.CreateMessage(message, user!);
         }
+
+        #endregion
 
         #region Helpers
 

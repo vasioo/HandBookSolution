@@ -17,7 +17,7 @@
 
             <div class="col-7 pt-4 pb-3">
                 <div class="row justify-content-around align-items-center">
-                    <div class="col-md-3">
+                    <div class="col-md-1">
                         @{
                             string link = $"https://res.cloudinary.com/dzaicqbce/image/upload/v1695818842/profile-image-for-{Model.UserTempUsername!}.png";
                             string alternativeLink = $"https://res.cloudinary.com/dzaicqbce/image/upload/v1700160046/azgysbpf8xpcxpfclb9i.jpg";
@@ -76,7 +76,7 @@
             </div>
         </div>
         <div class="row justify-content-center">
-            <div class="col-7">
+            <div class="col-7 p-0 m-0">
                 <div class="d-flex justify-content-around py-3">
                     @if (User!.Identity!.Name == Model.UserTempUsername)
                     {
@@ -107,7 +107,7 @@
         </div>
 
         <div class="pt-4">
-            <div class="post-container" data-user-username="@Model.UserTempUsername">
+            <div class="post-container row" data-user-username="@Model.UserTempUsername">
                 <div class="liked-comments-from-temp" data-comments-list="@TempData["UserLikedComments"]"></div>
                 @if (Model != null)
                 {

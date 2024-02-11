@@ -143,7 +143,7 @@
         });
     }
 
-    function toggleComments(itemId, element) {
+    function toggleComments(element, itemId) {
             const card = element.closest('.card');
             const cardId = `card-overlay-${itemId}`;
 
@@ -300,19 +300,16 @@
     var offsetPost = 0;
     var loadingPost = false;
 
-    document.querySelectorAll('.commentButton').forEach(button => {
-        button.addEventListener('click', function () {
-            var itemId = this.id; 
-            toggleComments(itemId, this);
-        });
+    $(document).on('click', '.commentButton', function () {
+        var itemId = this.id;
+        toggleComments(this, itemId);
     });
 
-    document.querySelectorAll('.likeButton').forEach(button => {
-        button.addEventListener('click', function () {
-            var itemId = this.id;
-            like(this,itemId);
-        });
+    $(document).on('click', '.likeButton', function () {
+        var itemId = this.id;
+        like(this, itemId);
     });
+
 
     var offset = 0;
     var loading = false;
