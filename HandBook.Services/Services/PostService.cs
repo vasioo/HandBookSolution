@@ -22,6 +22,7 @@ namespace HandBook.Services.Services
         public IQueryable<CardDTO> GetPostsBasedOnCreatorUser(string creatorUserUsername)
         {
             var posts = _dataContext.Posts.Where(x => x.CreatorUserName == creatorUserUsername);
+            var comments = _dataContext.Comments;
 
             var cardDTO = posts.OrderByDescending(x => x.Time)
                 .Take(20)
@@ -32,7 +33,7 @@ namespace HandBook.Services.Services
                     AmountOfLikes = post.AmountOfLikes,
                     image = post.ImageLink,
                     Time = post.Time,
-                    AmountOfComments = post.Comments.Count()
+                    AmountOfComments = comments.Where(x=>x.Post.Id==post.Id).Count()
                 });
 
             return cardDTO;
@@ -41,6 +42,7 @@ namespace HandBook.Services.Services
         public IQueryable<CardDTO> GetPostsBasedOnUserFavouritism(AppUser user)
         {
             var posts = _dataContext.Posts;
+            var coms = _dataContext.Comments;
 
             var cardDTO = posts.OrderByDescending(x => x.Time)
                 .Select(post => new CardDTO
@@ -50,7 +52,7 @@ namespace HandBook.Services.Services
                     AmountOfLikes = post.AmountOfLikes,
                     image = post.ImageLink,
                     Time = post.Time,
-                    AmountOfComments = post.Comments.Count()
+                    AmountOfComments = coms.Where(x=>x.Post.Id==post.Id).Count()
                 });
 
             return cardDTO;

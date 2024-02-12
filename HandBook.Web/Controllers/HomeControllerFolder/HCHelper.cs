@@ -54,13 +54,14 @@ namespace HandBook.Web.Controllers.HomeControllerFolder
         {
             try
             {
-                var cards = _postService.IQueryableGetAllAsync().OrderByDescending(x => x.Time).Include(p => p.Comments).Take(20);
+                var cards = _postService.IQueryableGetAllAsync().OrderByDescending(x => x.Time).Take(20);
+                var comments = _commentService.IQueryableGetAllAsync();
 
                 var posts = cards.Select(post => new CardDTO
                 {
                     Id = post.Id,
                     CreatorUserName = post.CreatorUserName,
-                    AmountOfComments = post.Comments.Count(),
+                    AmountOfComments = comments.Where(x=>x.Post.Id==post.Id).Count(),
                     AmountOfLikes = post.AmountOfLikes,
                     Time = post.Time,
                     image = post.ImageLink,
@@ -113,6 +114,7 @@ namespace HandBook.Web.Controllers.HomeControllerFolder
         public async Task<CardDTO> DesiredPostHelper(Guid desiredPostId, AppUser user)
         {
             var post = await _postService.GetByIdAsync(desiredPostId);
+            var comments = _commentService.IQueryableGetAllAsync();
 
             var cardDto = new CardDTO();
 
@@ -121,7 +123,7 @@ namespace HandBook.Web.Controllers.HomeControllerFolder
             cardDto.AmountOfLikes = post.AmountOfLikes;
             cardDto.image = post.ImageLink;
             cardDto.Time = post.Time;
-            cardDto.AmountOfComments = post.Comments.Count();
+            cardDto.AmountOfComments = comments.Where(x=> x.Post.Id == post.Id).Count();
             cardDto.Description = post.Description;
 
             if (user != null)
@@ -192,7 +194,7 @@ namespace HandBook.Web.Controllers.HomeControllerFolder
 
                 Guid randomGuid = Guid.NewGuid();
 
-                if (existingComment != null)
+                if (existingComment.Id.ToString() != "00000000-0000-0000-0000-000000000000")
                 {
                     var existingNotif = await _notificationService.GetExistingNotification(user.Id, commentsDTO.PostId, "commented on your post");
 
@@ -246,15 +248,14 @@ namespace HandBook.Web.Controllers.HomeControllerFolder
                 return jsonResult;
             }
 
-            public async Task<IQueryable<Comment>> LoadMoreCommentsHelper(int offset, Guid derivingFrom, Guid postId)
+            public  IQueryable<Comment> LoadMoreCommentsHelper(int offset, Guid derivingFrom, Guid postId)
             {
                 var allComments = _commentService.IQueryableGetAllAsync();
 
                 return allComments.OrderByDescending(x => x.DateOfCreation)
-                                    .Where(x => x.Post.Id == postId && x.CommentDeriveFromId == derivingFrom)
-                                    .Skip(offset)
-                                    .Take(20)
-                                    .Include(x => x.AppUser);
+                            .Where(x => x.Post.Id == postId && x.CommentDeriveFromId == derivingFrom)
+                            .Skip(offset)
+                            .Take(20);
             }
 
 
@@ -409,12 +410,12 @@ namespace HandBook.Web.Controllers.HomeControllerFolder
                 var allPosts = _postService.IQueryableGetAllAsync();
 
                 var cards = allPosts.OrderByDescending(x => x.Time).Skip(offset).Take(20);
-
+                var comments = _commentService.IQueryableGetAllAsync();
                 var posts = cards.Select(post => new CardDTO
                 {
                     Id = post.Id,
                     CreatorUserName = post.CreatorUserName,
-                    AmountOfComments = post.Comments.Count(),
+                    AmountOfComments = comments.Where(x => x.Post.Id == post.Id).Count(),
                     AmountOfLikes = post.AmountOfLikes,
                     image = post.ImageLink,
                     Time = post.Time
@@ -518,12 +519,12 @@ namespace HandBook.Web.Controllers.HomeControllerFolder
         public IQueryable<CardDTO> GetSpecificExplorePageItemsByProvidedItemHelper(Guid itemId)
         {
             var items = _postService.IQueryableGetAllAsync();
-
+            var comments = _commentService.IQueryableGetAllAsync();
             var posts = items.Select(post => new CardDTO
             {
                 Id = post.Id,
                 CreatorUserName = post.CreatorUserName,
-                AmountOfComments = post.Comments.Count(),
+                AmountOfComments = comments.Where(x => x.Post.Id == post.Id).Count(),
                 AmountOfLikes = post.AmountOfLikes,
                 Time = post.Time,
                 image = post.ImageLink,

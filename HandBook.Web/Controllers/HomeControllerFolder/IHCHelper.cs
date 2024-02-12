@@ -7,7 +7,7 @@ namespace HandBook.Web.Controllers.HomeControllerFolder
 {
     public interface IHCHelper
     {
-        Task<IQueryable<Comment>> LoadMoreCommentsHelper(int offset, Guid derivingFrom, Guid postId);
+        IQueryable<Comment> LoadMoreCommentsHelper(int offset, Guid derivingFrom, Guid postId);
         Task<List<CardDTO>> LoadMorePostsHelper(int offset);
         Task AddAPostHelper(Post tfm, IFormFile ImageUrl, Notification ntf, AppUser user);
         Task<string> AddOrRemoveACommentHelper(CommentsDTO commentsDTO, AppUser user);

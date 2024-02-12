@@ -7,6 +7,6 @@
         public string UserUsername { get; set; } = "";
         public string CommentContent { get; set; } = "";
         public DateTime DateOfCreation { get; set; } = DateTime.Now;
-        public Guid CommentDeriveFromId { get; set; }= Guid.NewGuid();
+        public Guid CommentDeriveFromId { get; set; } = new Guid();
     }
 }

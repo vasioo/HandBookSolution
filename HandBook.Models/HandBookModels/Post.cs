@@ -17,8 +17,6 @@ namespace HandBook.Models
         [System.ComponentModel.DataAnnotations.Required]
         public int AmountOfLikes { get; set; } = 0;
 
-        public List<Comment> Comments { get; set; } = new List<Comment>();
-
         [System.ComponentModel.DataAnnotations.Required]
         public string ImageLink { get; set; } = "";
 

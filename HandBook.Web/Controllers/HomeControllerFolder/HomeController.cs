@@ -130,8 +130,7 @@ namespace HandBook.Web.Controllers.HomeControllerFolder
 
             #region Comments
 
-            [HttpPost]
-                [Authorize]
+                [HttpPost]
                 public async Task<JsonResult> AddOrRemoveAComment(CommentsDTO commentsDTO)
                 {
                     try
@@ -155,7 +154,9 @@ namespace HandBook.Web.Controllers.HomeControllerFolder
                 {
                     try
                     {
-                        return Json(JsonConvert.SerializeObject(_helper.LoadMoreCommentsHelper(offset, derivingFrom, postId)));
+                        var result = _helper.LoadMoreCommentsHelper(offset, derivingFrom, postId);
+                        return Json(new { status = true, Message = result });
+
                     }
                     catch (Exception ex)
                     {
@@ -192,7 +193,7 @@ namespace HandBook.Web.Controllers.HomeControllerFolder
                 var username = HttpContext.User?.Identity?.Name ?? "";
                 var user = await _userManager.FindByNameAsync(username);
 
-                var item = _helper.IncrementOrDecrementCommentLikeCountHelper(itemId, user!);
+                var item =await _helper.IncrementOrDecrementCommentLikeCountHelper(itemId, user!);
 
                 return Json(item);
             }

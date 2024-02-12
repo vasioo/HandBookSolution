@@ -41,6 +41,11 @@ namespace HandBook.DataAccess
 
             builder.Entity<Comment>()
             .HasKey(l => l.Id);
+
+            builder.Entity<Comment>().Navigation(e => e.Post).AutoInclude();
+            builder.Entity<Comment>().Navigation(e => e.AppUser).AutoInclude();
+
+
         }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)

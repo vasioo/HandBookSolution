@@ -144,70 +144,80 @@
     }
 
     function toggleComments(element, itemId) {
-            const card = element.closest('.card');
-            const cardId = `card-overlay-${itemId}`;
+        const card = element.closest('.card');
+        const cardId = `card-overlay-${itemId}`;
+        var postId = $(card).data('post-id');
 
-            var postId = $(card).data('post-id');
+        loadMoreComments(0, postId);
 
-            loadMoreComments(0, postId);
+        const existingOverlay = document.getElementById(cardId);
 
-            const existingOverlay = document.getElementById(cardId);
+        if (existingOverlay) {
+            existingOverlay.remove();
+            const commentSection = card.querySelector('.comment-section');
+            commentSection.style.display = 'none';
 
-            if (existingOverlay) {
-                existingOverlay.remove();
+            card.style.zIndex = '';
+            card.style.position = '';
+            card.style.overflow = '';
+            card.style.scroll
+            document.body.style.overflow = 'auto';
+            $('.comment-section-regulation-div').empty();
+
+            document.removeEventListener('click', handleClickOutside);
+
+            return;
+        }
+
+        const overlay = document.createElement('div');
+        overlay.id = cardId;
+
+        function handleClickOutside(event) {
+            if (event.target === overlay) {
+                card.style.zIndex = '';
+                card.style.position = '';
+                card.style.overflow = '';
+                document.body.style.overflow = 'auto';
+                overlay.remove();
+
                 const commentSection = card.querySelector('.comment-section');
                 commentSection.style.display = 'none';
 
-                card.style.zIndex = '';
-                card.style.position = '';
-
-                $('.comment-section-regulation-div').empty();
-
                 document.removeEventListener('click', handleClickOutside);
-                return;
+
             }
-
-            const overlay = document.createElement('div');
-            overlay.id = cardId;
-
-            function handleClickOutside(event) {
-                if (event.target === overlay) {
-                    card.style.zIndex = '';
-                    card.style.position = ''; // Reset card position
-                    overlay.remove();
-
-                    const commentSection = card.querySelector('.comment-section');
-                    commentSection.style.display = 'none';
-
-                    document.removeEventListener('click', handleClickOutside);
-                }
-            }
-
-            card.style.zIndex = 1000;
-            card.style.position = 'relative'; 
-
-            overlay.style.position = 'fixed';
-            overlay.style.top = '0';
-            overlay.style.left = '0';
-            overlay.style.width = '100%';
-            overlay.style.height = '100%';
-            overlay.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
-            overlay.style.backdropFilter = 'blur(5px)'; 
-
-            const commentSection = card.querySelector('.comment-section');
-
-            if (commentSection.style.display === 'none' || commentSection.style.display === '') {
-                commentSection.style.display = 'block';
-
-                card.scrollIntoView({ behavior: 'smooth', block: 'start', inline: 'nearest' });
-            } else {
-                commentSection.style.display = 'none';
-            }
-
-            document.body.appendChild(overlay);
-
-            document.addEventListener('click', handleClickOutside);
         }
+
+        card.style.zIndex = 1000;
+        card.style.overflowY = 'scroll';
+        card.style.height = '100vh';
+        document.body.style.overflow = 'hidden';
+        card.style.position = 'relative';
+        overlay.style.position = 'fixed';
+        overlay.style.top = '0';
+        overlay.style.left = '0';
+        overlay.style.width = '100%';
+        overlay.style.height = '100%';
+        overlay.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
+        overlay.style.backdropFilter = 'blur(5px)';
+
+        const commentSection = card.querySelector('.comment-section');
+
+        if (commentSection.style.display === 'none' || commentSection.style.display === '') {
+            commentSection.style.display = 'block';
+
+            card.scrollIntoView({ behavior: 'smooth', block: 'start', inline: 'nearest' });
+
+            const cardContainer = card.parentElement;
+            cardContainer.style.overflow = 'hidden';
+        } else {
+            commentSection.style.display = 'none';
+        }
+
+        document.body.appendChild(overlay);
+
+        document.addEventListener('click', handleClickOutside);
+    }
 
     function like(button, Id) {
         var card = button.closest(".card");
@@ -484,153 +494,55 @@
         loadMoreComments(commentId, postId);
     });
 
-    function loadMoreComments(derivingFromId, postAttrId) {
 
+    $(document).on('click', '.comment-like-button', function () {
+        const comment = $(this).closest('.comment-container').find('.commentlikeCount');
+        var postId = comment.data('item-id');
+
+
+        likecom(this, postId);
+    });
+
+    function loadMoreComments(derivingFromId, postAttrId) {
         var concOffset = offset;
 
         if (derivingFromId > 0) {
-            var concOffset = $('.profile-reply-image-class').length;
+            concOffset = $('.profile-reply-image-class').length;
         }
-
 
         $.ajax({
             type: "POST",
             url: "/Home/LoadMoreComments",
             data: { offset: concOffset, derivingFrom: derivingFromId, postId: postAttrId },
             success: function (data) {
-
-                var posts = JSON.parse(data);
-
+                var posts = data.message;
                 var commentsList = $(".liked-comments-from-temp").data('comments-list');
+                var fragment = document.createDocumentFragment(); // Create document fragment
 
                 if (posts.length > 0) {
-                    var alternativeLink = "/handbook/images/anonymousUser.png";
-                    if (derivingFromId > 0) {
-                        posts.forEach(function (post) {
+                    posts.forEach(function (comment) {
+                        var link = `https://res.cloudinary.com/dzaicqbce/image/upload/v1695818842/profile-image-for-${comment.appUser.userName}.png`;
+                        var imgTag = `<img src="${link}" class="profile-image-class" alt="Image not found" style="border-radius:30px; width:60px;height:60px; margin-right:10px;" />`;
+                        var isLiked = commentsList && commentsList.includes(comment.id) ? '<div class="liked com-btn">Liked</div>' : '<div class="com-btn">Like</div>';
+                        var commentContent = `<div class="row">${comment.commentContent}</div>`;
+                        var likeCount = `<span class="commentlikeCount" data-item-id="${comment.id}" style="display: ${comment.amountOfLikes > 0 ? 'block' : 'none'};">${comment.amountOfLikes} <i class="fa-solid fa-heart liked fa-sm" style="color: #ff0000;"></i></span>`;
+                        var commentActions = `<div class="comment-actions mt-2"><button class="comment-like-button text-decoration-none text-primary"  data-count="${comment.post.amountOfLikes}">${isLiked}</button></div>`;
+                        var repliesHtml = `<div class="comment-container pt-2"><div class="profile-column">${imgTag}</div><div class="comment-column"><div class="comment"><div class="comment-header"><div class="comment-username font-weight-bold">${comment.appUser.userName}</div><div class="comment-time text-muted">${getTimeDisplay(comment.dateOfCreation)}</div></div><div class="comment-content mt-2">${commentContent}<div class="row">${likeCount}</div></div>${commentActions}</div></div></div>`;
+                        var containerId = `container-${comment.commentDeriveFromId}`;
 
-                            var replyLink = "https://res.cloudinary.com/dzaicqbce/image/upload/v1695818842/profile-image-for-" + post.AppUser.UserName + ".png";
+                        // Append to fragment
+                        var tempDiv = document.createElement('div');
+                        tempDiv.innerHTML = repliesHtml;
+                        fragment.appendChild(tempDiv.firstChild);
+                    });
 
-                            var imgTag = '<img src="' + replyLink + '" class="profile-image-class" alt="Image not found" style="border-radius:30px; width:60px;height:60px; margin-right:10px;" />';
-
-                            var isliked = '<div class="com-btn">Like</div>';
-                            if (commentsList && commentsList.includes(post.Id)) {
-                                isliked = '<div class="liked com-btn">Liked</div>';
-                            }
-
-                            var repliesHtml = '<div class="comment-container pt-2">' +
-                                '<div class="profile-column">' +
-                                imgTag +
-                                '</div>' +
-                                '<div class="comment-column">' +
-                                '<div class="comment">' +
-                                '<div class="comment-header">' +
-                                '<div class="comment-username font-weight-bold">' + post.AppUser.UserName + '</div>' +
-                                '<div class="comment-time text-muted">' +
-                                getTimeDisplay(post.DateOfCreation) +
-                                '</div>' +
-                                '</div>' +
-                                '<div class="comment-content mt-2">' +
-                                '<div class="row">' +
-                                post.CommentContent +
-                                '</div>' +
-                                '<div class="row">' +
-                                '<span class="commentlikeCount" data-item-id="' + post.Id + '" style="display: ' + (post.AmountOfLikes > 0 ? 'block' : 'none') + ';">' +
-                                post.AmountOfLikes + ' <i class="fa-solid fa-heart liked fa-sm" style="color: #ff0000;"></i>' +
-                                '</span>' +
-                                '</div>' +
-                                '</div>' +
-                                '<div class="comment-actions mt-2">' +
-                                '<button class="comment-like-button text-decoration-none text-primary" onclick="likecom(this,' + post.Id + ')" data-count="' + post.Post.AmountOfLikes + '">' +
-                                isliked +
-                                '</button>' +
-                                '</div>' +
-                                '</div>' +
-                                '</div>' +
-                                '</div>' +
-                                '</div>';
-                            var containerId = 'container-' + post.CommentDeriveFromId;
-
-                            $('.' + containerId).append(repliesHtml);
-
-
-                            $('.profile-image-class').on('error', function (event) {
-                                $(this).attr('src', 'handbook/images/anonymousUser.png');
-                                $(this).off('error');
-                            });
-                        });
-                    }
-                    else {
-                        offset += posts.length;
-                        posts.forEach(function (post) {
-                            var link = 'https://res.cloudinary.com/dzaicqbce/image/upload/v1695818842/profile-image-for-' + post.AppUser.UserName + '.png';
-                            var imgTag = '<img src="' + link + '" class="profile-image-class" alt="Image not found" style="border-radius:30px; width:60px;height:60px; margin-right:10px;" />';
-
-
-                            var isliked = '<div class="com-btn">Like</div>';
-                            if (commentsList && commentsList.includes(post.Id)) {
-                                isliked = '<div class="liked com-btn">Liked</div>';
-                            }
-
-                            var htmlString = '<div class="comment-container pt-2" data-comment-id="' + post.Id + '">' +
-                                '<div class="profile-column">' +
-                                imgTag +
-                                '</div>' +
-                                '<div class="comment-column">' +
-                                '<div class="comment">' +
-                                '<div class="comment-header">' +
-                                '<div class="comment-username font-weight-bold">' + post.AppUser.UserName + '</div>' +
-                                '<div class="comment-time text-muted">' +
-                                getTimeDisplay(post.DateOfCreation) +
-                                '</div>' +
-                                '</div>' +
-                                '<div class="comment-content mt-2">' +
-                                '<div class="">' +
-                                post.CommentContent +
-                                '</div>' +
-                                '<div class="row">' +
-                                '<span class="commentlikeCount" data-item-id="' + post.Id + '" style="display: ' + (post.AmountOfLikes > 0 ? 'block' : 'none') + ';">' +
-                                post.AmountOfLikes +
-                                ' <i class="fa-solid fa-heart liked fa-sm" style="color: #ff0000;"></i>' +
-                                '</span>' +
-                                '</div>' +
-                                '</div>' +
-                                '<div class="comment-actions mt-2">' +
-                                '<button class="comment-like-button text-decoration-none text-primary" onclick="likecom(this,' + post.Id + ')" data-count="' + post.Post.AmountOfLikes + '">' +
-                                isliked +
-                                '</button>' +
-                                '</div>' +
-                                '<a class="view-replies mt-2 text-primary" onclick="toggleReplies(this)">View Replies </a>' +
-                                '<div class="p-3 m-1 replies-container" id="' + post.Id + '" style="display:none">' +
-                                '<div class="input-group mt-3" data-post-id="' + post.Post.Id + '">' +
-                                '<div class="border col-10 p-0">' +
-                                '<textarea class="replies-text form-control" style="max-height:400px" placeholder="Reply to ' + post.AppUser.UserName + '...."></textarea>' +
-                                '</div>' +
-                                '<div class="input-group-append col-2">' +
-                                '<button class="btn btn-primary submit-reply-btn" type="button"><i class="fas fa-right-long"></i></button>' +
-                                '</div>' +
-                                '</div>' +
-                                '<div class="container-' + post.Id + '">' +
-                                '</div>' +
-                                '<div class="">' +
-                                '<a class="load-more-replies">Load More Replies</a>' +
-                                '</div>' +
-                                '</div>' +
-                                '</div>' +
-                                '</div>';
-                            $(".comment-section-regulation-div").append(htmlString);
-
-                            $('.profile-image-class').on('error', function (event) {
-                                $(this).attr('src', 'handbook/images/anonymousUser.png');
-                                $(this).off('error');
-                            });
-                        });
-                    }
+                    $(".comment-section-regulation-div").append(fragment); // Append fragment to DOM
                 }
+
                 if (posts.length < 20) {
                     if (derivingFromId > 0) {
                         $('.load-more-replies').hide();
-                    }
-                    else {
+                    } else {
                         $('.load-more-comments').hide();
                     }
                 }
@@ -642,6 +554,7 @@
             }
         });
     }
+
 
     function checkImage(url) {
         return fetch(url, { method: 'HEAD' })
