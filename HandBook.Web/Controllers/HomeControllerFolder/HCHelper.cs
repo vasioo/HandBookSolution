@@ -1,6 +1,7 @@
 ﻿using CloudinaryDotNet;
 using CloudinaryDotNet.Actions;
 using HandBook.Models;
+using HandBook.Models.JSONModel;
 using HandBook.Models.ViewModels;
 using HandBook.Services.Interfaces;
 using HandBook.Web.Models;
@@ -10,6 +11,7 @@ using Newtonsoft.Json;
 using ServiceStack;
 using System.Data.Entity;
 using System.Text;
+using System.Xml.Linq;
 
 namespace HandBook.Web.Controllers.HomeControllerFolder
 {
@@ -185,10 +187,9 @@ namespace HandBook.Web.Controllers.HomeControllerFolder
 
             #region CommentsHelper
 
-            public async Task<string> AddOrRemoveACommentHelper(CommentsDTO commentsDTO, AppUser user)
+            public async Task<string> AddOrRemoveACommentHelper(CommentsDTO commentsDTO, AppUser user)  
             {
                 var item = await _postService.GetByIdAsync(commentsDTO.PostId);
-
 
                 var existingComment = await _commentService.GetByIdAsync(commentsDTO.Id);
 
@@ -248,111 +249,125 @@ namespace HandBook.Web.Controllers.HomeControllerFolder
                 return jsonResult;
             }
 
-            public  IQueryable<Comment> LoadMoreCommentsHelper(int offset, Guid derivingFrom, Guid postId)
+            public  IQueryable<CommentJSON> LoadMoreCommentsHelper(int offset, Guid derivingFrom, Guid postId)
             {
                 var allComments = _commentService.IQueryableGetAllAsync();
 
-                return allComments.OrderByDescending(x => x.DateOfCreation)
+                var neededComs =  allComments.OrderByDescending(x => x.DateOfCreation)
                             .Where(x => x.Post.Id == postId && x.CommentDeriveFromId == derivingFrom)
                             .Skip(offset)
                             .Take(20);
+
+                var commentsJSON = neededComs.Select(com => new CommentJSON
+                {
+                    Id = com.Id,
+                    DateOfCreation = com.DateOfCreation,
+                    CommentContent= com.CommentContent,
+                    AmountOfLikes = com.AmountOfLikes,
+                    AppUser= com.AppUser,
+                    Post= com.Post,
+                    CommentDeriveFromId= com.CommentDeriveFromId,
+                    AmountOfReplies = allComments.Where(x=>x.CommentDeriveFromId==com.Id).Count()
+                });
+
+            return commentsJSON;
             }
 
 
         #endregion
 
-            #region LikesHelper
+        #region LikesHelper
 
-            public async Task<int> IncrementOrDecrementLikeCountHelper(Guid itemId, AppUser user)
+        public async Task<int> IncrementOrDecrementLikeCountHelper(Guid itemId, AppUser user)
+        {
+            var item = await _postService.GetByIdAsync(itemId);
+
+            var existingLike = _likeService.GetLikeEntityForUserAndPostInfo(user.Id, itemId);
+
+            if (existingLike != null)
             {
-                var item = await _postService.GetByIdAsync(itemId);
+                var existingNotif = await _notificationService.GetExistingNotification(user.Id, itemId, "liked your post");
 
-                var existingLike = _likeService.GetLikeEntityForUserAndPostInfo(user.Id, itemId);
-
-                if (existingLike != null)
+                item.AmountOfLikes--;
+                await _likeService.RemoveAsync(existingLike!.Id);
+                if (existingNotif != null)
                 {
-                    var existingNotif = await _notificationService.GetExistingNotification(user.Id, itemId, "liked your post");
-
-                    item.AmountOfLikes--;
-                    await _likeService.RemoveAsync(existingLike!.Id);
-                    if (existingNotif != null)
-                    {
-                        await _notificationService.RemoveAsync(existingNotif!.Id);
-                    }
+                    await _notificationService.RemoveAsync(existingNotif!.Id);
                 }
-                else
+            }
+            else
+            {
+                item.AmountOfLikes++;
+                var like = new Likes
                 {
-                    item.AmountOfLikes++;
-                    var like = new Likes
-                    {
-                        Post = item,
-                        AppUser = user!,
-                        LikedDate = DateTime.Now
-                    };
+                    Post = item,
+                    AppUser = user!,
+                    LikedDate = DateTime.Now
+                };
 
-                    if (item.CreatorUserName != user.UserName)
-                    {
-                        Notification ntf = new Notification();
-                        ntf.AppUser = user!;
-                        ntf.CreatorUserName = user!.UserName!;
-                        ntf.Post = item!;
-                        ntf.Time = DateTime.Now;
-                        ntf.MainText = "liked your post";
-                        await _notificationService.AddAsync(ntf);
-                    }
-                    await _likeService.AddAsync(like);
+                if (item.CreatorUserName != user.UserName)
+                {
+                    Notification ntf = new Notification();
+                    ntf.AppUser = user!;
+                    ntf.CreatorUserName = user!.UserName!;
+                    ntf.Post = item!;
+                    ntf.Time = DateTime.Now;
+                    ntf.MainText = "liked your post";
+                    await _notificationService.AddAsync(ntf);
                 }
-                return item.AmountOfLikes;
+                await _likeService.AddAsync(like);
+            }
+            return item.AmountOfLikes;
+        }
+
+        public async Task<int> IncrementOrDecrementCommentLikeCountHelper(Guid itemId, AppUser user)
+        {
+            var item = await _commentService.GetByIdAsync(itemId);
+
+            var existingLike = _likeService.GetLikeEntityForUserAndCommentInfo(user.Id, itemId);
+
+            if (existingLike != null)
+            {
+                var existingNotif = await _notificationService.GetExistingNotification(user.Id, itemId, "liked your comment");
+                item.AmountOfLikes--;
+                await _likeService.RemoveAsync(existingLike!.Id);
+                if (existingNotif != null)
+                {
+                    await _notificationService.RemoveAsync(existingNotif!.Id);
+                }
+            }
+            else
+            {
+                item.AmountOfLikes++;
+                var like = new Likes
+                {
+                    Post = item.Post,
+                    AppUser = user!,
+                    LikedDate = DateTime.Now,
+                    CommentId = item.Id
+                };
+
+                if (item.AppUser.UserName != user.UserName)
+                {
+                    Notification ntf = new Notification();
+                    ntf.AppUser = user!;
+                    ntf.CreatorUserName = user!.UserName!;
+                    ntf.Post = item!.Post;
+                    ntf.Time = DateTime.Now;
+                    ntf.MainText = "liked your comment";
+                    await _notificationService.AddAsync(ntf);
+                }
+                await _likeService.AddAsync(like);
             }
 
-            public async Task<int> IncrementOrDecrementCommentLikeCountHelper(Guid itemId, AppUser user)
-            {
-                var item = await _commentService.GetByIdAsync(itemId);
-
-                var existingLike = _likeService.GetLikeEntityForUserAndCommentInfo(user.Id, itemId);
-
-                if (existingLike != null)
-                {
-                    var existingNotif = await _notificationService.GetExistingNotification(user.Id, itemId, "liked your comment");
-                    item.AmountOfLikes--;
-                    await _likeService.RemoveAsync(existingLike!.Id);
-                    if (existingNotif != null)
-                    {
-                        await _notificationService.RemoveAsync(existingNotif!.Id);
-                    }
-                }
-                else
-                {
-                    item.AmountOfLikes++;
-                    var like = new Likes
-                    {
-                        Post = item.Post,
-                        AppUser = user!,
-                        LikedDate = DateTime.Now,
-                        CommentId = item.Id
-                    };
-
-                    if (item.AppUser.UserName != user.UserName)
-                    {
-                        Notification ntf = new Notification();
-                        ntf.AppUser = user!;
-                        ntf.CreatorUserName = user!.UserName!;
-                        ntf.Post = item!.Post;
-                        ntf.Time = DateTime.Now;
-                        ntf.MainText = "liked your comment";
-                        await _notificationService.AddAsync(ntf);
-                    }
-                    await _likeService.AddAsync(like);
-                }
-
-                return item.AmountOfLikes;
-            }
+            return item.AmountOfLikes;
+        }
 
         #endregion
 
-            #region FollowersHelper
+        #region FollowersHelper
 
-            public async Task AddFollowerRelationshipHelper(string username, string usernamefollower)
+        public async Task AddFollowerRelationshipHelper(string username, string usernamefollower)
             {
                 var follow = await _userManager.FindByNameAsync(username);
                 var follower = await _userManager.FindByNameAsync(usernamefollower);

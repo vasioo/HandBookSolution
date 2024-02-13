@@ -167,8 +167,8 @@ namespace HandBook.Web.Controllers.HomeControllerFolder
                 #endregion
 
             #region Likes
-        [HttpPost]
-        public async Task<IActionResult> IncrementOrDecrementLikeCount(Guid itemId)
+            [HttpPost]
+            public async Task<IActionResult> IncrementOrDecrementLikeCount(Guid itemId)
         {
             try
             {
@@ -185,8 +185,8 @@ namespace HandBook.Web.Controllers.HomeControllerFolder
             }
         }
 
-        [HttpPost]
-        public async Task<IActionResult> IncrementOrDecrementCommentLikeCount(Guid itemId)
+            [HttpPost]
+            public async Task<IActionResult> IncrementOrDecrementCommentLikeCount(Guid itemId)
         {
             try
             {

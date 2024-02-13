@@ -140,7 +140,7 @@
                     <div class="col">
                         <div class="input-group">
                             <div class="border col-10 pl-1 pr-1 m-0">
-                                <textarea class="comments-text w-100" style="max-height:400px" placeholder="Write a comment..."></textarea>
+                                <textarea class="replies-text w-100" style="max-height:400px" placeholder="Write a comment..."></textarea>
                             </div>
 
                             <div class="input-group-append align-self-end col-2">
@@ -149,7 +149,10 @@
                         </div>
                     </div>
                 </div>
-                <div class="comment-section-regulation-div">
+                @{
+                    var commentContainerId = $"comment-container-{Model.Id}";
+                }
+                <div class="comment-section-regulation-div" id="@commentContainerId">
                     @if (TempData["UserLikedComments"] == "")
                     {
                         TempData["UserLikedComments"] = new List<int>();
