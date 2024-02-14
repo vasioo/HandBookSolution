@@ -145,7 +145,7 @@
         const cardId = `card-overlay-${itemId}`;
         var postId = $(card).data('post-id');
 
-        loadMoreComments(0, postId);
+        loadMoreComments(0, postId,0);
 
         const existingOverlay = document.getElementById(cardId);
 
@@ -251,13 +251,23 @@
 
         var repliesContainer = this.nextElementSibling;
 
-        if (!repliesContainer.classList.contains('comments-loaded')) {
+        // Check if sub-container exists
+        var subContainerId = `sub-replies-container-${commentId}`;
+        var subRepliesContainer = $(`#${subContainerId}`);
+
+        if (subRepliesContainer.length > 0 && !subRepliesContainer.hasClass('comments-loaded')) {
+            loadMoreComments(commentId, postId, subContainerId);
+            subRepliesContainer.addClass('comments-loaded');
+        } else if (!repliesContainer.classList.contains('comments-loaded')) {
             loadMoreComments(commentId, postId);
             repliesContainer.classList.add('comments-loaded');
         }
 
         $(repliesContainer).toggle();
     });
+
+
+
 
     function likecom(button, Id) {
         var card = button.closest(".comment");
@@ -418,7 +428,7 @@
                             '</div>' +
                             '</div>' +
                             '</div>' +
-                            '<div class="comment-section-regulation-div" id="comment-container-"'+post.id+'">' +
+                            '<div class="comment-section-regulation-div" id="comment-container-"' + post.id + '">' +
                             '</div>' +
                             '<div class="">' +
                             '<a class="load-more-comments">Load More Comments</a>' +
@@ -476,7 +486,7 @@
         const card = $(this).closest('.card');
         var postId = $(card).data('post-id');
 
-        loadMoreComments(0, postId);
+        loadMoreComments(0, postId,0);
     });
 
     $(document).on('click', '.load-more-replies', function () {
@@ -485,7 +495,7 @@
         const card = $(this).closest('.card');
         var postId = $(card).data('post-id');
 
-        loadMoreComments(commentId, postId);
+        loadMoreComments(commentId, postId, 0);
     });
 
 
@@ -497,12 +507,14 @@
         likecom(this, postId);
     });
 
-    function loadMoreComments(derivingFromId, postAttrId) {
+    function loadMoreComments(derivingFromId, postAttrId, subContainerId) {
         var concOffset = offset;
 
         if (derivingFromId > 0) {
             concOffset = $('.profile-reply-image-class').length;
         }
+
+        var isFirstContainerAppended = false; 
 
         $.ajax({
             type: "POST",
@@ -514,146 +526,61 @@
                 var fragment = document.createDocumentFragment();
 
                 if (posts.length > 0) {
-                    if (derivingFromId != 0) {
-                        posts.forEach(function (comment) {
-                            var link = `https://res.cloudinary.com/dzaicqbce/image/upload/v1695818842/profile-image-for-${comment.appUser.userName}.png`;
-                            var imgTag = `<img src="${link}" class="profile-image-class" alt="Image not found" style="border-radius:30px; width:60px;height:60px; margin-right:10px;" />`;
-                            var isLiked = commentsList && commentsList.includes(comment.id) ? '<div class="liked com-btn">Liked</div>' : '<div class="com-btn">Like</div>';
-                            var commentContent = `<div class="d-flex pb-3 pt-2">${comment.commentContent}</div>`;
-                            var likeCount = `<span class="commentlikeCount" data-item-id="${comment.id}" style="display: ${comment.amountOfLikes > 0 ? 'block' : 'none'};">${comment.amountOfLikes} <i class="fa-solid fa-heart liked fa-sm" style="color: #ff0000;"></i></span>`;
-                            var commentActions = `
-                                <div class="comment-actions mt-2">
-                                    <button class="comment-like-button text-decoration-none text-primary" data-count="${comment.post.amountOfLikes}">
-                                        ${isLiked}
-                                    </button>
-                                    <button class="append-reply-textbox">
-                                        Reply
-                                    </button>
-                                </div>
-                               ${comment.amountOfReplies > 0 ? '<a class="toggle-replies-btn btn row">View Replies</a>' : ''}
-                                <div class="sub-replies-container" id="${comment.id}"></div>
-                                `;
+                    posts.forEach(function (comment, index) {
+                        var link = `https://res.cloudinary.com/dzaicqbce/image/upload/v1695818842/profile-image-for-${comment.appUser.userName}.png`;
+                        var imgTag = `<img src="${link}" class="profile-image-class" alt="Image not found" style="border-radius:30px; width:50px;height:50px; margin-right:10px;" />`;
+                        var isLiked = commentsList && commentsList.includes(comment.id) ? '<div class="liked com-btn">Liked</div>' : '<div class="com-btn">Like</div>';
+                        var commentContent = `<div class="d-flex pb-3 pt-2">${comment.commentContent}</div>`;
+                        var likeCount = `<span class="commentlikeCount" data-item-id="${comment.id}" style="display: ${comment.amountOfLikes > 0 ? 'block' : 'none'};">${comment.amountOfLikes} <i class="fa-solid fa-heart liked fa-sm" style="color: #ff0000;"></i></span>`;
+                        var commentActions = `
+                    <div class="comment-actions mt-2">
+                        <button class="comment-like-button text-decoration-none text-primary" data-count="${comment.post.amountOfLikes}">
+                            ${isLiked}
+                        </button>
+                        <button class="append-reply-textbox">
+                            Reply
+                        </button>
+                    </div>
+                    <a class="toggle-replies-btn btn row" data-comment-id="${comment.id}">View Replies</a>
+                     <div class="sub-replies-container${!isFirstContainerAppended && derivingFromId === 0 ? ' first-container-for-reply' : ''}" id="sub-replies-container-${comment.id}" style="display: none;"></div>`;
 
-                            document.addEventListener('click', function (event) {
-                                if (event.target.classList.contains('append-reply-textbox')) {
-                                    var repliesContainer = event.target.parentElement.nextElementSibling.nextElementSibling;
-                                    var inputBoxHtml = `
-                                    <div class="col">
-                                        <div class="col">
-                                            <div class="replies-group">
-                                                <div class="border col-10 pl-1 pr-1 m-0">
-                                                    <textarea class="reply-text w-100" style="max-height:400px" placeholder="Write a comment..."></textarea>
-                                                </div>
-                                                <div class="input-group-append align-self-end col-2">
-                                                    <button class="btn btn-primary submit-reply-btn" type="button"> <i class="fas fa-right-long"></i></button>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>`;
-                                    repliesContainer.innerHTML = inputBoxHtml;
-                                }
-                            });
-
-
-                            var repliesHtml = `<div class="comment-container row pt-2" data-comment-id="${comment.id}"><div class="profile-column">${imgTag}</div><div class="comment-column"><div class="comment"><div class="comment-header"><div class="comment-username font-weight-bold">${comment.appUser.userName}</div><div class="comment-time text-muted">${getTimeDisplay(comment.dateOfCreation)}</div></div><div class="comment-content mt-2">${commentContent}<div class="row">${likeCount}</div></div>${commentActions}</div></div></div>`;
-                            var containerId = `container-${comment.commentDeriveFromId}`;
-
-                            // Append to fragment
-                            var tempDiv = document.createElement('div');
-                            tempDiv.innerHTML = repliesHtml;
-                            fragment.appendChild(tempDiv.firstChild);
-                        });
-
-                        var containerId = `#replies-container-${derivingFromId}`;
-                        var replContainer = $(containerId);
-                        replContainer.css({
-                            'overflow-y': 'auto',
-                            'overflow-x': 'hidden',
-                            'padding': '2.2em',
-                            'display':'block'
-                        });
-
-                        replContainer.append(fragment);
-
-                    }
-                    else {
-                        posts.forEach(function (comment) {
-                            var link = `https://res.cloudinary.com/dzaicqbce/image/upload/v1695818842/profile-image-for-${comment.appUser.userName}.png`;
-                            var imgTag = `<img src="${link}" class="profile-image-class" alt="Image not found" style="border-radius:30px; width:50px;height:50px; margin-right:10px;" />`;
-                            var isLiked = commentsList && commentsList.includes(comment.id) ? '<div class="liked com-btn">Liked</div>' : '<div class="com-btn">Like</div>';
-                            var commentContent = `<div class="d-flex py-3">${comment.commentContent}</div>`;
-                            var likeCount = `<span class="commentlikeCount" data-item-id="${comment.id}" style="display: ${comment.amountOfLikes > 0 ? 'block' : 'none'};">${comment.amountOfLikes} <i class="fa-solid fa-heart liked fa-sm" style="color: #ff0000;"></i></span>`;
-                            var commentActions = `
-                                <div class="comment-actions mt-2">
-                                    <button class="comment-like-button text-decoration-none text-primary" data-count="${comment.post.amountOfLikes}">
-                                        ${isLiked}
-                                    </button>
-                                    <button class="append-reply-textbox">
-                                        Reply
-                                    </button>
-                                </div>
-                                ${comment.amountOfReplies > 0 ? '<a class="toggle-replies-btn btn row">View Replies</a>' : ''}
-                                <div class="replies-container" style="display:none;" id="replies-container-${comment.id}"></div>
-                                `;
-
-                            document.addEventListener('click', function (event) {
-                                if (event.target.classList.contains('append-reply-textbox')) {
-                                    var repliesContainer = event.target.parentElement.nextElementSibling.nextElementSibling;
-                                    var inputBoxHtml = `
-                                    <div class="col">
-                                        <div class="col">
-                                            <div class="replies-group">
-                                                <div class="border col-10 pl-1 pr-1 m-0">
-                                                    <textarea class="reply-text w-100" style="max-height:400px" placeholder="Write a comment..."></textarea>
-                                                </div>
-                                                <div class="input-group-append align-self-end col-2">
-                                                    <button class="btn btn-primary submit-reply-btn" type="button"> <i class="fas fa-right-long"></i></button>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>`;
-                                    repliesContainer.innerHTML = inputBoxHtml;
-                                }
-                            });
-
-
-                            var repliesHtml = `
-                            <div class="comment-container row pt-2" data-comment-id="${comment.id}">
-                                <div class="profile-column col-1 mx-2 p-0">
-                                    ${imgTag}
-                                </div>
-                                <div class="comment-column col mx-2 p-0">
-                                    <div class="comment">
-                                        <div class="comment-header rounded-top" style="background:#B0B3B8; padding-top:0.6em; padding-left:1.2em;">
-                                            <div class="comment-username font-weight-bold">
-                                                ${comment.appUser.userName}
-                                            </div>
-                                            <div class="comment-time text-muted">
-                                                ${getTimeDisplay(comment.dateOfCreation)}
-                                            </div>
-                                        </div>
-                                        <div class="comment-content rounded-bottom" style="background:#B0B3B8; padding-bottom:0.6em;padding-left:1.2em;">
-                                            ${commentContent}
-                                            <div class="row">
-                                                ${likeCount}
-                                            </div>
-                                        </div>
-                                        ${commentActions}
+                        var repliesHtml = `
+                        <div class="comment-container row pt-2" data-comment-id="${comment.id}">
+                            <div class="profile-column col-1 mx-2 p-0">${imgTag}</div>
+                            <div class="comment-column col mx-2 p-0">
+                                <div class="comment">
+                                    <div class="comment-header rounded-top">
+                                        <div class="comment-username font-weight-bold">${comment.appUser.userName}</div>
+                                        <div class="comment-time text-muted">${getTimeDisplay(comment.dateOfCreation)}</div>
                                     </div>
+                                    <div class="comment-content rounded-bottom">
+                                        ${commentContent}
+                                        <div class="row">${likeCount}</div>
+                                    </div>
+                                    ${commentActions}
                                 </div>
-                            </div>`;
-                            var containerId = `container-${comment.commentDeriveFromId}`;
+                            </div>
+                        </div>`;
 
-                            // Append to fragment
-                            var tempDiv = document.createElement('div');
-                            tempDiv.innerHTML = repliesHtml;
-                            fragment.appendChild(tempDiv);
-                        });
 
-                        var containerId = `#comment-container-${postAttrId}`
-                        var comContainerId = $(containerId);
-                        comContainerId.append(fragment);
+                        var tempDiv = document.createElement('div');
+                        tempDiv.innerHTML = repliesHtml;
+                        fragment.appendChild(tempDiv);
+
+                        if (!isFirstContainerAppended && derivingFromId === 0) {
+                            isFirstContainerAppended = true;
+                        }
+                    });
+
+                    var containerAppenderId;
+                    if (derivingFromId != 0) {
+                        containerAppenderId = `sub-replies-container-${derivingFromId}`;
+                    } else {
+                        containerAppenderId = `comment-container-${postAttrId}`;
                     }
+                    var containerAppender = $(`#${containerAppenderId}`);
+                    containerAppender.append(fragment);
+
                 }
 
                 if (posts.length < 20) {
@@ -672,6 +599,29 @@
         });
     }
 
+
+
+    $(document).on('click', '.append-reply-textbox', function (event) {
+        var $replyButton = $(this);
+        var $inputBoxContainer = $replyButton.closest('.comment-actions').next('.reply-input-box');
+
+        if ($inputBoxContainer.length === 0) {
+            var inputBoxHtml = `
+            <div class="col reply-input-box">
+                <div class="replies-group">
+                    <div class="border col-10 pl-1 pr-1 m-0">
+                        <textarea class="reply-text w-100" style="max-height:400px" placeholder="Reply to..."></textarea>
+                    </div>
+                    <div class="input-group-append align-self-end col-2">
+                        <button class="btn btn-primary submit-reply-btn" type="button"> <i class="fas fa-right-long"></i></button>
+                    </div>
+                </div>
+            </div>`;
+            $replyButton.closest('.comment-actions').after(inputBoxHtml);
+        } else {
+            $inputBoxContainer.toggle();
+        }
+    });
 
     function checkImage(url) {
         return fetch(url, { method: 'HEAD' })
