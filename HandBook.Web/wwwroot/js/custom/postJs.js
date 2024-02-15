@@ -140,12 +140,12 @@
         });
     }
 
-    function toggleComments(element, itemId) {
+    function toggleComments(element, itemId, buttonEvent) {
         const card = element.closest('.card');
         const cardId = `card-overlay-${itemId}`;
         var postId = $(card).data('post-id');
 
-        loadMoreComments(0, postId,0);
+        loadMoreComments(0, postId, buttonEvent);
 
         const existingOverlay = document.getElementById(cardId);
 
@@ -243,31 +243,34 @@
     }
 
     $(document).on('click', '.toggle-replies-btn', function () {
-        var commentContainer = $(this).closest('.comment-container');
-        var commentId = commentContainer.data('comment-id');
+        var highestElement = $(this).parents('.comment-container').last();
+        var commentId = highestElement.data('comment-id');
+
+        var closestElement = $(this).closest('.comment-container');
+        var commentReplyId = closestElement.data('comment-id');
 
         const card = this.closest('.card');
         var postId = $(card).data('post-id');
 
         var repliesContainer = this.nextElementSibling;
 
-        // Check if sub-container exists
-        var subContainerId = `sub-replies-container-${commentId}`;
-        var subRepliesContainer = $(`#${subContainerId}`);
-
-        if (subRepliesContainer.length > 0 && !subRepliesContainer.hasClass('comments-loaded')) {
-            loadMoreComments(commentId, postId, subContainerId);
-            subRepliesContainer.addClass('comments-loaded');
-        } else if (!repliesContainer.classList.contains('comments-loaded')) {
-            loadMoreComments(commentId, postId);
-            repliesContainer.classList.add('comments-loaded');
+        if (repliesContainer!=null &&repliesContainer!=undefined) {
+            $(repliesContainer).toggle();
         }
 
-        $(repliesContainer).toggle();
+        if ($(this).hasClass('no-src')) {
+            $('.comment-container[data-deriving-from="' + commentReplyId + '"]').toggle();
+        }
+
+        var subContainerId = '.commentlikeCount[data-item-id="' + commentReplyId + '"]';
+        var subRepliesContainer = $(`${subContainerId}`);
+
+        if (subRepliesContainer.length > 0 && !subRepliesContainer.hasClass('comments-loaded')) {
+            loadMoreComments(commentReplyId, postId, $(this));
+            subRepliesContainer.addClass('comments-loaded');
+        }
+        
     });
-
-
-
 
     function likecom(button, Id) {
         var card = button.closest(".comment");
@@ -314,9 +317,9 @@
     var offsetPost = 0;
     var loadingPost = false;
 
-    $(document).on('click', '.commentButton', function () {
+    $(document).on('click', '.commentButton', function (event) {
         var itemId = this.id;
-        toggleComments(this, itemId);
+        toggleComments(this, itemId, event);
     });
 
     $(document).on('click', '.likeButton', function () {
@@ -402,7 +405,7 @@
                             '<br>' +
                             '</div>' +
                             '<div class="col-1 pt-2 text-center pb-3">' +
-                            '<button class="commentButton" onclick="toggleComments(' + post.id + ', this)">' +
+                            '<button class="commentButton">' +
                             '<i class="fa-regular fa-comment fa-xl"></i>' +
                             '</button>' +
                             '<br>' +
@@ -481,21 +484,21 @@
 
     var loadingComments = false;
 
-    $(document).on('click', '.load-more-comments', function () {
+    $(document).on('click', '.load-more-comments', function (event) {
 
         const card = $(this).closest('.card');
         var postId = $(card).data('post-id');
 
-        loadMoreComments(0, postId,0);
+        loadMoreComments(0, postId, event);
     });
 
-    $(document).on('click', '.load-more-replies', function () {
+    $(document).on('click', '.load-more-replies', function (event) {
         var commentId = $(this).closest('.comment-container').data('comment-id');
 
         const card = $(this).closest('.card');
         var postId = $(card).data('post-id');
 
-        loadMoreComments(commentId, postId, 0);
+        loadMoreComments(commentId, postId, event);
     });
 
 
@@ -503,18 +506,15 @@
         const comment = $(this).closest('.comment-container').find('.commentlikeCount');
         var postId = comment.data('item-id');
 
-
         likecom(this, postId);
     });
 
-    function loadMoreComments(derivingFromId, postAttrId, subContainerId) {
+    function loadMoreComments(derivingFromId, postAttrId, buttonEvent) {
         var concOffset = offset;
 
         if (derivingFromId > 0) {
             concOffset = $('.profile-reply-image-class').length;
         }
-
-        var isFirstContainerAppended = false; 
 
         $.ajax({
             type: "POST",
@@ -533,19 +533,28 @@
                         var commentContent = `<div class="d-flex pb-3 pt-2">${comment.commentContent}</div>`;
                         var likeCount = `<span class="commentlikeCount" data-item-id="${comment.id}" style="display: ${comment.amountOfLikes > 0 ? 'block' : 'none'};">${comment.amountOfLikes} <i class="fa-solid fa-heart liked fa-sm" style="color: #ff0000;"></i></span>`;
                         var commentActions = `
-                    <div class="comment-actions mt-2">
-                        <button class="comment-like-button text-decoration-none text-primary" data-count="${comment.post.amountOfLikes}">
-                            ${isLiked}
-                        </button>
-                        <button class="append-reply-textbox">
-                            Reply
-                        </button>
-                    </div>
-                    <a class="toggle-replies-btn btn row" data-comment-id="${comment.id}">View Replies</a>
-                     <div class="sub-replies-container${!isFirstContainerAppended && derivingFromId === 0 ? ' first-container-for-reply' : ''}" id="sub-replies-container-${comment.id}" style="display: none;"></div>`;
+                        <div class="comment-actions mt-2">
+                            <button class="comment-like-button text-decoration-none text-primary"  data-count="${comment.post.amountOfLikes}">
+                                ${isLiked}
+                            </button>
+                            <button class="append-reply-textbox">
+                                Reply
+                            </button>
+                        </div>
+                        `;
+                        if (comment.amountOfReplies > 0) {
+                            if (derivingFromId == 0) {
+                                commentActions += ` <a class="toggle-replies-btn btn row" data-comment-id="${comment.id}" data-amount-of-replies="${comment.amountOfReplies}">View Replies</a>`;
+                            }
+                            else {
+                                commentActions += ` <a class="toggle-replies-btn btn row no-src" data-comment-id="${comment.id}" data-amount-of-replies="${comment.amountOfReplies}">View Replies</a>`;
+                            }
+                        }
+                        if (derivingFromId == 0) {
+                            commentActions += `<div class="sub-replies-container" id="sub-replies-container-${comment.id}" style="display: none;"></div>`;
+                        }
 
                         var repliesHtml = `
-                        <div class="comment-container row pt-2" data-comment-id="${comment.id}">
                             <div class="profile-column col-1 mx-2 p-0">${imgTag}</div>
                             <div class="comment-column col mx-2 p-0">
                                 <div class="comment">
@@ -559,28 +568,33 @@
                                     </div>
                                     ${commentActions}
                                 </div>
-                            </div>
-                        </div>`;
-
+                            </div>`;
 
                         var tempDiv = document.createElement('div');
+                        tempDiv.setAttribute('class', 'comment-container row pt-2');
+                        tempDiv.setAttribute('data-comment-id', comment.id);
+                        tempDiv.setAttribute('data-deriving-from', derivingFromId);
                         tempDiv.innerHTML = repliesHtml;
                         fragment.appendChild(tempDiv);
 
-                        if (!isFirstContainerAppended && derivingFromId === 0) {
-                            isFirstContainerAppended = true;
+                        if (derivingFromId === 0) {
+                            var containerAppenderId = `comment-container-${postAttrId}`;
+                            var containerAppender = $('#' + containerAppenderId);
+                            containerAppender.append(fragment);
+                        } else {
+                            var repliesContainer = buttonEvent.next();
+
+                            if (repliesContainer.length&&repliesContainer.hasClass('sub-replies-container')) {
+                                repliesContainer.append(fragment);
+                            }
+                            else {
+                                var parentContainer = buttonEvent.closest('.sub-replies-container');
+
+                                var targetElement = parentContainer.find(`.comment-container[data-comment-id="${derivingFromId}"]`);
+                                targetElement.after(fragment);
+                            }
                         }
                     });
-
-                    var containerAppenderId;
-                    if (derivingFromId != 0) {
-                        containerAppenderId = `sub-replies-container-${derivingFromId}`;
-                    } else {
-                        containerAppenderId = `comment-container-${postAttrId}`;
-                    }
-                    var containerAppender = $(`#${containerAppenderId}`);
-                    containerAppender.append(fragment);
-
                 }
 
                 if (posts.length < 20) {
@@ -598,9 +612,6 @@
             }
         });
     }
-
-
-
     $(document).on('click', '.append-reply-textbox', function (event) {
         var $replyButton = $(this);
         var $inputBoxContainer = $replyButton.closest('.comment-actions').next('.reply-input-box');
