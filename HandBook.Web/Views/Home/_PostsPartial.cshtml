@@ -137,14 +137,15 @@
             </div>
             <div class="row comment-section" style="display:none" data-post-id="@item.Id">
                 <div class="col">
-                    <div class="col">
-                        <div class="input-group">
-                            <div class="border col-10 pl-1 pr-1 m-0">
-                                <textarea class="replies-text w-100" style="max-height:400px" placeholder="Write a comment..."></textarea>
+                    <div class="col" style="background:lightgray;border-radius: 15px;">
+                        <div class="input-group justify-content-between">
+                            <div class="col-11 pl-1 pr-1 m-0">
+                                <textarea class="comment-text w-100" placeholder="Write a comment..."></textarea>
                             </div>
-
-                            <div class="input-group-append align-self-end col-2">
-                                <button class="btn btn-primary submit-btn" type="button"> <i class="fas fa-right-long"></i></button>
+                            <div class="input-group-append align-self-end ">
+                                <button class="btn submit-btn" type="button" disabled>
+                                    <i class="fa-solid fa-paper-plane" style="rotate:30deg"></i>
+                                </button>
                             </div>
                         </div>
                     </div>

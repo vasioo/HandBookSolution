@@ -15,7 +15,7 @@ namespace HandBook.Models
         public DateTime Time { get; set; } = DateTime.Now;
 
         [System.ComponentModel.DataAnnotations.Required]
-        public int AmountOfLikes { get; set; } = 0;
+        public int AmountOfLikes { get; set; } 
 
         [System.ComponentModel.DataAnnotations.Required]
         public string ImageLink { get; set; } = "";

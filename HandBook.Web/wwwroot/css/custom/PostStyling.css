@@ -1,4 +1,4 @@
-﻿    .btn-circle {
+﻿.btn-circle {
     width: 60px;
     height: 60px;
     border-radius: 50%;
@@ -9,16 +9,9 @@
     z-index: 9999;
 }
 
-.likeButton {
-    background-color: transparent;
-    border: none;
-    color: #555;
-    line-height: 1;
-    padding: 0;
-    transition: color 0.2s ease-in-out;
-}
-
-.commentButton, .shareButton {
+.likeButton,
+.commentButton,
+.shareButton {
     background-color: transparent;
     border: none;
     color: #555;
@@ -26,13 +19,9 @@
     padding: 0;
 }
 
-.likeButton.liked {
-    color: #ff385c;
-}
-
-.likeButton span {
-    margin-left: 4px;
-}
+    .likeButton span {
+        margin-left: 4px;
+    }
 
 .image-container {
     width: 450px;
@@ -47,20 +36,16 @@
     max-height: 100%;
 }
 
-.cr-us-name, .cr-us-name:hover {
+.cr-us-name,
+.cr-us-name:hover {
     color: black;
     text-decoration: none;
 }
 
-.card-header {
-    background: none;
-}
-
-.card, .card-header, .card-body {
+.card-header,
+.card,
+.card-body {
     border: none;
-}
-
-.custom-date {
 }
 
 .custom-comment-icon {
@@ -69,17 +54,96 @@
     text-decoration: none;
     color: #333;
 }
-.first-container-for-reply{
-    padding-left:2.2em;
+
+.first-container-for-reply {
+    padding-left: 2.2em;
 }
-.comment-header {
+
+.comment-header,
+.comment-content {
     background: #B0B3B8;
+}
+
+.comment-header {
     padding-left: 1.2em;
     padding-top: 0.6em;
 }
 
 .comment-content {
-    background: #B0B3B8;
     padding-bottom: 0.6em;
-    padding-left:1.2em;
+    padding-left: 1.2em;
+}
+
+textarea {
+    padding-left: 0.7em;
+    padding-top: 0.7em;
+    max-height: 400px;
+    background: transparent;
+    border: none;
+    height: 65px;
+    resize:none;
+}
+
+    textarea.active {
+        border: none;
+    }
+    textarea:focus {
+        outline: none;
+    }
+
+
+.submit-btn::before {
+    content: "Send";
+    position: absolute;
+    top: -50%;
+    left: 50%;
+    transform: translateX(-50%);
+    opacity: 0;
+    visibility: hidden;
+    background-color: rgba(0, 0, 0, 0.9);
+    color: white;
+    padding: 3px 8px;
+    border-radius: 5px;
+    font-size: 14px;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.submit-btn:hover::before {
+    opacity: 1;
+    visibility: visible;
+}
+
+.submit-reply-btn::before {
+    content: "Send";
+    position: absolute;
+    top: -50%;
+    left: 50%;
+    transform: translateX(-50%);
+    opacity: 0;
+    visibility: hidden;
+    background-color: rgba(0, 0, 0, 0.9);
+    color: white;
+    padding: 3px 8px;
+    border-radius: 5px;
+    font-size: 14px;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.submit-reply-btn:hover::before {
+    opacity: 1;
+    visibility: visible;
+}
+
+.card-header{
+    background:white;
+}
+
+.profile-column::after {
+    content: '';
+    position: absolute;
+    left: 2em;
+    width: 2px;
+    height: calc(11% - 20px); 
+    background-color: #ccc;
+    transform: translateX(-50%);
 }

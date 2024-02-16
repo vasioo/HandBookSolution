@@ -169,21 +169,21 @@ namespace HandBook.Web.Controllers.HomeControllerFolder
             #region Likes
             [HttpPost]
             public async Task<IActionResult> IncrementOrDecrementLikeCount(Guid itemId)
-        {
-            try
             {
-                var username = HttpContext.User?.Identity?.Name ?? "";
-                var user = await _userManager.FindByNameAsync(username);
+                try
+                {
+                    var username = HttpContext.User?.Identity?.Name ?? "";
+                    var user = await _userManager.FindByNameAsync(username);
 
-                var item = await _helper.IncrementOrDecrementLikeCountHelper(itemId, user);
+                    var item = await _helper.IncrementOrDecrementLikeCountHelper(itemId, user);
 
-                return Json(item);
+                    return Json(item);
+                }
+                catch (Exception)
+                {
+                    return Json("Error occurred while processing the like/unlike action.");
+                }
             }
-            catch (Exception)
-            {
-                return Json("Error occurred while processing the like/unlike action.");
-            }
-        }
 
             [HttpPost]
             public async Task<IActionResult> IncrementOrDecrementCommentLikeCount(Guid itemId)
