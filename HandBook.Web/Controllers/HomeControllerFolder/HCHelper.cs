@@ -56,41 +56,39 @@ namespace HandBook.Web.Controllers.HomeControllerFolder
         {
             try
             {
-                var cards = _postService.IQueryableGetAllAsync().OrderByDescending(x => x.Time).Take(20);
-                var comments = _commentService.IQueryableGetAllAsync();
+                var cards =  _postService.IQueryableGetAllAsync().OrderByDescending(x => x.Time).Take(20).ToList();
+                var comments =  _commentService.IQueryableGetAllAsync().ToList();
 
                 var posts = cards.Select(post => new CardDTO
                 {
                     Id = post.Id,
                     CreatorUserName = post.CreatorUserName,
-                    AmountOfComments = comments.Where(x => x.Post.Id == post.Id).Count(),
+                    AmountOfComments = comments.Count(x => x.Post.Id == post.Id),
                     AmountOfLikes = post.AmountOfLikes,
                     Time = post.Time,
                     image = post.ImageLink,
                     Description = post.Description
-                });
-
+                }).ToList();
 
                 if (user != null)
                 {
                     var userLikedCards = _likeService.GetUserLikedPosts(user.Id);
                     var userLikedComments = _likeService.GetUserLikedComments(user.Id);
 
-                    if (userLikedCards != null && userLikedCards.Count() > 0)
+                    if (userLikedCards != null && userLikedCards.Any())
                     {
-                        var items = userLikedCards.Select(x => x.PostId);
-                        posts.First().UserLikedCards = items.AsQueryable();
+                        var items = userLikedCards.Select(x => x.PostId.ToString().ToLower()).ToList();
+                        posts.First().UserLikedCards = items;
                     }
 
-                    if (userLikedComments != null && userLikedComments.Count() > 0)
+                    if (userLikedComments != null && userLikedComments.Any())
                     {
-                        string commentIdsString = string.Join(",", userLikedComments.Select(x => x.CommentId));
-
+                        string commentIdsString = string.Join(",", userLikedComments.Select(x => x.CommentId.ToString().ToLower()));
                         posts.First().UserLikedComments = commentIdsString;
-
                     }
                 }
-                return posts;
+
+                return posts.AsQueryable();
             }
             catch (Exception)
             {
@@ -186,7 +184,7 @@ namespace HandBook.Web.Controllers.HomeControllerFolder
 
         #region  HelperMethodsHelper
 
-        #region CommentsHelper
+            #region CommentsHelper
 
         public async Task<string> AddOrRemoveACommentHelper(CommentsDTO commentsDTO, AppUser user)
         {
@@ -277,7 +275,7 @@ namespace HandBook.Web.Controllers.HomeControllerFolder
 
         #endregion
 
-        #region LikesHelper
+            #region LikesHelper
 
         public async Task<int> IncrementOrDecrementLikeCountHelper(Guid itemId, AppUser user)
         {
@@ -333,7 +331,7 @@ namespace HandBook.Web.Controllers.HomeControllerFolder
             {
                 item.AmountOfLikes++;
             }
-           
+
             var existingLike = _likeService.GetLikeEntityForUserAndCommentInfo(user.Id, itemId);
 
             if (existingLike != null)
@@ -376,7 +374,7 @@ namespace HandBook.Web.Controllers.HomeControllerFolder
 
         #endregion
 
-        #region FollowersHelper
+            #region FollowersHelper
 
         public async Task AddFollowerRelationshipHelper(string username, string usernamefollower)
         {
@@ -429,7 +427,7 @@ namespace HandBook.Web.Controllers.HomeControllerFolder
 
         #endregion
 
-        #region PostsHelper
+            #region PostsHelper
 
         public async Task<List<CardDTO>> LoadMorePostsHelper(int offset)
         {
@@ -452,7 +450,7 @@ namespace HandBook.Web.Controllers.HomeControllerFolder
 
         #endregion
 
-        #region Others
+            #region Others
 
         static string GenerateRandomId(int length, Random random)
         {

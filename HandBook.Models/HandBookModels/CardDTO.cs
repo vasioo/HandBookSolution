@@ -16,7 +16,8 @@ namespace HandBook.Web.Models
 
         public int AmountOfComments { get; set; }
 
-        public IQueryable<Guid> UserLikedCards { get; set; }
+        public List<string> UserLikedCards { get; set; } = new List<string>();
+
         public string UserLikedComments { get; set; } = "";
 
         public string Description { get; set; } = "";

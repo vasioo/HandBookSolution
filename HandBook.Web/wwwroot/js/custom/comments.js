@@ -18,8 +18,22 @@
                 posts.forEach(function (comment, index) {
                     var link = `https://res.cloudinary.com/dzaicqbce/image/upload/v1695818842/profile-image-for-${comment.appUser.userName}.png`;
                     var imgTag = `<img src="${link}" class="profile-image-class" alt="Image not found" style="border-radius:30px; width:50px;height:50px; margin-right:10px;" />`;
-                    var isLiked = commentsList && commentsList.includes(comment.id) ? '<i class="fa-solid fa-heart liked fa-xl com-btn" style="color: #ff0000;"></i>' : '<i class="fa-regular fa-heart fa-xl com-btn" style="color: #000;"></i>';
-                    var commentContent = `<div class="d-flex pb-3 pt-2">${comment.commentContent}</div>`;
+                    var isLiked = commentsList && commentsList.includes(comment.id.toLowerCase()) ? '<i class="fa-solid fa-heart liked fa-xl com-btn" style="color: #ff0000;"></i>' : '<i class="fa-regular fa-heart fa-xl com-btn" style="color: #000;"></i>';
+
+                    var commentContent = ``;
+                    if (derivingFromId != 0) {
+                        var currReplyUsername = $('.comment[data-comment-id="' + derivingFromId + '"]').data('comment-username');
+                        commentContent = `
+                        <div class="d-flex pb-3 pt-2">
+                            <a class="custom-username-link" href="Home/Account?username=${currReplyUsername}">
+                                @${currReplyUsername} &#160
+                            </a>
+                            ${comment.commentContent}
+                        </div>`;
+                    }
+                    else {
+                         commentContent = `<div class="d-flex pb-3 pt-2">${comment.commentContent}</div>`;
+                    }
                     var likeCount = `<span class="commentlikeCount" data-item-id="${comment.id}" style="display: ${comment.amountOfLikes > 0 ? 'block' : 'none'};">${comment.amountOfLikes} <i class="fa-solid fa-heart liked fa-sm" style="color: #ff0000;"></i></span>`;
                     var commentActions = `
                     <div class="comment-actions mt-2">
@@ -45,11 +59,19 @@
                     }
 
                     var repliesHtml = `
-                        <div class="profile-column col-1 mx-2 p-0">${imgTag}</div>
+                        <div class="profile-column col-1 mx-2 p-0">
+                            <a class="" href="Home/Account?username=${currReplyUsername}">
+                                ${imgTag}
+                            </a>
+                        </div>
                         <div class="comment-column col mx-2 p-0">
-                            <div class="comment">
+                            <div class="comment" data-comment-id=${comment.id} data-comment-username=${comment.appUser.userName}>
                                 <div class="comment-header rounded-top">
-                                    <div class="comment-username font-weight-bold">${comment.appUser.userName}</div>
+                                    <div class="comment-username font-weight-bold">
+                                        <a class="custom-username-com-link" href="Home/Account?username=${currReplyUsername}">
+                                            @${comment.appUser.userName}
+                                        </a>
+                                    </div>
                                     <div class="comment-time text-muted">${getTimeDisplay(comment.dateOfCreation)}</div>
                                 </div>
                                 <div class="comment-content rounded-bottom">

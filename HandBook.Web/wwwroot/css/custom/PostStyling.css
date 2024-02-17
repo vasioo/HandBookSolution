@@ -81,12 +81,13 @@ textarea {
     background: transparent;
     border: none;
     height: 65px;
-    resize:none;
+    resize: none;
 }
 
     textarea.active {
         border: none;
     }
+
     textarea:focus {
         outline: none;
     }
@@ -134,16 +135,27 @@ textarea {
     visibility: visible;
 }
 
-.card-header{
-    background:white;
+.card-header {
+    background: white;
 }
 
-.profile-column::after {
-    content: '';
-    position: absolute;
-    left: 2em;
-    width: 2px;
-    height: calc(11% - 20px); 
-    background-color: #ccc;
-    transform: translateX(-50%);
+.custom-username-link {
+    text-decoration: none;
+    color: #0B60B0;
 }
+
+    .custom-username-link.active {
+        text-decoration: none;
+    }
+.custom-username-com-link {
+    text-decoration: none;
+    color: #362B32;
+}
+    .custom-username-com-link.active {
+        text-decoration: none;
+        color:black;
+    }
+    .custom-username-com-link:hover {
+        text-decoration: none;
+        color: black;
+    }

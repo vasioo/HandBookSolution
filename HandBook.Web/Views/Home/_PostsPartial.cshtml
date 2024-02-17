@@ -42,7 +42,7 @@
         return displayString;
     }
 
-    IQueryable<Guid> userLikedCards = (IQueryable<Guid>)TempData["UserLikedCards"];
+    List<string> userLikedCards = (List<string>)TempData["UserLikedCards"];
 
     TempData.Keep();
 }
@@ -58,7 +58,7 @@
                         <img src="@link" class="profile-image-class" alt="Image not found" style="border-radius:30px; width:60px;height:60px; margin-right:10px;" />
                     </a>
                     <div>
-                        <a class="card-title h5 cr-us-name" asp-controller="Home" asp-action="Account" asp-route-username="@item.CreatorUserName">
+                        <a class="card-title h5 cr-us-name custom-username-com-link" asp-controller="Home" asp-action="Account" asp-route-username="@item.CreatorUserName">
                             &#64;@item.CreatorUserName
                         </a>
                         <div class="custom-date">@GetTimeDisplay(item.Time)</div>
@@ -106,7 +106,7 @@
                         <button class="likeButton" data-count="@item.AmountOfLikes" id="@item.Id">
                             @if (userLikedCards != null)
                             {
-                                @if (userLikedCards.Contains(item.Id))
+                                @if (userLikedCards.Contains(item.Id.ToString().ToLower()))
                                 {
                                     <i class="fa-solid fa-heart liked fa-xl" style="color: #ff0000;"></i>
                                 }

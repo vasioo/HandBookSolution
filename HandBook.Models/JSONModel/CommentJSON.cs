@@ -12,6 +12,7 @@ namespace HandBook.Models.JSONModel
 
         // Navigation properties
         public AppUser AppUser { get; set; } = new AppUser();
+
         public Post Post { get; set; } = new Post();
 
         public int AmountOfLikes { get; set; }
