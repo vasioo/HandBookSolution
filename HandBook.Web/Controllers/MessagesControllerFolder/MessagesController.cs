@@ -26,7 +26,7 @@ namespace HandBook.Web.Controllers.MessagesControllerFolder
 
         #region MainPage
         [Authorize]
-        public async Task<IActionResult> MainPage(int currentPage)
+        public async Task<IActionResult> MainPage(int currentPage=0)
         {
             if (currentPage <= 0)
             {

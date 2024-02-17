@@ -132,6 +132,12 @@ namespace HandBook.Web.Areas.Identity.Pages.Account
                     ModelState.AddModelError("Input.Username", "Username is already in use.");
                     return Page();
                 }
+                var existingEmail = await _userManager.FindByNameAsync(Input.Email);
+                if (existingEmail != null)
+                {
+                    ModelState.AddModelError("Input.Email", "Email is already in use.");
+                    return Page();
+                }
 
                 var user = new AppUser();
                 user.UserName = Input.Username;

@@ -29,13 +29,15 @@ $(document).on('click', '.append-reply-textbox', function (event) {
     var $inputBoxContainer = $replyButton.closest('.comment-actions').next('.reply-input-box');
 
     if (!$nextSibling.hasClass('row')) {
+        var neededId = $(this).attr('data-comment-id');
+        var derivingFromUsername = $('.comment[data-comment-id="' + neededId + '"]').data('comment-username')
         var inputBoxHtml = `
             <div class="row py-3" style="padding-left: 1.2em;">
-                <div class="col" style="background:lightgray;border-radius: 15px;">
+                <div class="col-11" style="background:lightgray;border-radius: 15px;">
                     <div class="col reply-input-box">
                         <div class="replies-group d-flex justify-content-between">
                             <div class="col-11 pl-1 pr-1 m-0">
-                                <textarea class="reply-text w-100" placeholder="Reply to..."></textarea>
+                                <textarea class="reply-text w-100" placeholder="Reply to ${derivingFromUsername}"></textarea>
                             </div>
                             <div class="input-group-append align-self-end">
                                 <button class="btn submit-reply-btn" type="button" disabled>
@@ -249,6 +251,7 @@ $(document).on('input', '.reply-text', function () {
         $submitButton.prop('disabled', false);
     }
 });
+
 
 $('.profile-image-class').on('error', function () {
     $(this).off('error').attr('src', '/handbook/images/anonymousUser.png');

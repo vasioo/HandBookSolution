@@ -116,15 +116,12 @@ textarea {
 
 .submit-reply-btn::before {
     content: "Send";
-    position: absolute;
-    top: -50%;
-    left: 50%;
-    transform: translateX(-50%);
+    position: relative;
     opacity: 0;
     visibility: hidden;
     background-color: rgba(0, 0, 0, 0.9);
     color: white;
-    padding: 3px 8px;
+    padding: 3px 4px;
     border-radius: 5px;
     font-size: 14px;
     transition: opacity 0.3s ease, visibility 0.3s ease;
@@ -134,6 +131,7 @@ textarea {
     opacity: 1;
     visibility: visible;
 }
+
 
 .card-header {
     background: white;
@@ -147,14 +145,17 @@ textarea {
     .custom-username-link.active {
         text-decoration: none;
     }
+
 .custom-username-com-link {
     text-decoration: none;
     color: #362B32;
 }
+
     .custom-username-com-link.active {
         text-decoration: none;
-        color:black;
+        color: black;
     }
+
     .custom-username-com-link:hover {
         text-decoration: none;
         color: black;

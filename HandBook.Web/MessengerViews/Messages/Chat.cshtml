@@ -31,69 +31,88 @@
         margin: 0px 0px !important;
         padding: 0px 0px !important;
     }
+
+    .form-control.input-for-sending,
+    .btn.btn-for-sending {
+        border: none; /* Remove borders */
+        box-shadow: none; /* Remove box shadow if any */
+    }
+
+        .form-control.input-for-sending:focus,
+        .btn.btn-for-sending:focus {
+            border: none; /* Remove borders on focus */
+            box-shadow: none; /* Remove box shadow on focus if any */
+        }
+
+    .btn-for-sending.disabled {
+        opacity: 0.5;
+        cursor: not-allowed; 
+        background:lightgray;
+    }
 </style>
 
-<div class="bg-light vh-100 row align-items-end" id="content">
-    <div data-username="@userName" id="current-user-username" hidden></div>
-    <div data-targetusername="@targetUser" id="target-user-username" hidden></div>
-    <div class="row" id="mainChatContainer">
-        <div class="row" id="chat">
-            @if (Model != null)
-            {
-                @foreach (var message in Model.OrderBy(m => m.TimeSent))
+<div class="container">
+    <div class="bg-light vh-100 row align-items-end" id="content">
+        <div data-username="@userName" id="current-user-username" hidden></div>
+        <div data-targetusername="@targetUser" id="target-user-username" hidden></div>
+        <div class="row" id="mainChatContainer">
+            <div class="row" id="chat">
+                @if (Model != null)
                 {
-                    string containterClass, timePosition, textAlign, contcolor = "", offset = "", additionalRowSetting = "";
-                    if (userName == message.Username)
+                    @foreach (var message in Model.OrderBy(m => m.TimeSent))
                     {
-                        containterClass = "message-sender";
-                        timePosition = "time-right text-light";
-                        textAlign = "text-right text-white mb-1 mt-1";
-                        contcolor = "bg-primary";
-                        offset = "col-md-7 row";
-                        additionalRowSetting = "d-flex justify-content-end";
-                    }
-                    else
-                    {
-                        containterClass = "message-receiver";
-                        timePosition = "time-left";
-                        textAlign = "text-left mb-1 mt-1";
-                        offset = "col-md-7 row";
-                    }
+                        string containterClass, timePosition, textAlign, contcolor = "", offset = "", additionalRowSetting = "";
+                        if (userName == message.Username)
+                        {
+                            containterClass = "message-sender";
+                            timePosition = "time-right text-light";
+                            textAlign = "text-right text-white mb-1 mt-1";
+                            contcolor = "bg-primary";
+                            offset = "col-md-7 row";
+                            additionalRowSetting = "d-flex justify-content-end";
+                        }
+                        else
+                        {
+                            containterClass = "message-receiver";
+                            timePosition = "time-left";
+                            textAlign = "text-left mb-1 mt-1";
+                            offset = "col-md-7 row";
+                        }
 
-                    <div class="row @additionalRowSetting">
-                        <div class="@offset @additionalRowSetting">
-                            <div class="col-auto">
-                                <div class="message-container @containterClass @contcolor @message.Username">
-                                    <p class="sender @textAlign" hidden>@message.Username</p>
-                                    <p class="@textAlign">@message.Text</p>
-                                    <span class="@timePosition" hidden>@message.TimeSent.ToString("M/dd/yyyy hh:MM tt")</span>
+                        <div class="row @additionalRowSetting">
+                            <div class="@offset @additionalRowSetting">
+                                <div class="col-auto">
+                                    <div class="message-container @containterClass @contcolor @message.Username">
+                                        <p class="sender @textAlign" hidden>@message.Username</p>
+                                        <p class="@textAlign">@message.Text</p>
+                                        <span class="@timePosition" hidden>@message.TimeSent.ToString("M/dd/yyyy hh:MM tt")</span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
+                    }
                 }
-            }
-            <input type="hidden" id="currentPage" value="1" />
-        </div>
-        <div class="row pt-4 pb-4">
-            <div class="col-9  p-0 m-0">
-                <div class="form-group">
-                    <input name="Text" class="form-control" id="messageText" placeholder="Message..." />
-                </div>
+                <input type="hidden" id="currentPage" value="1" />
             </div>
-            <div class="col-3  p-0 m-0">
-                <div class="form-group">
-                    <input value="Send" id="submitButton" class="btn text-white btn-outline-primary btn-block w-100 btn-dark" />
+            <div class="row pt-4 pb-4">
+                <div class="col-9  p-0 m-0">
+                    <div class="form-group">
+                        <input name="Text" class="form-control input-for-sending" id="messageText" placeholder="Message..." />
+                    </div>
                 </div>
+                <div class="col-3  p-0 m-0">
+                    <div class="form-group">
+                        <input value="Send" id="submitButton" class="btn text-white btn-outline-primary btn-block w-100 btn-dark btn-for-sending disabled" disabled/>
+                    </div>
+                </div>
+                <input type="hidden" value="@userName" name="username" id="username" />
+                <input type="hidden" value="@targetUser" name="targetusername" id="targetusername" />
             </div>
-            <input type="hidden" value="@userName" name="username" id="username" />
-            <input type="hidden" value="@targetUser" name="targetusername" id="targetusername" />
         </div>
     </div>
 </div>
 @if (User.Identity.IsAuthenticated)
 {
-
     <script>
         const userName = "@ViewBag.CurrentUserName";
     </script>
@@ -101,29 +120,6 @@
 
 @section scripts{
     <script src="~/js/signalr/dist/browser/signalr.js"></script>
+    <script src="~/js/custom/chat-event-handlers.js"></script>
     <script src="~/js/chat.js"></script>
 }
-<script>
-    $(document).ready(function () {
-        $(window).scroll(async function () {
-            if ($(window).scrollTop() <= 0) {
-                await loadOlderChatMessages();
-            }
-        });
-    });
-
-    async function loadOlderChatMessages() {
-        var currentPage = parseInt($("#currentPage").val());
-
-        try {
-            const response = await fetch(`/Mesages?handler=Chat&userName=${@userName}&currentPage=${currentPage}`);
-            const partialView = await response.text();
-
-            $("#chat").prepend(partialView);
-
-            $("#currentPage").val(currentPage + 1);
-        } catch (error) {
-            console.error('Error loading older chat messages:', error);
-        }
-    }
-</script>

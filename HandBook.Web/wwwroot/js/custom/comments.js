@@ -40,9 +40,9 @@
                         <a class="comment-like-button btn text-decoration-none text-primary"  data-count="${comment.post.amountOfLikes}">
                             ${isLiked}
                         </a>
-                        <a class="append-reply-textbox btn">
+                        <button class="append-reply-textbox btn" data-comment-id="${comment.id}">
                             <i class="fa-solid fa-reply fa-xl"></i>
-                        </a>
+                        </button>
                     </div>
                     `;
                     if (comment.amountOfReplies > 0) {
@@ -64,7 +64,7 @@
                                 ${imgTag}
                             </a>
                         </div>
-                        <div class="comment-column col mx-2 p-0">
+                        <div class="comment-column col-10 mx-2 p-0">
                             <div class="comment" data-comment-id=${comment.id} data-comment-username=${comment.appUser.userName}>
                                 <div class="comment-header rounded-top">
                                     <div class="comment-username font-weight-bold">
@@ -208,7 +208,7 @@ function toggleComments(element, itemId, buttonEvent) {
             commentSection.style.display = 'none';
 
             document.removeEventListener('click', handleClickOutside);
-
+            $('.comment-section-regulation-div').empty();
         }
     }
 
