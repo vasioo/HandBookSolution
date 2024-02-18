@@ -1,7 +1,6 @@
 ﻿$(document).on('input', '#messageText', function () {
     var $submitButton = $(document).find('#submitButton');
-
-    if ($(this).val().trim() === '') {
+    if ($(this).val().trim().length>0) {
         $submitButton.prop('disabled', true).addClass('disabled');
     } else {
         $submitButton.prop('disabled', false).removeClass('disabled');

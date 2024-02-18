@@ -10,6 +10,23 @@
     <script src="@Url.Content("~/js/custom/postJs.js")" type="text/javascript" asp-append-version="true"></script>
     <script src="@Url.Content("~/js/custom/accountPage.js")" type="text/javascript" asp-append-version="true"></script>
 }
+
+<style>
+    #overlay-panel-for-follows {
+        display: block;
+        z-index: 1000;
+        height: 80vh;
+        overflow: auto;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.7);
+        backdrop-filter: blur(5px);
+        display:none;
+    }
+
+</style>
 @if (Model != null && Model.UserTempUsername != null)
 {
     <div class="row justify-content-center">
@@ -56,7 +73,7 @@
                             </div>
                             <div class="col pr-1">
                                 <div class="d-flex justify-content-center">
-                                    <span>@Model.Followers</span>
+                                    <a class="btn" id="followers-load-btn" data-offset-count="0">@Model.Followers</a>
                                 </div>
                                 <div class="d-flex justify-content-center">
                                     <span class="text">Followers</span>
@@ -64,7 +81,7 @@
                             </div>
                             <div class="col pr-1">
                                 <div class="d-flex justify-content-center">
-                                    <span>@Model.Follows</span>
+                                    <a class="btn" id="follows-load-btn" data-offset-count="0">@Model.Follows</a>
                                 </div>
                                 <div class="d-flex justify-content-center">
                                     <span class="text">Following</span>
@@ -119,6 +136,9 @@
                 }
             </div>
         </div>
+    </div>
+    <div id="overlay-panel-for-follows" >
+
     </div>
 }
 else

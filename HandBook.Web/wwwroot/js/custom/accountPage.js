@@ -23,6 +23,7 @@
         });
     });
 });
+
 function validateAndResizeImage(file, callback) {
 
     const maxSizeInPixels = 1024, // Maximum dimension in pixels
@@ -52,6 +53,7 @@ function validateAndResizeImage(file, callback) {
         callback(false, 'Invalid file type.');
     }
 }
+
 function resizeImage(image, maxSize, callback) {
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d');
@@ -80,6 +82,7 @@ function resizeImage(image, maxSize, callback) {
 
     callback(resizedDataUrl);
 }
+
 function getImageSizeInBytes(dataUrl) {
     const base64String = dataUrl.split(',')[1],
         padding = (base64String.length % 4 === 0 ? 0 : 4 - (base64String.length % 4)),
@@ -88,6 +91,7 @@ function getImageSizeInBytes(dataUrl) {
 
     return sizeInBytes;
 }
+
 $('.add-following').click(function () {
     var buttonElement = $(this);
     var username = buttonElement.data("username");
@@ -105,6 +109,7 @@ $('.add-following').click(function () {
         }
     });
 });
+
 $('.remove-following').click(function () {
     var buttonElement = $(this);
     var username = buttonElement.data("username");
@@ -131,7 +136,6 @@ function showProfileImage() {
     neededBody.style.overflow = 'hidden';
 }
 
-
 $('#custom-view-profile-image-container-id').click(function () {
     var itemContainer = document.getElementById('custom-view-profile-image-container-id');
     itemContainer.style.setProperty('display', 'none', 'important');
@@ -139,3 +143,57 @@ $('#custom-view-profile-image-container-id').click(function () {
     var neededBody = document.getElementsByTagName('body')[0];
     neededBody.style.overflow = 'hidden';
 });
+
+$('#follows-load-btn').click(function () {
+    getFollows(true, $(this).data('offset-count'));
+});
+
+$('#followers-load-btn').click(function () {
+    getFollows(true,$(this).data('offset-count'));
+});
+
+function getFollows(isFollowers,offsetItem) {
+
+    $.ajax({
+        type: "POST",
+        url: "/Home/LoadFollows",
+        data: { followers: isFollowers,offset:offsetItem },
+        success: function (data) {
+            var follows = data.message;
+            var fragment = '';
+            follows.forEach(function () {
+                var imageLink = `https://res.cloudinary.com/dzaicqbce/image/upload/v1695818842/profile-image-for-${follows.userName}.png`;
+                var btnType = isFollowers ? `<div class="btn btn-secondary"  id="remove-follower-${follows.userName}">Remove</div>` : `<div class="btn btn-secondary" id="remove-following-for-${follows.userName}">Following</div>`;
+                var followerDivContainer = `
+                <a class="row" href="Home/Account?username=${follows.userName}">
+                    <div class="col-1">
+                        <img src="${imageLink}" style="width:40px;height:40px;border-radius:30px;">
+                    </div>
+                    <div class="col-8">
+                        <div class="row">@${follows.userName}</div>
+                    </div>
+                    <div class="col-3 text-center">
+                        ${btnType}
+                    </div>
+                </div>
+                `;
+
+                fragment.append(followerDivContainer);
+            });
+            if (isFollowers) {
+                $('#followers-load-btn').data('offset-count', offsetItem + 1);
+            }
+            else {
+                $('#follows-load-btn').data('offset-count',offsetItem + 1);
+            }
+            var $overlayPanel = $('#overlay-panel-for-follows');
+            $overlayPanel.css('display', 'block');
+
+            $overlayPanel.append(fragment);
+        },
+        error: function (error) {
+            console.log("Error loading more comments: " + error.responseText);
+            loading = false;
+        }
+    });
+}

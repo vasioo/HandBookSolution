@@ -527,6 +527,24 @@ namespace HandBook.Web.Controllers.HomeControllerFolder
             return useraccdto;
         }
 
+        public IQueryable<string?> LoadFollowsBasedOnOffset(AppUser currUser,bool isFollower, int offset)
+        {
+            if (isFollower)
+            {
+                return _followerService.IQueryableGetAllAsync()
+                    .Where(x => x.FollowedUserId == currUser.Id)
+                    .Select(x => x.Follower.UserName)
+                    .Skip(offset*30);
+            }
+            else
+            {
+                return _followerService.IQueryableGetAllAsync()
+                    .Where(x => x.FollowerUserId == currUser.Id)
+                    .Select(x => x.Followed.UserName)
+                    .Skip(offset * 30);
+            }
+        }
+
         #endregion
 
         #region  ExlporePageHelper
@@ -557,6 +575,8 @@ namespace HandBook.Web.Controllers.HomeControllerFolder
 
             return posts;
         }
+
+       
 
         #endregion
 

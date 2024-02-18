@@ -161,7 +161,7 @@ namespace HandBook.Web.Controllers.HomeControllerFolder
                     catch (Exception ex)
                     {
                         Console.WriteLine($"Error occurred: {ex.Message}");
-                        return Json("Error occurred while adding newer posts.");
+                        return Json("Error occurred while retrieving newer posts.");
                     }
                 }
                 #endregion
@@ -294,6 +294,23 @@ namespace HandBook.Web.Controllers.HomeControllerFolder
             return View("~/Views/Home/Account.cshtml", useraccdto);
         }
 
+        [HttpPost]
+        public async Task<JsonResult> LoadFollows(bool followers,int offset)
+        {
+            try
+            {
+                var username = HttpContext.User?.Identity?.Name ?? "";
+                var user = await _userManager.FindByNameAsync(username);
+
+                var result = _helper.LoadFollowsBasedOnOffset(user!,followers,offset);
+                return Json(new { status = true, Message = result });
+            }
+            catch (Exception)
+            {
+                return Json("Error occurred while extracting followers/followings.");
+                throw;
+            }
+        }
         #endregion
 
         #region ExplorePage

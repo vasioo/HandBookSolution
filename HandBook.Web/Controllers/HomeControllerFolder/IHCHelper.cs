@@ -22,5 +22,6 @@ namespace HandBook.Web.Controllers.HomeControllerFolder
         IQueryable<CardDTO> FeedHelper(AppUser user);
         Task<ExplorePageViewModel> GetExplorePageAttributes(AppUser user);
         IQueryable<CardDTO> GetSpecificExplorePageItemsByProvidedItemHelper(Guid itemId);
+        IQueryable<string?> LoadFollowsBasedOnOffset(AppUser currUser, bool isFollower, int offset);
     }
 }

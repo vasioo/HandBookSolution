@@ -6,6 +6,7 @@ namespace HandBook.Web.Controllers.MessagesControllerFolder
 {
     public class MCHelper : IMCHelper
     {
+
         #region FieldsAndController
         public readonly UserManager<AppUser> _userManager;
 
@@ -16,6 +17,64 @@ namespace HandBook.Web.Controllers.MessagesControllerFolder
             _userManager = userManager;
             _messageService = messageService;
         }
+        #endregion
+
+        #region MainPage
+
+        public async Task<List<UserMassageDTO>> GetUsersWithMessages(string senderId)
+        {
+            var neededUsers = GetUsersSentMessagesTo(senderId);
+            List<UserMassageDTO> userMsgDTOList = new List<UserMassageDTO>();
+            foreach (var item in neededUsers)
+            {
+                UserMassageDTO userMsgDto = new UserMassageDTO();
+
+                userMsgDto.UserData = item;
+
+                var users = _userManager.Users;
+
+                var specUserNeeded = users.Where(u => u.UserName == item).FirstOrDefault();
+
+                if (specUserNeeded != null)
+                {
+                    var messages = GetUnreadMessagesForUser(senderId, specUserNeeded.Id);
+                    if (messages.Count == 1)
+                    {
+                        userMsgDto.Message = messages!.FirstOrDefault()!.Text;
+                        userMsgDto.DateOfSending = messages!.FirstOrDefault()!.TimeSent;
+                    }
+                    else if (messages.Count > 0)
+                    {
+                        int neededCountNumber = messages.Count();
+                        if (neededCountNumber > 4)
+                        {
+                            userMsgDto.Message = $"4+ unopened messages";
+                        }
+                        else
+                        {
+                            userMsgDto.Message = $"{messages.Count()} unopened messages";
+                        }
+                        userMsgDto.DateOfSending = messages!.OrderByDescending(x => x.TimeSent)!.Select(x => x.TimeSent).FirstOrDefault();
+                    }
+                    else
+                    {
+                        var allMessages = _messageService.IQueryableGetAllAsync();
+
+                        var lastMessage = allMessages
+                            .Where(m => m.SenderMessageId == senderId && m.MessageReceiverId == specUserNeeded.Id
+                            || m.SenderMessageId == specUserNeeded.Id && m.MessageReceiverId == senderId)
+                            .OrderByDescending(m => m.TimeSent)
+                            .FirstOrDefault();
+
+                        userMsgDto.Message = lastMessage!.Text!;
+                        userMsgDto.DateOfSending = lastMessage.TimeSent;
+                    }
+                }
+                userMsgDTOList.Add(userMsgDto);
+            }
+            return userMsgDTOList;
+        }
+
         #endregion
 
         #region Chat
@@ -51,58 +110,7 @@ namespace HandBook.Web.Controllers.MessagesControllerFolder
             return messages;
         }
 
-        public async Task<List<UserMassageDTO>> GetUsersWithMessages(string senderId)
-        {
-            var neededUsers = GetUsersSentMessagesTo(senderId);
-            List<UserMassageDTO> userMsgDTOList = new List<UserMassageDTO>();
-            foreach (var item in neededUsers)
-            {
-                UserMassageDTO userMsgDto = new UserMassageDTO();
-
-                userMsgDto.UserData = item;
-
-                var users = _userManager.Users;
-
-                var specUserNeeded = users.Where(u => u.UserName == item).FirstOrDefault();
-
-                if (specUserNeeded != null)
-                {
-                    var messages = GetUnreadMessagesForUser(senderId, specUserNeeded.Id);
-
-                    if (messages.Count == 1)
-                    {
-                        userMsgDto.Message = messages!.FirstOrDefault()!.Text;
-                    }
-                    else if (messages.Count > 0)
-                    {
-                        int neededCountNumber = messages.Count();
-                        if (neededCountNumber > 4)
-                        {
-                            userMsgDto.Message = $"4+ unopened messages";
-                        }
-                        else
-                        {
-                            userMsgDto.Message = $"{messages.Count()} unopened messages";
-                        }
-                    }
-                    else
-                    {
-                        var allMessages = _messageService.IQueryableGetAllAsync();
-
-                        var lastMessage = allMessages
-                            .Where(m => m.SenderMessageId == senderId && m.MessageReceiverId == specUserNeeded.Id
-                            || m.SenderMessageId == specUserNeeded.Id && m.MessageReceiverId == senderId)
-                            .OrderByDescending(m => m.TimeSent)
-                            .FirstOrDefault();
-
-                        userMsgDto.Message = lastMessage!.Text!;
-
-                    }
-                }
-                userMsgDTOList.Add(userMsgDto);
-            }
-            return userMsgDTOList;
-        }
+      
         #endregion
 
     }

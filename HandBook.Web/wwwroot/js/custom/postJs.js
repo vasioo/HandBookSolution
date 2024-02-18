@@ -1,5 +1,4 @@
-﻿
-    function likeButtonClick(Id) {
+﻿    function likeButtonClick(Id) {
         $.ajax({
             type: "POST",
             url: "/Home/IncrementOrDecrementLikeCount",

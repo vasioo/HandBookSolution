@@ -1,20 +1,72 @@
 ﻿@model IEnumerable<Messenger.Models.UserMassageDTO>
-
-<div id="item-containter" class="container">
-    @if (Model != null&&Model.Count()>0)
+@{
+    string GetTimeDisplay(DateTime postDate)
     {
+        TimeSpan timeDifference = DateTime.Now - postDate;
+
+        double seconds = Math.Floor(timeDifference.TotalSeconds);
+        double minutes = Math.Floor(timeDifference.TotalMinutes);
+        double hours = Math.Floor(timeDifference.TotalHours);
+        double days = Math.Floor(timeDifference.TotalDays);
+
+        string displayString = "";
+
+        if (days > 365 || (days > 7 && postDate.Year != DateTime.Now.Year))
+        {
+            displayString = postDate.ToString("yyyy-MM-dd HH:mm:ss");
+        }
+        else if (days > 7)
+        {
+            displayString = postDate.ToString("MMMM d");
+        }
+        else if (days >= 1)
+        {
+            displayString = days == 1 ? "1 day ago" : $"{(int)days}d";
+        }
+        else if (hours >= 1)
+        {
+            displayString = hours == 1 ? "1 hour ago" : $"{(int)hours}h";
+        }
+        else if (minutes >= 1)
+        {
+            displayString = minutes == 1 ? "1 minute ago" : $"{(int)minutes}m";
+        }
+        else
+        {
+            displayString = seconds == 1 ? "1 second ago" : $"{(int)seconds}s";
+        }
+
+        return displayString;
+    }
+}
+<div id="item-containter" class="container">
+    @if (Model != null && Model.Count() > 0)
+    {
+        <div class="row pt-5 pb-4 h4">
+            <div class="col">Messages</div>
+        </div>
         @foreach (var item in Model)
         {
-            <a href="@Url.Action("Chat", "Messages", new { userName = item.UserData })" style="text-decoration:none">
-                <div class="row border p-3">
-                    <div class="row ">
-                        <h3 class="text-dark">@item.UserData</h3>
+            <div class="row">
+                @{
+                    var link = $"https://res.cloudinary.com/dzaicqbce/image/upload/v1695818842/profile-image-for-{item.UserData}.png";
+                }
+                <a class="col-1 d-flex align-items-center" asp-controller="Home" asp-action="Account" asp-route-username="@item.UserData">
+                    <img src="@link" class="profile-image-class" alt="Image not found" style="border-radius:30px; width:4em;height:4em; margin-right:10px;" />
+                </a>
+                <a href="@Url.Action("Chat", "Messages", new { userName = item.UserData })" style="text-decoration:none" class="col p-0 m-0">
+                    <div class="row">
+                        <div class="row">
+                            <h3 class="text-dark">@item.UserData</h3>
+                        </div>
+                        <div class="row h5">
+                            <h5 class="col mb-0" style="color:dimgray">@item.Message</h5>
+                            <h5 class="col-2 text-end mb-0" style="color:dimgray">@GetTimeDisplay(item.DateOfSending)</h5>
+                        </div>
                     </div>
-                    <div class="row h5">
-                        <h5 class="" style="color:dimgray">@item.Message</h5>
-                    </div>
-                </div>
-            </a>
+                </a>
+            </div>
+
         }
     }
     else
@@ -25,6 +77,3 @@
     }
     <input type="hidden" id="currentPage" value="1" />
 </div>
-<script>
-
-</script>

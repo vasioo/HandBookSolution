@@ -49,6 +49,10 @@
         cursor: not-allowed; 
         background:lightgray;
     }
+
+    footer{
+        display:none;
+    }
 </style>
 
 <div class="container">
@@ -56,7 +60,8 @@
         <div data-username="@userName" id="current-user-username" hidden></div>
         <div data-targetusername="@targetUser" id="target-user-username" hidden></div>
         <div class="row" id="mainChatContainer">
-            <div class="row" id="chat">
+         
+            <div class="row pt-3" id="chat">
                 @if (Model != null)
                 {
                     @foreach (var message in Model.OrderBy(m => m.TimeSent))
@@ -102,7 +107,7 @@
                 </div>
                 <div class="col-3  p-0 m-0">
                     <div class="form-group">
-                        <input value="Send" id="submitButton" class="btn text-white btn-outline-primary btn-block w-100 btn-dark btn-for-sending disabled" disabled/>
+                        <input value="Send" id="submitButton" class="btn text-white btn-outline-primary btn-block w-100 btn-dark btn-for-sending disabled"/>
                     </div>
                 </div>
                 <input type="hidden" value="@userName" name="username" id="username" />
