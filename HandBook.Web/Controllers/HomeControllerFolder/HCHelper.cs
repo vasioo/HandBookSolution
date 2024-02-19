@@ -186,7 +186,7 @@ namespace HandBook.Web.Controllers.HomeControllerFolder
 
             #region CommentsHelper
 
-        public async Task<string> AddOrRemoveACommentHelper(CommentsDTO commentsDTO, AppUser user)
+            public async Task<string> AddOrRemoveACommentHelper(CommentsDTO commentsDTO, AppUser user)
         {
             var item = await _postService.GetByIdAsync(commentsDTO.PostId);
 
@@ -248,36 +248,36 @@ namespace HandBook.Web.Controllers.HomeControllerFolder
             return jsonResult;
         }
 
-        public IQueryable<CommentJSON> LoadMoreCommentsHelper(int offset, Guid derivingFrom, Guid postId)
-        {
-            var allComments = _commentService.IQueryableGetAllAsync();
-
-            var neededComs = allComments.OrderByDescending(x => x.DateOfCreation)
-                        .Where(x => x.Post.Id == postId && x.CommentDeriveFromId == derivingFrom)
-                        .Skip(offset)
-                        .Take(20);
-
-            var commentsJSON = neededComs.Select(com => new CommentJSON
+            public IQueryable<CommentJSON> LoadMoreCommentsHelper(int offset, Guid derivingFrom, Guid postId)
             {
-                Id = com.Id,
-                DateOfCreation = com.DateOfCreation,
-                CommentContent = com.CommentContent,
-                AmountOfLikes = com.AmountOfLikes,
-                AppUser = com.AppUser,
-                Post = com.Post,
-                CommentDeriveFromId = com.CommentDeriveFromId,
-                AmountOfReplies = allComments.Where(x => x.CommentDeriveFromId == com.Id).Count()
-            });
+                var allComments = _commentService.IQueryableGetAllAsync();
 
-            return commentsJSON;
-        }
+                var neededComs = allComments.OrderByDescending(x => x.DateOfCreation)
+                            .Where(x => x.Post.Id == postId && x.CommentDeriveFromId == derivingFrom)
+                            .Skip(offset)
+                            .Take(20);
+
+                var commentsJSON = neededComs.Select(com => new CommentJSON
+                {
+                    Id = com.Id,
+                    DateOfCreation = com.DateOfCreation,
+                    CommentContent = com.CommentContent,
+                    AmountOfLikes = com.AmountOfLikes,
+                    AppUser = com.AppUser,
+                    Post = com.Post,
+                    CommentDeriveFromId = com.CommentDeriveFromId,
+                    AmountOfReplies = allComments.Where(x => x.CommentDeriveFromId == com.Id).Count()
+                });
+
+                return commentsJSON;
+            }
 
 
-        #endregion
+            #endregion
 
             #region LikesHelper
 
-        public async Task<int> IncrementOrDecrementLikeCountHelper(Guid itemId, AppUser user)
+            public async Task<int> IncrementOrDecrementLikeCountHelper(Guid itemId, AppUser user)
         {
             var item = await _postService.GetByIdAsync(itemId);
             item.AmountOfLikes = _likeService.IQueryableGetAllAsync().Where(x => x.PostId == item.Id).Count();
@@ -323,7 +323,7 @@ namespace HandBook.Web.Controllers.HomeControllerFolder
             return item.AmountOfLikes;
         }
 
-        public async Task<int> IncrementOrDecrementCommentLikeCountHelper(Guid itemId, AppUser user)
+            public async Task<int> IncrementOrDecrementCommentLikeCountHelper(Guid itemId, AppUser user)
         {
             var item = await _commentService.GetByIdAsync(itemId);
             item.AmountOfLikes = _likeService.IQueryableGetAllAsync().Where(x => x.PostId == item.Id).Count();
@@ -372,37 +372,37 @@ namespace HandBook.Web.Controllers.HomeControllerFolder
             return item.AmountOfLikes;
         }
 
-        #endregion
+            #endregion
 
             #region FollowersHelper
 
-        public async Task AddFollowerRelationshipHelper(string username, string usernamefollower)
-        {
-            var follow = await _userManager.FindByNameAsync(username);
-            var follower = await _userManager.FindByNameAsync(usernamefollower);
-
-            if (follow != null && follower != null && usernamefollower != username)
+            public async Task AddFollowerRelationshipHelper(string username, string usernamefollower)
             {
-                var followerrelation = new Followers();
+                var follow = await _userManager.FindByNameAsync(username);
+                var follower = await _userManager.FindByNameAsync(usernamefollower);
 
-                followerrelation.Follower = follower;
-                followerrelation.Followed = follow;
-
-                await _followerService.AddAsync(followerrelation);
-
-                Notification ntf = new Notification
+                if (follow != null && follower != null && usernamefollower != username)
                 {
-                    AppUser = follow!,
-                    CreatorUserName = follow!.UserName!,
-                    Time = DateTime.Now,
-                    MainText = "started followed you"
-                };
+                    var followerrelation = new Followers();
 
-                await _notificationService.AddAsync(ntf);
+                    followerrelation.Follower = follower;
+                    followerrelation.Followed = follow;
+
+                    await _followerService.AddAsync(followerrelation);
+
+                    Notification ntf = new Notification
+                    {
+                        AppUser = follow!,
+                        CreatorUserName = follow!.UserName!,
+                        Time = DateTime.Now,
+                        MainText = "started followed you"
+                    };
+
+                    await _notificationService.AddAsync(ntf);
+                }
             }
-        }
 
-        public async Task RemoveFollowerRelationshipHelper(string username, string usernamefollower)
+            public async Task RemoveFollowerRelationshipHelper(string username, string usernamefollower)
         {
             var follow = await _userManager.FindByNameAsync(username);
             var follower = await _userManager.FindByNameAsync(usernamefollower);
@@ -425,7 +425,7 @@ namespace HandBook.Web.Controllers.HomeControllerFolder
             }
         }
 
-        #endregion
+            #endregion
 
             #region PostsHelper
 
@@ -532,15 +532,15 @@ namespace HandBook.Web.Controllers.HomeControllerFolder
             if (isFollower)
             {
                 return _followerService.IQueryableGetAllAsync()
-                    .Where(x => x.FollowedUserId == currUser.Id)
-                    .Select(x => x.Follower.UserName)
+                    .Where(x => x.Follower.Id == currUser.Id)
+                    .Select(x => x.Followed.UserName)
                     .Skip(offset*30);
             }
             else
             {
                 return _followerService.IQueryableGetAllAsync()
-                    .Where(x => x.FollowerUserId == currUser.Id)
-                    .Select(x => x.Followed.UserName)
+                    .Where(x => x.Followed.Id== currUser.Id)
+                    .Select(x => x.Follower.UserName)
                     .Skip(offset * 30);
             }
         }

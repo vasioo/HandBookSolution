@@ -160,26 +160,62 @@ function getFollows(isFollowers,offsetItem) {
         data: { followers: isFollowers,offset:offsetItem },
         success: function (data) {
             var follows = data.message;
-            var fragment = '';
+            var fragment = document.createDocumentFragment();
+            var indexer = 0;
             follows.forEach(function () {
-                var imageLink = `https://res.cloudinary.com/dzaicqbce/image/upload/v1695818842/profile-image-for-${follows.userName}.png`;
-                var btnType = isFollowers ? `<div class="btn btn-secondary"  id="remove-follower-${follows.userName}">Remove</div>` : `<div class="btn btn-secondary" id="remove-following-for-${follows.userName}">Following</div>`;
+                var imageLink = `https://res.cloudinary.com/dzaicqbce/image/upload/v1695818842/profile-image-for-${follows[indexer]}.png`;
+                var btnType = isFollowers ? `<div class="btn btn-secondary"  id="remove-follower-${follows[indexer]}">Remove</div>` : `<div class="btn btn-secondary" id="remove-following-for-${follows[indexer]}">Following</div>`;
                 var followerDivContainer = `
-                <a class="row" href="Home/Account?username=${follows.userName}">
-                    <div class="col-1">
+                <a class="row user-username-link" href="Account?username=${follows[indexer]}">
+                    <div class="col-2">
                         <img src="${imageLink}" style="width:40px;height:40px;border-radius:30px;">
                     </div>
-                    <div class="col-8">
-                        <div class="row">@${follows.userName}</div>
+                    <div class="col-6">
+                        <div class="row">@${follows[indexer]}</div>
                     </div>
-                    <div class="col-3 text-center">
+                    <div class="col-4 text-center">
                         ${btnType}
                     </div>
                 </div>
                 `;
-
-                fragment.append(followerDivContainer);
+                var tempDiv = document.createElement('div');
+                tempDiv.setAttribute('class', '');
+                tempDiv.innerHTML = followerDivContainer;
+                fragment.appendChild(tempDiv);
+                indexer++;
             });
+
+            const existingOverlay = document.getElementById('overlay-panel-for-follows');
+
+            if (existingOverlay) {
+                existingOverlay.remove();
+
+                document.body.style.overflow = 'auto';
+                $('.comment-section-regulation-div').empty();
+
+                document.removeEventListener('click', handleOutsideClickForFollowers);
+            }
+            const overlay = document.createElement('div');
+            overlay.setAttribute('class', 'd-flex justify-content-center align-items-center');
+            overlay.id = "overlay-panel-for-follows";
+            document.body.appendChild(overlay);
+
+            const overlayContent = document.createElement('div');
+            overlayContent.setAttribute('class', 'overlay-content');
+            overlayContent.append(fragment);
+            overlay.appendChild(overlayContent);
+
+
+            function handleOutsideClickForFollowers(event) {
+                if (event.target === overlay) {
+                    document.body.style.overflow = 'auto';
+                    overlay.remove();
+                    document.removeEventListener('click', handleOutsideClickForFollowers);
+                }
+            }
+
+            document.addEventListener('click', handleOutsideClickForFollowers);
+            
             if (isFollowers) {
                 $('#followers-load-btn').data('offset-count', offsetItem + 1);
             }
