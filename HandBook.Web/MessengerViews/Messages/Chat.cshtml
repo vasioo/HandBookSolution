@@ -116,6 +116,12 @@
         </div>
     </div>
 </div>
+
+@if (!ViewBag.RelationshipBetweenThem)
+{
+    <div id="confirm-status-of-overlay"></div>    
+}
+
 @if (User.Identity.IsAuthenticated)
 {
     <script>

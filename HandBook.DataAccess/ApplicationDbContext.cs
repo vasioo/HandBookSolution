@@ -1,4 +1,5 @@
 ﻿using HandBook.Models;
+using HandBook.Models.UserModel;
 using HandBook.Web.Models;
 using Messenger.Models;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
@@ -18,6 +19,7 @@ namespace HandBook.DataAccess
         public DbSet<Messages> Messages { get; set; }
         public DbSet<Comment> Comments { get; set; }
         public DbSet<Followers> Followers { get; set; }
+        public DbSet<BannedUser> BannedUsers { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {

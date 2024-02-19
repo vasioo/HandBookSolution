@@ -50,6 +50,17 @@
         .user-username-link:active {
             text-decoration: none;
         }
+
+    .element-size-1em {
+        font-size: 1em;
+    }
+
+        .element-size-1em.btn {
+            padding: 0;
+            margin: 0;
+            border: none; 
+            box-sizing: content-box;
+        }
 </style>
 @if (Model != null && Model.UserTempUsername != null)
 {
@@ -88,27 +99,27 @@
                     <div class="col-md-6">
                         <div class="row" id="following-information">
                             <div class="col pr-1">
-                                <div class="d-flex justify-content-center">
-                                    <span>@Model.PostsTemp.Count()</span>
+                                <div class="d-flex justify-content-center ">
+                                    <div class="element-size-1em">@Model.PostsTemp.Count()</div>
                                 </div>
-                                <div class="d-flex justify-content-center">
-                                    <span>Posts</span>
-                                </div>
-                            </div>
-                            <div class="col pr-1">
-                                <div class="d-flex justify-content-center">
-                                    <a class="btn" id="followers-load-btn" data-offset-count="0">@Model.Followers</a>
-                                </div>
-                                <div class="d-flex justify-content-center">
-                                    <span class="text">Followers</span>
+                                <div class="d-flex justify-content-center ">
+                                    <div class="element-size-1em">Posts</div>
                                 </div>
                             </div>
                             <div class="col pr-1">
-                                <div class="d-flex justify-content-center">
-                                    <a class="btn" id="follows-load-btn" data-offset-count="0">@Model.Follows</a>
+                                <div class="d-flex justify-content-center ">
+                                    <a class="btn p-0 element-size-1em" id="followers-load-btn" data-offset-count="0">@Model.Followers</a>
                                 </div>
-                                <div class="d-flex justify-content-center">
-                                    <span class="text">Following</span>
+                                <div class="d-flex justify-content-center ">
+                                    <div class="text element-size-1em">Followers</div>
+                                </div>
+                            </div>
+                            <div class="col pr-1">
+                                <div class="d-flex justify-content-center ">
+                                    <a class="btn p-0 element-size-1em" id="follows-load-btn" data-offset-count="0">@Model.Follows</a>
+                                </div>
+                                <div class="d-flex justify-content-center ">
+                                    <div class="text element-size-1em">Following</div>
                                 </div>
                             </div>
                         </div>

@@ -1,12 +1,6 @@
 ﻿using HandBook.DataAccess;
-using HandBook.Models;
 using HandBook.Services.Interfaces;
 using Messenger.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace HandBook.Services.Services
 {
@@ -20,14 +14,31 @@ namespace HandBook.Services.Services
 
         public List<string> UsersThatAreInMessagesList(string userId)
         {
-            var receiverIds = _dataContext.Messages.OrderByDescending(x => x.TimeSent)
+            var receiverIds = _dataContext.Messages
+               .OrderByDescending(x => x.TimeSent)
                .Where(m => m.SenderMessageId == userId)
                .Select(m => m.MessageReceiverId)
                .Distinct()
-           .ToList();
+               .ToList();
 
             var users = _dataContext.Users
                 .Where(u => receiverIds.Contains(u.Id))
+                .Select(u => u.UserName)
+                .ToList();
+
+            return users!;
+        }
+        public List<string> UsersThatHaveSentAMessage(string userId)
+        {
+            var sendersId = _dataContext.Messages
+              .OrderByDescending(x => x.TimeSent)
+              .Where(m => m.MessageReceiverId == userId)
+              .Select(m => m.SenderMessageId)
+              .Distinct()
+              .ToList();
+
+            var users = _dataContext.Users
+                .Where(u => sendersId.Contains(u.Id))
                 .Select(u => u.UserName)
                 .ToList();
 

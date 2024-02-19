@@ -9,5 +9,7 @@ namespace HandBook.Web.Controllers.MessagesControllerFolder
         List<string> GetUsersSentMessagesTo(string userId);
         IOrderedQueryable<Messages> GetCurrentChatMessages(string currentUserId, string otherUserId);
         Task<List<UserMassageDTO>> GetUsersWithMessages(string senderId);
+        bool IsThereAreRelationshipBetweenThem(AppUser sender, AppUser receiver);
+        bool BanAUser(AppUser sender, AppUser receiver);
     }
 }

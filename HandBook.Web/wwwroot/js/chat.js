@@ -74,5 +74,48 @@ document.getElementById("submitButton").addEventListener("click", function (even
 });
 
 $(document).ready(function () {
+    if ($("#confirm-status-of-overlay").length) {
+        Swal.fire({
+            title: 'Warning!',
+            text: 'This user could be a spam account.',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Continue',
+            cancelButtonText: 'Block'
+        }).then((result) => {
+            if (!result.isConfirmed) {
+                Swal.fire({
+                    title: 'Are you sure?',
+                    text: 'Do you want to block this user?',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'Yes, block',
+                    cancelButtonText: 'Cancel'
+                }).then((blockResult) => {
+                    if (blockResult.isConfirmed) {
+                        $.ajax({
+                            type: "POST",
+                            url: "Messages/BanUser",
+                            data: { userId: $('#target-user-username').data('username') },
+                            success: function (response) {
+                                Swal.fire(
+                                    'Banned!',
+                                    'The user was banned successfully.',
+                                    'success'
+                                );
+                            },
+                            error: function (xhr, status, error) {
+                            }
+                        });
+                    }
+                });
+            }
+        });
+    }
+
     $('html, body').animate({ scrollTop: $('#content').height() }, 0);
 });

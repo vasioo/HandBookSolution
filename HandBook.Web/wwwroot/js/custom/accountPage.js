@@ -149,37 +149,40 @@ $('#follows-load-btn').click(function () {
 });
 
 $('#followers-load-btn').click(function () {
-    getFollows(true,$(this).data('offset-count'));
+    getFollows(true, $(this).data('offset-count'));
 });
 
-function getFollows(isFollowers,offsetItem) {
+function getFollows(isFollowers, offsetItem) {
 
     $.ajax({
         type: "POST",
         url: "/Home/LoadFollows",
-        data: { followers: isFollowers,offset:offsetItem },
+        data: { followers: isFollowers, offset: offsetItem },
         success: function (data) {
             var follows = data.message;
             var fragment = document.createDocumentFragment();
             var indexer = 0;
             follows.forEach(function () {
                 var imageLink = `https://res.cloudinary.com/dzaicqbce/image/upload/v1695818842/profile-image-for-${follows[indexer]}.png`;
-                var btnType = isFollowers ? `<div class="btn btn-secondary"  id="remove-follower-${follows[indexer]}">Remove</div>` : `<div class="btn btn-secondary" id="remove-following-for-${follows[indexer]}">Following</div>`;
+                var btnType = isFollowers ? `<div class="btn btn-secondary remove-follower"  id="${follows[indexer]}">Remove</div>` : `<div class="btn btn-secondary remove-following-overlay" id="${follows[indexer]}">Following</div>`;
                 var followerDivContainer = `
-                <a class="row user-username-link" href="Account?username=${follows[indexer]}">
-                    <div class="col-2">
-                        <img src="${imageLink}" style="width:40px;height:40px;border-radius:30px;">
-                    </div>
+                    <div class="col-2" >
+                        <a class=" user-username-link" href="Account?username=${follows[indexer]}">
+                            <img src="${imageLink}" style="width:40px;height:40px;border-radius:30px;">
+                        </a>
+                    </div >
                     <div class="col-6">
-                        <div class="row">@${follows[indexer]}</div>
+                        <a class=" user-username-link" href="Account?username=${follows[indexer]}">
+                            <div class="row">@${follows[indexer]}</div>
+                        </a>
                     </div>
                     <div class="col-4 text-center">
                         ${btnType}
                     </div>
-                </div>
+                </div >
                 `;
                 var tempDiv = document.createElement('div');
-                tempDiv.setAttribute('class', '');
+                tempDiv.setAttribute('class', 'row');
                 tempDiv.innerHTML = followerDivContainer;
                 fragment.appendChild(tempDiv);
                 indexer++;
@@ -199,6 +202,7 @@ function getFollows(isFollowers,offsetItem) {
             overlay.setAttribute('class', 'd-flex justify-content-center align-items-center');
             overlay.id = "overlay-panel-for-follows";
             document.body.appendChild(overlay);
+            document.body.style.overflow = 'hidden';
 
             const overlayContent = document.createElement('div');
             overlayContent.setAttribute('class', 'overlay-content');
@@ -215,12 +219,12 @@ function getFollows(isFollowers,offsetItem) {
             }
 
             document.addEventListener('click', handleOutsideClickForFollowers);
-            
+
             if (isFollowers) {
                 $('#followers-load-btn').data('offset-count', offsetItem + 1);
             }
             else {
-                $('#follows-load-btn').data('offset-count',offsetItem + 1);
+                $('#follows-load-btn').data('offset-count', offsetItem + 1);
             }
             var $overlayPanel = $('#overlay-panel-for-follows');
             $overlayPanel.css('display', 'block');
@@ -233,3 +237,76 @@ function getFollows(isFollowers,offsetItem) {
         }
     });
 }
+
+$(document).on('click', '.remove-follower', function () {
+    var usernametemp = $(this).attr('id');
+    Swal.fire({
+        title: 'Confirmation',
+        text: `Are you sure you want to remove ${usernametemp} as a follower?`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Yes, remove!',
+        cancelButtonText: 'Cancel'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            $.ajax({
+                type: "POST",
+                url: "/Home/RemoveFollowerRelationship",
+                data: { username: usernametemp },
+                success: function (data) {
+                    $(this).removeClass("btn-secondary remove-follower").addClass("btn-primary add-follower");
+                    $(this).text("Unfollow");
+                },
+                error: function (error) {
+                    console.log("Error loading more posts: " + error.responseText);
+                }
+            });
+        }
+    });
+});
+
+$(document).on('click', '.remove-following-overlay', function () {
+    var usernametemp = $(this).attr('id');
+    Swal.fire({
+        title: 'Confirmation',
+        text: `Are you sure you want to remove ${usernametemp} as a follower?`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Yes, remove!',
+        cancelButtonText: 'Cancel'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            $.ajax({
+                type: "POST",
+                url: "/Home/RemoveFollowerRelationship",
+                data: { username: usernametemp, shouldBeReversed: true },
+                success: function (data) {
+                    $(this).closest('.user-username-link').remove();
+                },
+                error: function (error) {
+                    console.log("Error loading more posts: " + error.responseText);
+                }
+            });
+        }
+    });
+});
+
+$(document).on('click', '.add-follower', function () {
+    var usernametemp = $(this).attr('id');
+    $.ajax({
+        type: "POST",
+        url: "/Home/AddFollowerRelationship",
+        data: { username: usernametemp },
+        success: function (data) {
+            $(this).removeClass("btn-secondary add-follower").addClass("btn-primary remove-follower")
+            $(this).text("Follow");
+        },
+        error: function (error) {
+            console.log("Error loading more posts: " + error.responseText);
+        }
+    });
+});

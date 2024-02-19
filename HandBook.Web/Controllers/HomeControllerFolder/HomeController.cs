@@ -23,7 +23,7 @@ namespace HandBook.Web.Controllers.HomeControllerFolder
         private readonly ILogger<HomeController> _logger;
 
         public HomeController(ILogger<HomeController> logger, UserManager<AppUser> userManager,
-            IHttpContextAccessor httpContextAccessor, IHCHelper helper, ViewRenderer  viewRenderer)
+            IHttpContextAccessor httpContextAccessor, IHCHelper helper, ViewRenderer viewRenderer)
         {
             _logger = logger;
             _helper = helper;
@@ -31,7 +31,7 @@ namespace HandBook.Web.Controllers.HomeControllerFolder
             _httpContextAccessor = httpContextAccessor;
             _viewRenderer = viewRenderer;
         }
-#endregion
+        #endregion
 
         #region Feed
 
@@ -128,72 +128,72 @@ namespace HandBook.Web.Controllers.HomeControllerFolder
 
         #region HelperMethods
 
-            #region Comments
+        #region Comments
 
-                [HttpPost]
-                public async Task<JsonResult> AddOrRemoveAComment(CommentsDTO commentsDTO)
-                {
-                    try
-                    {
-                        var username = HttpContext.User?.Identity?.Name ?? "";
-                        var user = await _userManager.FindByNameAsync(username);
-                        var jsonResult = await _helper.AddOrRemoveACommentHelper(commentsDTO, user);
-                        return Json(jsonResult);
-                    }
-                    catch (Exception ex)
-                    {
-                        // Add logging
-                        Console.WriteLine($"Error occurred: {ex.Message}");
-
-                        return Json("Error occurred while processing the like/unlike action.");
-                    }
-                }
-
-                [HttpPost]
-                public JsonResult LoadMoreComments(int offset, Guid derivingFrom, Guid postId)
-                {
-                    try
-                    {
-                        var result = _helper.LoadMoreCommentsHelper(offset, derivingFrom, postId);
-                        return Json(new { status = true, Message = result });
-
-                    }
-                    catch (Exception ex)
-                    {
-                        Console.WriteLine($"Error occurred: {ex.Message}");
-                        return Json("Error occurred while retrieving newer posts.");
-                    }
-                }
-                #endregion
-
-            #region Likes
-            [HttpPost]
-            public async Task<IActionResult> IncrementOrDecrementLikeCount(Guid itemId)
+        [HttpPost]
+        public async Task<JsonResult> AddOrRemoveAComment(CommentsDTO commentsDTO)
+        {
+            try
             {
-                try
-                {
-                    var username = HttpContext.User?.Identity?.Name ?? "";
-                    var user = await _userManager.FindByNameAsync(username);
-
-                    var item = await _helper.IncrementOrDecrementLikeCountHelper(itemId, user);
-
-                    return Json(item);
-                }
-                catch (Exception)
-                {
-                    return Json("Error occurred while processing the like/unlike action.");
-                }
+                var username = HttpContext.User?.Identity?.Name ?? "";
+                var user = await _userManager.FindByNameAsync(username);
+                var jsonResult = await _helper.AddOrRemoveACommentHelper(commentsDTO, user);
+                return Json(jsonResult);
             }
+            catch (Exception ex)
+            {
+                // Add logging
+                Console.WriteLine($"Error occurred: {ex.Message}");
 
-            [HttpPost]
-            public async Task<IActionResult> IncrementOrDecrementCommentLikeCount(Guid itemId)
+                return Json("Error occurred while processing the like/unlike action.");
+            }
+        }
+
+        [HttpPost]
+        public JsonResult LoadMoreComments(int offset, Guid derivingFrom, Guid postId)
+        {
+            try
+            {
+                var result = _helper.LoadMoreCommentsHelper(offset, derivingFrom, postId);
+                return Json(new { status = true, Message = result });
+
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error occurred: {ex.Message}");
+                return Json("Error occurred while retrieving newer posts.");
+            }
+        }
+        #endregion
+
+        #region Likes
+        [HttpPost]
+        public async Task<IActionResult> IncrementOrDecrementLikeCount(Guid itemId)
         {
             try
             {
                 var username = HttpContext.User?.Identity?.Name ?? "";
                 var user = await _userManager.FindByNameAsync(username);
 
-                var item =await _helper.IncrementOrDecrementCommentLikeCountHelper(itemId, user!);
+                var item = await _helper.IncrementOrDecrementLikeCountHelper(itemId, user);
+
+                return Json(item);
+            }
+            catch (Exception)
+            {
+                return Json("Error occurred while processing the like/unlike action.");
+            }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> IncrementOrDecrementCommentLikeCount(Guid itemId)
+        {
+            try
+            {
+                var username = HttpContext.User?.Identity?.Name ?? "";
+                var user = await _userManager.FindByNameAsync(username);
+
+                var item = await _helper.IncrementOrDecrementCommentLikeCountHelper(itemId, user!);
 
                 return Json(item);
             }
@@ -205,70 +205,77 @@ namespace HandBook.Web.Controllers.HomeControllerFolder
 
         #endregion
 
-            #region Followers
-            public async Task<IActionResult> AddFollowerRelationship(string username)
+        #region Followers
+        public async Task<IActionResult> AddFollowerRelationship(string username)
+        {
+            try
             {
-                try
+                if (username == null || username == "")
                 {
-                    if (username == null || username == "")
-                    {
-                        return View("~/Views/Home/Index.cshtml");
-                    }
-                    var usernamefollower = HttpContext.User?.Identity?.Name ?? "";
+                    return View("~/Views/Home/Index.cshtml");
+                }
+                var usernamefollower = HttpContext.User?.Identity?.Name ?? "";
 
-                    await _helper.AddFollowerRelationshipHelper(username, usernamefollower);
-                    return Json("Success");
-                }
-                catch (Exception)
-                {
-                    return Json("Error occurred while processing the relation.");
-                }
+                await _helper.AddFollowerRelationshipHelper(username, usernamefollower);
+                return Json("Success");
             }
-
-            public async Task<IActionResult> RemoveFollowerRelationship(string username)
+            catch (Exception)
             {
-                try
-                {
-                    if (username == null || username == "")
-                    {
-                        return View("~/Views/Home/Index.cshtml");
-                    }
-                    var usernamefollower = HttpContext.User?.Identity?.Name ?? "";
+                return Json("Error occurred while processing the relation.");
+            }
+        }
 
+        public async Task<IActionResult> RemoveFollowerRelationship(string username, bool shouldBeReversed = false)
+        {
+            try
+            {
+                if (username == null || username == "")
+                {
+                    return View("~/Views/Home/Index.cshtml");
+                }
+                var usernamefollower = HttpContext.User?.Identity?.Name ?? "";
+
+                if (shouldBeReversed)
+                {
+                    await _helper.RemoveFollowerRelationshipHelper(usernamefollower, username);
+                }
+                else
+                {
                     await _helper.RemoveFollowerRelationshipHelper(username, usernamefollower);
-                    return Json("Success");
                 }
-                catch (Exception)
-                {
-                    return Json("Error occurred while processing the relation.");
-                }
+                return Json("Success");
             }
+            catch (Exception)
+            {
+                return Json("Error occurred while processing the relation.");
+            }
+        }
 
         #endregion
 
-            #region Posts
-            [HttpPost]
-            public async Task<JsonResult> LoadMorePosts(int offset)
+        #region Posts
+        [HttpPost]
+        public async Task<JsonResult> LoadMorePosts(int offset)
+        {
+            try
             {
-                try
-                {
-                    return Json(JsonConvert.SerializeObject(await _helper.LoadMorePostsHelper(offset)));
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"Error occurred: {ex.Message}");
-                    return Json("Error occurred while adding newer posts.");
-                }
+                return Json(JsonConvert.SerializeObject(await _helper.LoadMorePostsHelper(offset)));
             }
-
-            #endregion
-
-            #region Others
-            [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-            public IActionResult Error()
+            catch (Exception ex)
             {
-                return View(new Models.ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+                Console.WriteLine($"Error occurred: {ex.Message}");
+                return Json("Error occurred while adding newer posts.");
             }
+        }
+
+        #endregion
+
+        #region Others
+        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
+        public IActionResult Error()
+        {
+            return View(new Models.ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+        }
         #endregion
 
         #endregion
@@ -295,14 +302,14 @@ namespace HandBook.Web.Controllers.HomeControllerFolder
         }
 
         [HttpPost]
-        public async Task<JsonResult> LoadFollows(bool followers,int offset)
+        public async Task<JsonResult> LoadFollows(bool followers, int offset)
         {
             try
             {
                 var username = HttpContext.User?.Identity?.Name ?? "";
                 var user = await _userManager.FindByNameAsync(username);
 
-                var result = _helper.LoadFollowsBasedOnOffset(user!,followers,offset);
+                var result = _helper.LoadFollowsBasedOnOffset(user!, followers, offset);
                 return Json(new { status = true, Message = result });
             }
             catch (Exception)
@@ -349,24 +356,24 @@ namespace HandBook.Web.Controllers.HomeControllerFolder
             }
         }
 
-            #region SearchUsers
-            public IActionResult SearchUsersFilter(string searchString)
+        #region SearchUsers
+        public IActionResult SearchUsersFilter(string searchString)
+        {
+            ViewData["CurrentFilter"] = searchString;
+
+            var users = _userManager.Users;
+
+            if (!string.IsNullOrEmpty(searchString))
             {
-                ViewData["CurrentFilter"] = searchString;
-
-                var users = _userManager.Users;
-
-                if (!string.IsNullOrEmpty(searchString))
-                {
-                    users = users.Where(usr => usr.UserName.Contains(searchString));
-                }
-
-                var userResults = users.Select(u => new { u.UserName }).ToList(); // Adjust the properties you want to return
-
-                return Json(userResults);
+                users = users.Where(usr => usr.UserName.Contains(searchString));
             }
 
-            #endregion
+            var userResults = users.Select(u => new { u.UserName }).ToList(); // Adjust the properties you want to return
+
+            return Json(userResults);
+        }
+
+        #endregion
 
         #endregion
     }

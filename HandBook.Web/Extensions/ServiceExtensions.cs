@@ -1,6 +1,7 @@
 ﻿using HandBook.DataAccess;
 using HandBook.Models;
 using HandBook.Models.BaseModels.ViewRender;
+using HandBook.Models.UserModel;
 using HandBook.Services.Interfaces;
 using HandBook.Services.Services;
 using HandBook.Web.Controllers.HomeControllerFolder;
@@ -32,6 +33,9 @@ namespace HandBook.Web.Extensions
 
             service.AddScoped<IBaseService<Post>, BaseService<Post>>();
             service.AddScoped<IPostService,PostService>();
+
+            service.AddScoped<IBaseService<BannedUser>, BaseService<BannedUser>>();
+            service.AddScoped<IBannedUserService, BannedUserService>();
 
             service.AddScoped<IHCHelper, HCHelper>();
             service.AddScoped<IMCHelper, MCHelper>();

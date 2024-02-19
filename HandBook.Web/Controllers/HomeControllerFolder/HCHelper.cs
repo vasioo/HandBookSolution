@@ -403,27 +403,24 @@ namespace HandBook.Web.Controllers.HomeControllerFolder
             }
 
             public async Task RemoveFollowerRelationshipHelper(string username, string usernamefollower)
-        {
-            var follow = await _userManager.FindByNameAsync(username);
-            var follower = await _userManager.FindByNameAsync(usernamefollower);
-
-            if (follow != null && follower != null && usernamefollower != username)
             {
-                var followerrelation = new Followers();
+                var follow = await _userManager.FindByNameAsync(username);
+                var follower = await _userManager.FindByNameAsync(usernamefollower);
 
-                followerrelation.Follower = follower;
-                followerrelation.Followed = follow;
-
-                await _followerService.RemoveAsync(followerrelation.Id);
-
-                var tempGuid = Guid.Empty;
-                var existingNotif = await _notificationService.GetExistingNotification(follow.Id, tempGuid, "started followed you");
-                if (existingNotif != null)
+                if (follow != null && follower != null && usernamefollower != username)
                 {
-                    await _notificationService.RemoveAsync(existingNotif!.Id);
+                    var followerToRemove = _followerService.IQueryableGetAllAsync().Where(x => x.Followed.Id == follow.Id && x.Follower.Id == follower.Id).FirstOrDefault();
+                    
+                    await _followerService.RemoveAsync(followerToRemove.Id);
+
+                    var tempGuid = Guid.Empty;
+                    var existingNotif = await _notificationService.GetExistingNotification(follow.Id, tempGuid, "started followed you");
+                    if (existingNotif != null)
+                    {
+                        await _notificationService.RemoveAsync(existingNotif!.Id);
+                    }
                 }
             }
-        }
 
             #endregion
 

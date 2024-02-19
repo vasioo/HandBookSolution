@@ -32,8 +32,6 @@ namespace HandBook.Web.Controllers.MessagesControllerFolder
             {
                 currentPage = 1;
             }
-
-            
             var username = HttpContext.User?.Identity?.Name ?? "";
             var sender = await _userManager.FindByNameAsync(username);
             if (sender != null)
@@ -59,6 +57,11 @@ namespace HandBook.Web.Controllers.MessagesControllerFolder
 
                 ViewBag.CurrentUserName = currentUser!.UserName;
                 ViewBag.TargetedUserId = specUserNeeded!.Id;
+                ViewBag.RelationshipBetweenThem = true;
+                if (_helper.IsThereAreRelationshipBetweenThem(currentUser,specUserNeeded))
+                {
+                    ViewBag.RelationshipBetweenThem = false;
+                }
 
                 var messages = _helper.GetCurrentChatMessages(currentUser.Id, specUserNeeded!.Id);
 
@@ -68,7 +71,6 @@ namespace HandBook.Web.Controllers.MessagesControllerFolder
         }
 
         [HttpPost]
-        [Authorize]
         public async Task Create(Messages message)
         {
             var username = HttpContext.User?.Identity?.Name ?? "";
@@ -76,6 +78,24 @@ namespace HandBook.Web.Controllers.MessagesControllerFolder
             await _helper.CreateMessage(message, user!);
         }
 
+        [HttpPost]
+        public async Task<JsonResult> BanUser(string userId)
+        {
+            try
+            {
+                var receiverUsername = HttpContext.User?.Identity?.Name ?? "";
+                var receiver = await _userManager.FindByNameAsync(receiverUsername);
+                var sender = await _userManager.FindByIdAsync(userId);
+
+                var result = _helper.BanAUser(receiver!,sender!);
+                return Json(new { status = false, Message = result });
+            }
+            catch (Exception)
+            {
+                return Json(new { status = false });
+                throw;
+            }
+        }
         #endregion
 
         #region Helpers
