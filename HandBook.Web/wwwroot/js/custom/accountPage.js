@@ -161,6 +161,35 @@ function getFollows(isFollowers, offsetItem) {
         success: function (data) {
             var follows = data.message;
             var fragment = document.createDocumentFragment();
+
+            var starterDivContainer = `
+                <div class="row align-items-center border-bottom">
+                    <div class="col"></div>
+                    <div class="col text-center h5">
+                       ${isFollowers ? 'Followers' : 'Following'}
+                    </div>
+                    <div class="col text-end">
+                        <a class="btn" id="close-overlay-btn">
+                            <i class="fa-solid fa-xmark"></i>
+                        </a>
+                    </div>
+                </div>
+                <div class="row justify-content-around">
+                    <div class="col-9">
+                        <input type="text" class="py-3 col-12 ellipsis-input " placeholder="Search">
+                    </div>
+                    <div class="col-2">
+                        <a id="clear-followers-input-field" class=" py-3 hidden btn"><i class="fa-regular fa-circle-xmark"></i></a>
+                    </div>
+                </div>
+            `;
+
+            var starterPosition = document.createElement('div');
+            starterPosition.setAttribute('class', 'row align-items-center justify-content-center ');
+            starterPosition.innerHTML = starterDivContainer;
+            fragment.appendChild(starterPosition);
+
+
             var indexer = 0;
             follows.forEach(function () {
                 var imageLink = `https://res.cloudinary.com/dzaicqbce/image/upload/v1695818842/profile-image-for-${follows[indexer]}.png`;
@@ -182,7 +211,7 @@ function getFollows(isFollowers, offsetItem) {
                 </div >
                 `;
                 var tempDiv = document.createElement('div');
-                tempDiv.setAttribute('class', 'row');
+                tempDiv.setAttribute('class', 'row user-following-section');
                 tempDiv.innerHTML = followerDivContainer;
                 fragment.appendChild(tempDiv);
                 indexer++;
@@ -203,7 +232,6 @@ function getFollows(isFollowers, offsetItem) {
             overlay.id = "overlay-panel-for-follows";
             document.body.appendChild(overlay);
             document.body.style.overflow = 'hidden';
-
             const overlayContent = document.createElement('div');
             overlayContent.setAttribute('class', 'overlay-content');
             overlayContent.append(fragment);
@@ -238,6 +266,8 @@ function getFollows(isFollowers, offsetItem) {
     });
 }
 
+
+
 $(document).on('click', '.remove-follower', function () {
     var usernametemp = $(this).attr('id');
     Swal.fire({
@@ -257,7 +287,12 @@ $(document).on('click', '.remove-follower', function () {
                 data: { username: usernametemp },
                 success: function (data) {
                     $(this).removeClass("btn-secondary remove-follower").addClass("btn-primary add-follower");
-                    $(this).text("Unfollow");
+                    $(this).text("Follow");
+
+                    var currentValue = parseInt($('#follows-load-btn').val());
+                    var newValue = Math.max(currentValue - 1, 0);
+                    $('#follows-load-btn').val(newValue);
+
                 },
                 error: function (error) {
                     console.log("Error loading more posts: " + error.responseText);
@@ -286,6 +321,10 @@ $(document).on('click', '.remove-following-overlay', function () {
                 data: { username: usernametemp, shouldBeReversed: true },
                 success: function (data) {
                     $(this).closest('.user-username-link').remove();
+
+                    var currentValue = parseInt($('#followers-load-btn').val());
+                    var newValue = Math.max(currentValue - 1, 0);
+                    $('#followers-load-btn').val(newValue);
                 },
                 error: function (error) {
                     console.log("Error loading more posts: " + error.responseText);
@@ -303,10 +342,44 @@ $(document).on('click', '.add-follower', function () {
         data: { username: usernametemp },
         success: function (data) {
             $(this).removeClass("btn-secondary add-follower").addClass("btn-primary remove-follower")
-            $(this).text("Follow");
+            $(this).text("Unfollow");
+
+            var currentValue = parseInt($('#follows-load-btn').val());
+            var newValue = Math.max(currentValue + 1, 0);
+            $('#follows-load-btn').val(newValue);
         },
         error: function (error) {
             console.log("Error loading more posts: " + error.responseText);
         }
     });
+});
+
+$(document).on('click', '#close-overlay-btn', function () {
+    document.body.style.overflow = 'auto';
+    $('#overlay-panel-for-follows').remove();
+    document.removeEventListener('click', handleOutsideClickForFollowers);
+});
+
+$(document).on('input', '.ellipsis-input', function () {
+    var searchText = $(this).val().toLowerCase().trim();
+
+    $('.user-following-section').each(function () {
+        var username = $(this).find('.user-username-link').text().toLowerCase();
+        if (username.includes(searchText)) {
+            $(this).show();
+        } else {
+            $(this).hide();
+        }
+    });
+
+    if ($(this).val().length) {
+        $('#clear-followers-input-field').removeClass('hidden');
+    } else {
+        $('#clear-followers-input-field').addClass('hidden');
+    }
+});
+
+$(document).on('click', '#clear-followers-input-field', function () {
+    $('.ellipsis-input').val('');
+    $(this).addClass('hidden');
 });

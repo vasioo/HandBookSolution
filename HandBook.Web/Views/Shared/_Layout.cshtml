@@ -18,7 +18,7 @@
 
 <body>
     <header>
-        <nav class="collapse d-lg-block sidebar collapse bg-white">
+        <nav class="collapse d-lg-block sidebar collapse bg-white" id="desktop-menu">
             <div class="position-sticky" id="navbarAttributes">
                 <div class="list-group list-group-flush mx-3 mt-4">
                     <a class="list-group-item list-group-item-action py-2 ripple" asp-area="" asp-controller="Home" asp-action="Feed">
@@ -58,6 +58,45 @@
                 </div>
             </div>
         </nav>
+
+        <nav class="custom-list-group" id="smaller-menu">
+            <div class="position-sticky" id="navbarAttributes">
+                <div class="row justify-content-center">
+                    <a class="col-1" asp-area="" asp-controller="Home" asp-action="Feed">
+                        <span class="icon"><i class="fas fa-home"></i></span>
+                    </a>
+                    <a class="col-1" asp-area="" asp-controller="Home" asp-action="ExplorePage">
+                        <span class="icon"><i class="fa-solid fa-magnifying-glass"></i></span>
+                    </a>
+                    <a class="col-1" asp-area="" asp-controller="Home" asp-action="Notifications">
+                        <span class="icon"><i class="fa-solid fa-bell"></i></span>
+                    </a>
+                    <a class="col-1" asp-area="" asp-controller="Messages" asp-action="MainPage">
+                        <span class="icon"><i class="fa-solid fa-comments"></i></span>
+                    </a>
+
+                    @if (!User!.Identity!.IsAuthenticated)
+                    {
+                        <a class="col-1" asp-area="Identity" asp-page="/Account/Register">
+                            <span class="icon"><i class="fa-solid fa-user-lock"></i></span>
+                        </a>
+                    }
+                    else
+                    {
+                        var username = User.Identity.Name;
+                        <a class="col-1" href="/Home/Account?username=@username">
+                            <span class="icon">
+                                <i class="fa-solid fa-user-gear"></i>
+                            </span>
+                        </a>
+                    }
+                </div>
+            </div>
+        </nav>
+
+
+
+
     </header>
     <div id="cookie-consent-message">
         <partial name="_CookieConsentPartial" />
