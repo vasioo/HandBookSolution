@@ -1,30 +1,4 @@
-﻿$(document).ready(function () {
-    const $profileImages = $('.image-upload');
-
-    // Event listener for file input change
-    $profileImages.change(function (event) {
-        const $self = $(this),
-            $uploadedImage = $self.closest('.uploaded-image'),
-            $uploadedImageContainer = $('#custom-view-profile-image-id'),
-            file = event.target.files[0];
-
-        validateAndResizeImage(file, function (isValid, imageData) {
-            if (isValid) {
-                $uploadedImage.attr('src', imageData);
-                $uploadedImageContainer.attr('src', imageData);
-
-            } else {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Oops...',
-                    text: 'Image validation failed:' + imageData
-                })
-            }
-        });
-    });
-});
-
-function validateAndResizeImage(file, callback) {
+﻿function validateAndResizeImage(file, callback) {
 
     const maxSizeInPixels = 1024, // Maximum dimension in pixels
         maxSizeInBytes = 1 * 1024 * 1024; // 1MB in bytes
@@ -91,66 +65,6 @@ function getImageSizeInBytes(dataUrl) {
 
     return sizeInBytes;
 }
-
-$('.add-following').click(function () {
-    var buttonElement = $(this);
-    var username = buttonElement.data("username");
-
-    $.ajax({
-        type: "POST",
-        url: "/Home/AddFollowerRelationship",
-        data: { username: username },
-        success: function (data) {
-            buttonElement.removeClass("btn-primary add-following").addClass("btn-secondary remove-following");
-            buttonElement.text("Following");
-        },
-        error: function (error) {
-            console.log("Error loading more posts: " + error.responseText);
-        }
-    });
-});
-
-$('.remove-following').click(function () {
-    var buttonElement = $(this);
-    var username = buttonElement.data("username");
-
-    $.ajax({
-        type: "POST",
-        url: "/Home/RemoveFollowerRelationship",
-        data: { username: username },
-        success: function (data) {
-            buttonElement.removeClass("btn-secondary remove-following").addClass("btn-primary add-following");
-            buttonElement.text("Follow");
-        },
-        error: function (error) {
-            console.log("Error loading more posts: " + error.responseText);
-        }
-    });
-});
-
-function showProfileImage() {
-    var itemContainer = document.getElementById('custom-view-profile-image-container-id');
-    itemContainer.style.setProperty('display', 'flex', 'important');
-
-    var neededBody = document.getElementsByTagName('body')[0];
-    neededBody.style.overflow = 'hidden';
-}
-
-$('#custom-view-profile-image-container-id').click(function () {
-    var itemContainer = document.getElementById('custom-view-profile-image-container-id');
-    itemContainer.style.setProperty('display', 'none', 'important');
-
-    var neededBody = document.getElementsByTagName('body')[0];
-    neededBody.style.overflow = 'hidden';
-});
-
-$('#follows-load-btn').click(function () {
-    getFollows(true, $(this).data('offset-count'));
-});
-
-$('#followers-load-btn').click(function () {
-    getFollows(true, $(this).data('offset-count'));
-});
 
 function getFollows(isFollowers, offsetItem) {
 
@@ -243,6 +157,8 @@ function getFollows(isFollowers, offsetItem) {
                     document.body.style.overflow = 'auto';
                     overlay.remove();
                     document.removeEventListener('click', handleOutsideClickForFollowers);
+                    $('#followers-load-btn').data('offset-count', 0);
+                    $('#follows-load-btn').data('offset-count', 0);
                 }
             }
 
@@ -266,7 +182,65 @@ function getFollows(isFollowers, offsetItem) {
     });
 }
 
+function showProfileImage() {
+    var itemContainer = document.getElementById('custom-view-profile-image-container-id');
+    itemContainer.style.setProperty('display', 'flex', 'important');
 
+    var neededBody = document.getElementsByTagName('body')[0];
+    neededBody.style.overflow = 'hidden';
+}
+
+$('.add-following').click(function () {
+    var buttonElement = $(this);
+    var username = buttonElement.data("username");
+
+    $.ajax({
+        type: "POST",
+        url: "/Home/AddFollowerRelationship",
+        data: { username: username },
+        success: function (data) {
+            buttonElement.removeClass("btn-primary add-following").addClass("btn-secondary remove-following");
+            buttonElement.text("Following");
+        },
+        error: function (error) {
+            console.log("Error loading more posts: " + error.responseText);
+        }
+    });
+});
+
+$('.remove-following').click(function () {
+    var buttonElement = $(this);
+    var username = buttonElement.data("username");
+
+    $.ajax({
+        type: "POST",
+        url: "/Home/RemoveFollowerRelationship",
+        data: { username: username },
+        success: function (data) {
+            buttonElement.removeClass("btn-secondary remove-following").addClass("btn-primary add-following");
+            buttonElement.text("Follow");
+        },
+        error: function (error) {
+            console.log("Error loading more posts: " + error.responseText);
+        }
+    });
+});
+
+$('#custom-view-profile-image-container-id').click(function () {
+    var itemContainer = document.getElementById('custom-view-profile-image-container-id');
+    itemContainer.style.setProperty('display', 'none', 'important');
+
+    var neededBody = document.getElementsByTagName('body')[0];
+    neededBody.style.overflow = 'hidden';
+});
+
+$('#follows-load-btn').click(function () {
+    getFollows(false, $(this).data('offset-count'));
+});
+
+$('#followers-load-btn').click(function () {
+    getFollows(true, $(this).data('offset-count'));
+});
 
 $(document).on('click', '.remove-follower', function () {
     var usernametemp = $(this).attr('id');
@@ -357,7 +331,8 @@ $(document).on('click', '.add-follower', function () {
 $(document).on('click', '#close-overlay-btn', function () {
     document.body.style.overflow = 'auto';
     $('#overlay-panel-for-follows').remove();
-    document.removeEventListener('click', handleOutsideClickForFollowers);
+    $('#followers-load-btn').data('offset-count', 0);
+    $('#follows-load-btn').data('offset-count', 0);
 });
 
 $(document).on('input', '.ellipsis-input', function () {
@@ -365,7 +340,8 @@ $(document).on('input', '.ellipsis-input', function () {
 
     $('.user-following-section').each(function () {
         var username = $(this).find('.user-username-link').text().toLowerCase();
-        if (username.includes(searchText)) {
+
+        if (username.substring(0, searchText.length) === searchText) {
             $(this).show();
         } else {
             $(this).hide();
@@ -380,6 +356,31 @@ $(document).on('input', '.ellipsis-input', function () {
 });
 
 $(document).on('click', '#clear-followers-input-field', function () {
-    $('.ellipsis-input').val('');
+    $('.ellipsis-input').val('').trigger('input');
     $(this).addClass('hidden');
+});
+
+$(document).ready(function () {
+    const $profileImages = $('.image-upload');
+
+    $profileImages.change(function (event) {
+        const $self = $(this),
+            $uploadedImage = $self.closest('.uploaded-image'),
+            $uploadedImageContainer = $('#custom-view-profile-image-id'),
+            file = event.target.files[0];
+
+        validateAndResizeImage(file, function (isValid, imageData) {
+            if (isValid) {
+                $uploadedImage.attr('src', imageData);
+                $uploadedImageContainer.attr('src', imageData);
+
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Oops...',
+                    text: 'Image validation failed:' + imageData
+                })
+            }
+        });
+    });
 });

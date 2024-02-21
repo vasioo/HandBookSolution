@@ -365,10 +365,11 @@ namespace HandBook.Web.Controllers.HomeControllerFolder
 
             if (!string.IsNullOrEmpty(searchString))
             {
-                users = users.Where(usr => usr.UserName.Contains(searchString));
+                users = users.Where(usr => usr.UserName!.Length >= searchString.Length &&
+                                    usr.UserName.Substring(0, searchString.Length).Equals(searchString));
             }
 
-            var userResults = users.Select(u => new { u.UserName }).ToList(); // Adjust the properties you want to return
+            var userResults = users.Select(u => new { u.UserName }).ToList();
 
             return Json(userResults);
         }

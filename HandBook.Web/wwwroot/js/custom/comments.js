@@ -12,7 +12,7 @@
         success: function (data) {
             var posts = data.message;
             var commentsList = $(".liked-comments-from-temp").data('comments-list');
-            var fragment = document.createDocumentFragment(); 
+            var fragment = document.createDocumentFragment();
 
             if (posts.length > 0) {
                 posts.forEach(function (comment, index) {
@@ -32,7 +32,7 @@
                         </div>`;
                     }
                     else {
-                         commentContent = `<div class="d-flex pb-3 pt-2">${comment.commentContent}</div>`;
+                        commentContent = `<div class="d-flex pb-3 pt-2">${comment.commentContent}</div>`;
                     }
                     var likeCount = `<span class="commentlikeCount" data-item-id="${comment.id}" style="display: ${comment.amountOfLikes > 0 ? 'block' : 'none'};">${comment.amountOfLikes} <i class="fa-solid fa-heart liked fa-sm" style="color: #ff0000;"></i></span>`;
                     var commentActions = `
@@ -87,7 +87,7 @@
                     tempDiv.setAttribute('data-comment-id', comment.id);
                     tempDiv.setAttribute('data-deriving-from', derivingFromId);
                     tempDiv.innerHTML = repliesHtml;
-                    fragment.appendChild(tempDiv); 
+                    fragment.appendChild(tempDiv);
                 });
             }
 
@@ -102,18 +102,18 @@
             if (derivingFromId === 0) {
                 var containerAppenderId = `comment-container-${postAttrId}`;
                 var containerAppender = $('#' + containerAppenderId);
-                containerAppender.append(fragment); 
+                containerAppender.append(fragment);
             } else {
                 var repliesContainer = buttonEvent.next();
 
                 if (repliesContainer.length && repliesContainer.hasClass('sub-replies-container')) {
-                    repliesContainer.append(fragment); 
+                    repliesContainer.append(fragment);
                 }
                 else {
                     var parentContainer = buttonEvent.closest('.sub-replies-container');
 
                     var targetElement = parentContainer.find(`.comment-container[data-comment-id="${derivingFromId}"]`);
-                    targetElement.after(fragment); 
+                    targetElement.after(fragment);
                 }
             }
 
@@ -124,6 +124,7 @@
             loading = false;
         }
     });
+
 }
 
 function likecom(button, Id) {
@@ -168,6 +169,7 @@ function likeCommentClick(Id) {
 }
 
 function toggleComments(element, itemId, buttonEvent) {
+
     const card = element.closest('.card');
     const cardId = `card-overlay-${itemId}`;
     var postId = $(card).data('post-id');

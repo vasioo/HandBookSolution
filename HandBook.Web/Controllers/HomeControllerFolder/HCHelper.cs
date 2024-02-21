@@ -529,15 +529,15 @@ namespace HandBook.Web.Controllers.HomeControllerFolder
             if (isFollower)
             {
                 return _followerService.IQueryableGetAllAsync()
-                    .Where(x => x.Follower.Id == currUser.Id)
-                    .Select(x => x.Followed.UserName)
+                    .Where(x => x.Followed.Id == currUser.Id)
+                    .Select(x => x.Follower.UserName)
                     .Skip(offset*30);
             }
             else
             {
                 return _followerService.IQueryableGetAllAsync()
-                    .Where(x => x.Followed.Id== currUser.Id)
-                    .Select(x => x.Follower.UserName)
+                    .Where(x => x.Follower.Id== currUser.Id)
+                    .Select(x => x.Followed.UserName)
                     .Skip(offset * 30);
             }
         }

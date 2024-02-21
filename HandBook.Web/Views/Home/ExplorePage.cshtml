@@ -3,55 +3,16 @@
 @using Microsoft.AspNetCore.Identity;
 @inject UserManager<AppUser> UserManager
 @model ExplorePageViewModel
-<style>
-    .user-link, .user-link:hover {
-        text-decoration: none;
-        color: black;
-    }
-
-    .user-information {
-        background: white;
-    }
-
-    .overlay {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background-color: rgba(0, 0, 0, 0.5);
-        z-index: 9999;
-        overflow-y: auto;
-    }
-
-    .container-explorer {
-        position: relative;
-        max-width: 90%;
-        margin: 20px auto;
-        padding: 20px;
-    }
-
-
-    #clearSearch {
-        font-size: 17px;
-        text-decoration: none;
-        color:darkgray;
-        display:none;
-    }
-
-        #clearSearch:hover,
-        #clearSearch:active,
-        #clearSearch:focus {
-            text-decoration: none;
-            color:black;
-        }
-
-    #hidden-icon-for-canceling{
-        cursor: pointer;
-        display:none;
-    }
-</style>
-
+@section Styles {
+    <link href="@Url.Content("~/css/custom/CustomExplorePage.css")" rel="stylesheet" type="text/css" />
+}
+@section Scripts {
+    <script src="@Url.Content("~/js/custom/explorePage.js")" type="text/javascript" asp-append-version="true"></script>
+    <script src="@Url.Content("~/js/custom/postJs.js")" type="text/javascript" asp-append-version="true"></script>
+    <script src="@Url.Content("~/js/custom/general-functions.js")" type="text/javascript" asp-append-version="true"></script>
+    <script src="@Url.Content("~/js/custom/comments.js")" type="text/javascript" asp-append-version="true"></script>
+    <script src="@Url.Content("~/js/custom/event-handlers.js")" type="text/javascript" asp-append-version="true"></script>
+}
 <div class="container pt-5">
     <form id="searchForm" method="get">
         <div class="form-actions no-color">
@@ -87,11 +48,3 @@
 
 <div id="searchResults" style="z-index:1" class="pt-2">
 </div>
-
-@section Scripts {
-    <script src="@Url.Content("~/js/custom/explorePage.js")" type="text/javascript" asp-append-version="true"></script>
-    <script src="@Url.Content("~/js/custom/postJs.js")" type="text/javascript" asp-append-version="true"></script>
-    <script src="@Url.Content("~/js/custom/general-functions.js")" type="text/javascript" asp-append-version="true"></script>
-    <script src="@Url.Content("~/js/custom/comments.js")" type="text/javascript" asp-append-version="true"></script>
-    <script src="@Url.Content("~/js/custom/event-handlers.js")" type="text/javascript" asp-append-version="true"></script>
-}

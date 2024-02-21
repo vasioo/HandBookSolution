@@ -95,3 +95,41 @@ body {
 body {
     overflow-x: hidden;
 }
+.sidebar-medium {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    padding: 58px 0 0;
+    box-shadow: 0 2px 5px 0 rgb(0 0 0 / 5%), 0 2px 10px 0 rgb(0 0 0 / 5%);
+    width: 10%;
+    z-index: 600;
+}
+
+#medium-menu,
+#mobile-menu {
+    display: none;
+}
+
+@media (min-width: 1200px) {
+    #desktop-menu {
+        display: block;
+    }
+}
+
+@media (max-width: 1199px) {
+    #medium-menu {
+        display: block;
+    }
+}
+
+@media (max-width:768px) {
+    #desktop-menu,
+    #medium-menu {
+        display: none;
+    }
+
+    #mobile-menu {
+        display: block;
+    }
+}

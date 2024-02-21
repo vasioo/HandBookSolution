@@ -1,5 +1,4 @@
 ﻿$(document).ready(function () {
-
     $('.explore-link').click(function (e) {
         e.preventDefault();
         var itemId = $(this).data('explore-id');

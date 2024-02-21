@@ -1,11 +1,6 @@
 ﻿using HandBook.DataAccess;
 using HandBook.Models;
 using HandBook.Services.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace HandBook.Services.Services
 {
@@ -19,9 +14,9 @@ namespace HandBook.Services.Services
 
         public Task<IOrderedQueryable<Notification>> GetNotificationsByUserId(string userId)
         {
-            var followers = _dataContext.Followers.Where(f => f.FollowedUserId == userId);
+            var followers = _dataContext.Followers.Where(f => f.Follower.Id == userId);
 
-            var followersId = followers.Select(f => f.FollowerUserId);
+            var followersId = followers.Select(f => f.Followed.Id);
 
             var data = _dataContext.Notifications.Where(card => followersId.Contains(card.UserId)).OrderByDescending(x => x.Time);
 

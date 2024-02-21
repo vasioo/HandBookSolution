@@ -60,7 +60,7 @@ namespace HandBook.Web.Controllers.MessagesControllerFolder
                 ViewBag.RelationshipBetweenThem = true;
                 if (_helper.IsThereAreRelationshipBetweenThem(currentUser,specUserNeeded))
                 {
-                    ViewBag.RelationshipBetweenThem = false;
+                    ViewBag.RelationshipBetweenThem = true;
                 }
 
                 var messages = _helper.GetCurrentChatMessages(currentUser.Id, specUserNeeded!.Id);

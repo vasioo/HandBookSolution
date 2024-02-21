@@ -68,7 +68,6 @@ $(document).on('click', '.likeButton', function () {
 });
 
 $(document).on('click', '.toggle-replies-btn', function () {
-
     var highestElement = $(this).parents('.comment-container').last();
     var commentId = highestElement.data('comment-id');
 
@@ -80,6 +79,14 @@ $(document).on('click', '.toggle-replies-btn', function () {
 
     var repliesContainer = this.nextElementSibling;
 
+    var subContainerId = '.commentlikeCount[data-item-id="' + commentReplyId + '"]';
+    var subRepliesContainer = $(`${subContainerId}`);
+
+    if (subRepliesContainer.length > 0 && !subRepliesContainer.hasClass('comments-loaded')) {
+        loadMoreComments(commentReplyId, postId, $(this));
+        subRepliesContainer.addClass('comments-loaded');
+    }
+    
     if (repliesContainer != null && repliesContainer != undefined) {
         $(repliesContainer).toggle();
         if ($(repliesContainer).is(':visible')) {
@@ -91,23 +98,21 @@ $(document).on('click', '.toggle-replies-btn', function () {
 
     if ($(this).hasClass('no-src')) {
         $('.comment-container[data-deriving-from="' + commentReplyId + '"]').toggle();
+        var commentContainers = $('.comment-container[data-deriving-from="' + commentReplyId + '"]');
 
-        if ($('.comment-container[data-deriving-from="' + commentReplyId + '"]').is(':visible')) {
+        if (commentContainers.is(':visible')) {
             $(this).text('Hide Replies');
         } else {
             $(this).text('View Replies');
         }
-    }
-
-    var subContainerId = '.commentlikeCount[data-item-id="' + commentReplyId + '"]';
-    var subRepliesContainer = $(`${subContainerId}`);
-
-    if (subRepliesContainer.length > 0 && !subRepliesContainer.hasClass('comments-loaded')) {
-        loadMoreComments(commentReplyId, postId, $(this));
-        subRepliesContainer.addClass('comments-loaded');
+        if (!commentContainers || commentContainers.length === 0) {
+            $(this).text('Hide Replies');
+            return;
+        }
 
     }
 });
+
 
 $(document).on('click', '.submit-btn', function () {
     var $commentContainer = $(this).closest('.comment-section');

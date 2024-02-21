@@ -1,0 +1,46 @@
+﻿.user-link, .user-link:hover {
+    text-decoration: none;
+    color: black;
+}
+
+.user-information {
+    background: white;
+}
+
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 9999;
+    overflow-y: auto;
+}
+
+.container-explorer {
+    position: relative;
+    max-width: 90%;
+    margin: 20px auto;
+    padding: 20px;
+}
+
+
+#clearSearch {
+    font-size: 17px;
+    text-decoration: none;
+    color: darkgray;
+    display: none;
+}
+
+    #clearSearch:hover,
+    #clearSearch:active,
+    #clearSearch:focus {
+        text-decoration: none;
+        color: black;
+    }
+
+#hidden-icon-for-canceling {
+    cursor: pointer;
+    display: none;
+}
