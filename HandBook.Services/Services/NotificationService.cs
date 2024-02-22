@@ -14,9 +14,9 @@ namespace HandBook.Services.Services
 
         public Task<IOrderedQueryable<Notification>> GetNotificationsByUserId(string userId)
         {
-            var followers = _dataContext.Followers.Where(f => f.Follower.Id == userId);
+            var followers = _dataContext.Followers.Where(f => f.Followed.Id == userId);
 
-            var followersId = followers.Select(f => f.Followed.Id);
+            var followersId = followers.Select(f => f.Follower.Id);
 
             var data = _dataContext.Notifications.Where(card => followersId.Contains(card.UserId)).OrderByDescending(x => x.Time);
 

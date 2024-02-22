@@ -21,7 +21,7 @@ namespace HandBook.Models
         [System.ComponentModel.DataAnnotations.Schema.ForeignKey("AppUser")]
         public string? UserId { get; set; } = "";
 
-        public AppUser? AppUser { get; set; } = new AppUser();
-        public Post? Post { get; set; } = new Post();
+        public AppUser? AppUser { get; set; } 
+        public Post? Post { get; set; } 
     }
 }

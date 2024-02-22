@@ -1,9 +1,9 @@
 ﻿$(document).on('input', '#messageText', function () {
     var $submitButton = $(document).find('#submitButton');
-    if ($(this).val().trim().length>0) {
-        $submitButton.prop('disabled', true).addClass('disabled');
-    } else {
+    if ($(this).val().trim().length > 0) {
         $submitButton.prop('disabled', false).removeClass('disabled');
+    } else {
+        $submitButton.prop('disabled', true).addClass('disabled');
     }
 });
 //$(document).ready(function () {

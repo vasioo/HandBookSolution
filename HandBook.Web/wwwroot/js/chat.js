@@ -2,8 +2,6 @@
 
 var connection = new signalR.HubConnectionBuilder().withUrl("/chatHub").build();
 
-document.getElementById("submitButton").disabled = true;
-
 var currUserDiv = document.getElementById("current-user-username");
 var currUsername = currUserDiv.getAttribute("data-username");
 
@@ -47,13 +45,6 @@ connection.on("ReceiveMessage", async function (user, message, shouldRead) {
             return console.error(err.toString());
         });
     }
-});
-
-
-connection.start().then(function () {
-    document.getElementById("submitButton").disabled = false;
-}).catch(function (err) {
-    return console.error(err.toString());
 });
 
 
@@ -119,3 +110,4 @@ $(document).ready(function () {
 
     $('html, body').animate({ scrollTop: $('#content').height() }, 0);
 });
+

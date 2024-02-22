@@ -5,6 +5,7 @@ using Messenger.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Hosting;
 using Newtonsoft.Json;
 using ServiceStack;
 using System.Diagnostics;
@@ -286,7 +287,6 @@ namespace HandBook.Web.Controllers.HomeControllerFolder
         {
             if (string.IsNullOrEmpty(username))
             {
-                username = "[Error]";
                 return View("~/Views/Home/Account.cshtml", new UserAccountDTO());
             }
 
@@ -297,6 +297,9 @@ namespace HandBook.Web.Controllers.HomeControllerFolder
             var curruser = await _userManager.FindByNameAsync(currusername);
 
             var useraccdto = await _helper.AccountHelper(user!, curruser!);
+
+                TempData["UserLikedCards"] = useraccdto.UserLikedCards;
+                TempData["UserLikedComments"] = useraccdto.UserLikedComments;
 
             return View("~/Views/Home/Account.cshtml", useraccdto);
         }

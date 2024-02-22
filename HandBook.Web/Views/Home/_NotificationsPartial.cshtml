@@ -51,18 +51,41 @@
 </style>
 <div class="row justify-content-center pt-4">
     <div class="card col-6 m-0 p-0">
-        <a class="link-to-post" asp-controller="Home" asp-action="DesiredPost" asp-route-modelData="@Model.PostId">
-            <div class="card-body">
-                <div class="card-title d-flex align-items-center">
-                    <div class="col-2">
-                        <img src="@link" alt="Image not found" onerror="this.onerror=null;this.src='@alternativeLink';" style="border-radius:30px; width:50px; margin-right: 10px;" />
+        @if (Model.Post!=null)
+        {
+            <a class="link-to-post" asp-controller="Home" asp-action="DesiredPost" asp-route-modelData="@Model.PostId">
+                <div class="card-body">
+                    <div class="card-title d-flex align-items-center">
+                        <div class="col-2">
+                            <img src="@link" alt="Image not found"  style="border-radius:30px; width:50px; margin-right: 10px;" />
+                        </div>
+                        <div class="row justify-content-around">
+                            <div class="col-auto font-weight-bold h5 m-0 p-0">@Model.CreatorUserName @Model.MainText</div>
+                            <div class="col-3">
+                                <img src="@Model.Post.ImageLink" alt="Image not found" style="border-radius:30px; width:50px; margin-right: 10px;" />
+                            </div>
+                        </div>
                     </div>
-                    <div class="row">
-                        <div class="col-auto font-weight-bold h5 m-0 p-0">@Model.CreatorUserName @Model.MainText</div>
-                    </div>
+                    <p class="card-text text-left">  @GetTimeDisplay(Model.Time)</p>
                 </div>
-                <p class="card-text text-left">  @GetTimeDisplay(Model.Time)</p>
-            </div>
-        </a>
+            </a>
+        }
+        else
+        {
+            <a class="link-to-post" asp-controller="Home" asp-action="Account" asp-route-username="@Model.CreatorUserName">
+                <div class="card-body">
+                    <div class="card-title d-flex align-items-center">
+                        <div class="col-2">
+                            <img src="@link" alt="Image not found" onerror="this.onerror=null;this.src='@alternativeLink';" style="border-radius:30px; width:50px; margin-right: 10px;" />
+                        </div>
+                        <div class="row">
+                            <div class="col-auto font-weight-bold h5 m-0 p-0">@Model.CreatorUserName @Model.MainText</div>
+                        </div>
+                    </div>
+                    <p class="card-text text-left">  @GetTimeDisplay(Model.Time)</p>
+                </div>
+            </a>
+        }
+      
     </div>
 </div>

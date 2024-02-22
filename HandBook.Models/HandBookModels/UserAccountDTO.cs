@@ -7,9 +7,9 @@ namespace HandBook.Web.Models
     {
         public string UserTempUsername { get; set; }
 
-        public IEnumerable<CardDTO> PostsTemp { get; set; }
+        public List<CardDTO> PostsTemp { get; set; }
 
-        public IEnumerable<Guid>UserLikedCards { get; set; }
+        public List<string>UserLikedCards { get; set; }
         public string UserLikedComments{ get; set; }
 
         public int Follows { get; set; }

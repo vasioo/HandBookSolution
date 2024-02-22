@@ -11,7 +11,6 @@ using Newtonsoft.Json;
 using ServiceStack;
 using System.Data.Entity;
 using System.Text;
-using System.Xml.Linq;
 
 namespace HandBook.Web.Controllers.HomeControllerFolder
 {
@@ -410,8 +409,10 @@ namespace HandBook.Web.Controllers.HomeControllerFolder
                 if (follow != null && follower != null && usernamefollower != username)
                 {
                     var followerToRemove = _followerService.IQueryableGetAllAsync().Where(x => x.Followed.Id == follow.Id && x.Follower.Id == follower.Id).FirstOrDefault();
-                    
-                    await _followerService.RemoveAsync(followerToRemove.Id);
+                    if (followerToRemove!=null)
+                    {
+                        await _followerService.RemoveAsync(followerToRemove.Id);
+                    }
 
                     var tempGuid = Guid.Empty;
                     var existingNotif = await _notificationService.GetExistingNotification(follow.Id, tempGuid, "started followed you");
@@ -493,7 +494,7 @@ namespace HandBook.Web.Controllers.HomeControllerFolder
             useraccdto.UserTempUsername = user?.UserName;
 
 
-            useraccdto.PostsTemp = _postService.GetPostsBasedOnCreatorUser(user!.UserName!);
+            useraccdto.PostsTemp = _postService.GetPostsBasedOnCreatorUser(user!.UserName!).ToList();
 
 
             if (user != null)
@@ -502,7 +503,7 @@ namespace HandBook.Web.Controllers.HomeControllerFolder
                 var userLikedComments = _likeService.GetUserLikedPosts(user.Id);
                 if (userLikedCards != null && userLikedCards.Count() > 0)
                 {
-                    useraccdto.UserLikedCards = userLikedCards.Select(x => x.PostId).ToList();
+                    useraccdto.UserLikedCards = userLikedCards.Select(x => x.PostId.ToString()).ToList();
                 }
 
                 if (userLikedComments != null && userLikedComments.Count() > 0)
