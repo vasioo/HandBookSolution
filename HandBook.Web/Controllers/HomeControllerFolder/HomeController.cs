@@ -380,5 +380,11 @@ namespace HandBook.Web.Controllers.HomeControllerFolder
         #endregion
 
         #endregion
+
+        public IActionResult AuthenticationPage()
+        {
+            return View("~/Views/Identity/AuthenticationPage.cshtml");
+        }
+
     }
 }

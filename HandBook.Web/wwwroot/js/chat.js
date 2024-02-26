@@ -48,21 +48,29 @@ connection.on("ReceiveMessage", async function (user, message, shouldRead) {
 });
 
 
-document.getElementById("submitButton").addEventListener("click", function (event) {
-    var user = document.getElementById("username").value;
-    var targetUser = document.getElementById("targetusername").value;
-    var message = document.getElementById("messageText");
-    if (!message.value || message.value.trim() === '') {
-        message.focus();
-    }
-    else {
-        connection.invoke("SendMessage", user, message.value, targetUser).catch(function (err) {
-            return console.error(err.toString());
+connection.start()
+    .then(function () {
+        document.getElementById("submitButton").addEventListener("click", function (event) {
+            var user = document.getElementById("username").value;
+            var targetUser = document.getElementById("targetusername").value;
+            var message = document.getElementById("messageText");
+            if (!message.value || message.value.trim() === '') {
+                message.focus();
+            } else {
+                connection.invoke("SendMessage", user, message.value, targetUser)
+                    .catch(function (err) {
+                        return console.error(err.toString());
+                    });
+                event.preventDefault();
+                    var $submitButton = $(document).find('#submitButton');
+                    $submitButton.prop('disabled', true).addClass('disabled');
+            }
+            message.value = "";
         });
-        event.preventDefault();
-    }
-    document.getElementById("messageText").value = "";
-});
+    })
+    .catch(function (err) {
+        console.error("Error establishing SignalR connection:", err);
+    });
 
 $(document).ready(function () {
     if ($("#confirm-status-of-overlay").length) {

@@ -56,7 +56,6 @@ $(document).on('click', '.append-reply-textbox', function (event) {
 
 });
 
-
 $(document).on('click', '.commentButton', function (event) {
     var itemId = this.id;
     toggleComments(this, itemId, event);
@@ -112,7 +111,6 @@ $(document).on('click', '.toggle-replies-btn', function () {
 
     }
 });
-
 
 $(document).on('click', '.submit-btn', function () {
     var $commentContainer = $(this).closest('.comment-section');
@@ -257,18 +255,19 @@ $(document).on('input', '.reply-text', function () {
     }
 });
 
-
-$('.profile-image-class').on('error', function () {
+$(document).on('error', '.profile-image-class', function () {
     $(this).off('error').attr('src', '/handbook/images/anonymousUser.png');
-}).on('load', function () { });
+}).on('load', '.profile-image-class', function () { });
 
-$('.profile-image-class').each(function () {
-    if (!this.complete || (typeof this.naturalWidth !== 'undefined' && this.naturalWidth === 0)) {
-        $(this).trigger('error');
-    }
+$(document).ready(function () {
+    $(document).find('.profile-image-class').each(function () {
+        if (!this.complete || (typeof this.naturalWidth !== 'undefined' && this.naturalWidth === 0)) {
+            $(this).trigger('error');
+        }
+    });
 });
 
-$('textarea').on('input', function () {
+$(document).on('textarea','input', function () {
     this.style.height = 'auto';
 
     this.style.height =

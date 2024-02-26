@@ -17,7 +17,14 @@
             if (posts.length > 0) {
                 posts.forEach(function (comment, index) {
                     var link = `https://res.cloudinary.com/dzaicqbce/image/upload/v1695818842/profile-image-for-${comment.appUser.userName}.png`;
-                    var imgTag = `<img src="${link}" class="profile-image-class" alt="Image not found" style="border-radius:30px; width:50px;height:50px; margin-right:10px;" />`;
+                    var imgTag = `<img src="/handbook/images/anonymousUser.png" class="profile-image-class" alt="Image not found" style="border-radius:30px; width:50px;height:50px; margin-right:10px;" />`;
+                    $.get(link)
+                        .done(function () {
+                            imgTag = `<img src="${link}" class="profile-image-class" alt="Image not found" style="border-radius:30px; width:50px;height:50px; margin-right:10px;" />`;
+                        })
+                        .fail(function () {
+                        });
+
                     var isLiked = commentsList && commentsList.includes(comment.id.toLowerCase()) ? '<i class="fa-solid fa-heart liked fa-xl com-btn" style="color: #ff0000;"></i>' : '<i class="fa-regular fa-heart fa-xl com-btn" style="color: #000;"></i>';
 
                     var commentContent = ``;
@@ -116,7 +123,6 @@
                     targetElement.after(fragment);
                 }
             }
-
             loading = false;
         },
         error: function (error) {

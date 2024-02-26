@@ -27,23 +27,23 @@
                             @if (User!.Identity!.Name == Model.UserTempUsername)
                             {
                                 <div class="upload-container">
-                                    <img src="@link" alt="Image not found" onerror="this.onerror=null;this.src='@alternativeLink';" onclick="showProfileImage()" class="rounded-circle uploaded-image" />
+                                    <img src="@link" alt="Image not found" onclick="showProfileImage()" class="profile-image-class rounded-circle uploaded-image" />
                                     <div class="upload-input" style="cursor:pointer;">
                                         <div class="overlay">
                                             <div class="plus-icon" style="cursor:pointer;">
-                                                <input type="file" id="profile-image" name="profile-image" class="image-upload" accept=".png, .jpg, .jpeg" multiple="multiple" max="1">
+                                                <input type="file" id="profile-image" name="profile-image" class="image-upload " accept=".png, .jpg, .jpeg" multiple="multiple" max="1">
                                                 <i class="fa-solid fa-camera"></i>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
                                 <div id="custom-view-profile-image-container-id" class="d-flex justify-content-center align-items-center">
-                                    <img src="@link" alt="Image not found" onerror="this.onerror=null;this.src='@alternativeLink';" id="custom-view-profile-image-id" />
+                                    <img src="@link" alt="Image not found" id="custom-view-profile-image-id" class="profile-image-class" />
                                 </div>
                             }
                             else
                             {
-                                <img src="@link" alt="Image not found" onerror="this.onerror=null;this.src='@alternativeLink';" class="rounded-circle uploaded-image" style="width:100px; margin-right: 10px;" />
+                                <img src="@link" alt="Image not found" class="rounded-circle uploaded-image profile-image-class" style="width:100px; margin-right: 10px;" />
                             }
                         }
                     </div>

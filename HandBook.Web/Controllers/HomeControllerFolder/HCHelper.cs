@@ -39,11 +39,11 @@ namespace HandBook.Web.Controllers.HomeControllerFolder
             _notificationService = notificationService;
             Configuration = configuration;
             _cloudinarySettings = Configuration.GetSection("CloudinarySettings").Get<CloudinarySettings>() ?? new CloudinarySettings();
-            Account account = new Account(
-              _cloudinarySettings.CloudName,
-              _cloudinarySettings.ApiKey,
-              _cloudinarySettings.ApiSecret);
-            _cloudinary = new Cloudinary(account);
+            //Account account = new Account(
+            //  _cloudinarySettings.CloudName,
+            //  _cloudinarySettings.ApiKey,
+            //  _cloudinarySettings.ApiSecret);
+            //_cloudinary = new Cloudinary(account);
             _likeService = likeService;
             _followerService = followerService;
         }
