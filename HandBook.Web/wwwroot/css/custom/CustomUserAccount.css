@@ -15,7 +15,8 @@
     }
 
 .uploaded-image {
-    height: 100px;
+    height: 8em;
+    width: 8em;
     cursor: pointer;
 }
 
@@ -152,3 +153,10 @@
     .hidden{
         display:none;
     }
+
+#custom-view-profile-image-id{
+    width:50%;
+}
+.rounded-circle{
+    border-radius:50%;
+}

@@ -39,11 +39,11 @@ namespace HandBook.Web.Controllers.HomeControllerFolder
             _notificationService = notificationService;
             Configuration = configuration;
             _cloudinarySettings = Configuration.GetSection("CloudinarySettings").Get<CloudinarySettings>() ?? new CloudinarySettings();
-            //Account account = new Account(
-            //  _cloudinarySettings.CloudName,
-            //  _cloudinarySettings.ApiKey,
-            //  _cloudinarySettings.ApiSecret);
-            //_cloudinary = new Cloudinary(account);
+            CloudinaryDotNet.Account account = new CloudinaryDotNet.Account(
+              _cloudinarySettings.CloudName,
+              _cloudinarySettings.ApiKey,
+              _cloudinarySettings.ApiSecret);
+            _cloudinary = new Cloudinary(account);
             _likeService = likeService;
             _followerService = followerService;
         }
@@ -487,7 +487,6 @@ namespace HandBook.Web.Controllers.HomeControllerFolder
         #endregion
 
         #region  Account
-
         public async Task<UserAccountDTO> AccountHelper(AppUser user, AppUser currUser)
         {
             var useraccdto = new UserAccountDTO();
@@ -540,6 +539,39 @@ namespace HandBook.Web.Controllers.HomeControllerFolder
                     .Where(x => x.Follower.Id== currUser.Id)
                     .Select(x => x.Followed.UserName)
                     .Skip(offset * 30);
+            }
+        }
+
+        public async Task<bool> ChangeProfileImage(string imageSrc, AppUser user)
+        {
+            try
+            {
+                await DeleteImage($"https://res.cloudinary.com/dzaicqbce/image/upload/v1695818842/profile-image-for-{user.UserName}");
+                await _cloudinary.UploadAsync(new ImageUploadParams()
+                {
+                    File = new FileDescription(imageSrc),
+                    DisplayName = $"profile-image-for-{user.UserName}",
+                    PublicId = $"profile-image-for-{user.UserName}",
+                    Overwrite = false,
+                });
+                return true;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+        }
+        private async Task<bool> DeleteImage(string imageId)
+        {
+            try
+            {
+                var deletionParams = new DeletionParams(imageId);
+                var res = await _cloudinary.DestroyAsync(deletionParams);
+                return true;
+            }
+            catch (Exception)
+            {
+                return false;
             }
         }
 

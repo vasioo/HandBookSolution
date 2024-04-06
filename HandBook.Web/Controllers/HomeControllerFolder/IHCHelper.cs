@@ -23,5 +23,6 @@ namespace HandBook.Web.Controllers.HomeControllerFolder
         Task<ExplorePageViewModel> GetExplorePageAttributes(AppUser user);
         IQueryable<CardDTO> GetSpecificExplorePageItemsByProvidedItemHelper(Guid itemId);
         IQueryable<string?> LoadFollowsBasedOnOffset(AppUser currUser, bool isFollower, int offset);
+        Task<bool> ChangeProfileImage(string imageSrc, AppUser user);
     }
 }

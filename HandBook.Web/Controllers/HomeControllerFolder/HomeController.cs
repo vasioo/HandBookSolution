@@ -298,8 +298,8 @@ namespace HandBook.Web.Controllers.HomeControllerFolder
 
             var useraccdto = await _helper.AccountHelper(user!, curruser!);
 
-                TempData["UserLikedCards"] = useraccdto.UserLikedCards;
-                TempData["UserLikedComments"] = useraccdto.UserLikedComments;
+            TempData["UserLikedCards"] = useraccdto.UserLikedCards;
+            TempData["UserLikedComments"] = useraccdto.UserLikedComments;
 
             return View("~/Views/Home/Account.cshtml", useraccdto);
         }
@@ -320,6 +320,23 @@ namespace HandBook.Web.Controllers.HomeControllerFolder
                 return Json("Error occurred while extracting followers/followings.");
                 throw;
             }
+        }
+
+        [HttpPost]
+        public async Task<JsonResult> ChangeProfileImage(string imageSrc)
+        {
+            try
+            {
+                var username = HttpContext.User?.Identity?.Name ?? "";
+                var user = await _userManager.FindByNameAsync(username);
+
+                await _helper.ChangeProfileImage(imageSrc,user);
+            }
+            catch
+            {
+                return Json(new { status = false, Message = "The image could not be changed!" });
+            }
+            return Json(new { status = true, Message = "The image was changed successfully!" });
         }
         #endregion
 

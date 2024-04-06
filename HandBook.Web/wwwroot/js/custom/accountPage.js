@@ -242,16 +242,15 @@ $('#followers-load-btn').click(function () {
     getFollows(true, $(this).data('offset-count'));
 });
 
-$(document).on('error', '.profile-image-class', function () {
-    $(this).off('error').attr('src', '/handbook/images/anonymousUser.png');
-}).on('load', '.profile-image-class', function () { });
-
 $(document).ready(function () {
     $(document).find('.profile-image-class').each(function () {
         if (!this.complete || (typeof this.naturalWidth !== 'undefined' && this.naturalWidth === 0)) {
             $(this).trigger('error');
         }
     });
+    $(document).on('error', '.profile-image-class', function () {
+        $(this).off('error').attr('src', '/handbook/images/anonymousUser.png');
+    }).on('load', '.profile-image-class', function () { });
 });
 
 $(document).on('click', '.remove-follower', function () {
@@ -385,7 +384,35 @@ $(document).ready(function () {
             if (isValid) {
                 $uploadedImage.attr('src', imageData);
                 $uploadedImageContainer.attr('src', imageData);
-
+                $.ajax({
+                    type: "POST",
+                    url: "/Home/ChangeProfileImage",
+                    data: { imageSrc: imageData },
+                    success: function (data) {
+                        if (data.status) {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Changes made',
+                                text: data.message
+                            })
+                        }
+                        else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Wrong action',
+                                text: data.message
+                            })
+                        }
+                     
+                    },
+                    error: function (error) {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Oops...',
+                            text: 'Image could not be changed in the database. Try again!'
+                        })
+                    }
+                });
             } else {
                 Swal.fire({
                     icon: 'error',

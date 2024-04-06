@@ -1,5 +1,5 @@
 ﻿.upload-input {
-    height: 25rem; /* Set height to 7 columns */
+    height: 25rem; 
     position: relative;
     overflow: hidden;
 }
@@ -55,5 +55,5 @@
 
     .custom-textbox:focus {
         border-color: dodgerblue;
-        box-shadow: 0 0 0 0.25rem rgba(0, 123, 255, 0.25); /* Bootstrap focus style */
+        box-shadow: 0 0 0 0.25rem rgba(0, 123, 255, 0.25); 
     }
