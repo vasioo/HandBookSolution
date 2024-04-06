@@ -2,7 +2,7 @@
 @{
     TempData.Keep();
     var comment = Model;
-    string link = $"https://res.cloudinary.com/dzaicqbce/image/upload/v1695818842/profile-image-for-{comment.AppUser.UserName}.png";
+    string link = $"https://res.cloudinary.com/dzaicqbce/image/upload/v1695818842/profile-image-for-{comment.AppUser.UserName}?timestamp={DateTime.Now}";
     string alternativeLink = $"https://res.cloudinary.com/dzaicqbce/image/upload/v1700160046/azgysbpf8xpcxpfclb9i.jpg";
 
     string tempdata = TempData["UserLikedComments"] as string;
@@ -11,7 +11,7 @@
 <div class="comment-container pt-2" data-comment-id="@comment.CommentDeriveFromId">
     <div class="profile-column">
         @{
-            var pilink = "https://res.cloudinary.com/dzaicqbce/image/upload/v1695818842/profile-image-for-" + comment.AppUser.UserName + ".png";
+            var pilink = "https://res.cloudinary.com/dzaicqbce/image/upload/v1695818842/profile-image-for-" + comment.AppUser.UserName + "?timestamp="+DateTime.Now;
         }
 
         <img src="@pilink" class="profile-image-class" alt="Image not found" style="border-radius:30px; width:50px; margin-right:10px;" />

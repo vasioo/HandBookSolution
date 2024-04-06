@@ -16,7 +16,8 @@
 
             if (posts.length > 0) {
                 posts.forEach(function (comment, index) {
-                    var link = `https://res.cloudinary.com/dzaicqbce/image/upload/v1695818842/profile-image-for-${comment.appUser.userName}.png`;
+                    var timestamp = new Date().getTime();
+                    var link = `https://res.cloudinary.com/dzaicqbce/image/upload/v1695818842/profile-image-for-${comment.appUser.userName}?timestamp=${timestamp}`;
                     var imgTag = `<img src="/handbook/images/anonymousUser.png" class="profile-image-class" alt="Image not found" style="border-radius:30px; width:50px;height:50px; margin-right:10px;" />`;
                     $.get(link)
                         .done(function () {

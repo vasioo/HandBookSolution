@@ -42,7 +42,30 @@
         return displayString;
     }
 
-    List<string> userLikedCards = (List<string>)TempData["UserLikedCards"];
+    List<string> userLikedCards;
+
+    if (TempData.ContainsKey("UserLikedCards"))
+    {
+        var tempDataValue = TempData["UserLikedCards"];
+
+        if (tempDataValue is string[] tempDataArray)
+        {
+            userLikedCards = tempDataArray.ToList();
+        }
+        else if (tempDataValue is List<string> tempList)
+        {
+            userLikedCards = tempList;
+        }
+        else
+        {
+            throw new InvalidOperationException("Invalid type found in TempData for key 'UserLikedCards'");
+        }
+    }
+    else
+    {
+        userLikedCards = new List<string>();
+    }
+
 
     TempData.Keep();
 }
@@ -52,7 +75,7 @@
             <div class="row justify-content-between w-100">
                 <div class="profile-column-post d-flex align-items-center">
                     @{
-                        var link = $"https://res.cloudinary.com/dzaicqbce/image/upload/v1695818842/profile-image-for-{item.CreatorUserName}.png";
+                        var link = $"https://res.cloudinary.com/dzaicqbce/image/upload/v1695818842/profile-image-for-{item.CreatorUserName}?timestamp={DateTime.Now}";
                     }
                     <a class="" asp-controller="Home" asp-action="Account" asp-route-username="@item.CreatorUserName">
                         <img src="@link" class="profile-image-class" alt="Image not found" style="border-radius:30px; width:60px;height:60px; margin-right:10px;" />

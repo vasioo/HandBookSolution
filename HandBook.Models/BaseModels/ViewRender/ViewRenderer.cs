@@ -28,27 +28,36 @@ namespace HandBook.Models.BaseModels.ViewRender
 
         public async Task<string> RenderViewToStringAsync<TModel>(string viewName, TModel model, string[] additionalViewLocations = null, HttpContext httpContext = null)
         {
-            var actionContext = GetActionContext(httpContext);
-            var view = FindView(actionContext, viewName, additionalViewLocations);
-
-            using (var output = new StringWriter())
+            try
             {
-                var viewContext = new ViewContext(
-                    actionContext,
-                    view,
-                    new ViewDataDictionary<TModel>(new EmptyModelMetadataProvider(), new ModelStateDictionary())
-                    {
-                        Model = model
-                    },
-                    new TempDataDictionary(_httpContextAccessor.HttpContext, _tempDataProvider),
-                    output,
-                    new HtmlHelperOptions()
-                );
+                var actionContext = GetActionContext(httpContext);
+                var view = FindView(actionContext, viewName, additionalViewLocations);
 
-                await view.RenderAsync(viewContext);
+                using (var output = new StringWriter())
+                {
+                    var viewContext = new ViewContext(
+                        actionContext,
+                        view,
+                        new ViewDataDictionary<TModel>(new EmptyModelMetadataProvider(), new ModelStateDictionary())
+                        {
+                            Model = model
+                        },
+                        new TempDataDictionary(_httpContextAccessor.HttpContext, _tempDataProvider),
+                        output,
+                        new HtmlHelperOptions()
+                    );
 
-                return output.ToString();
+                    await view.RenderAsync(viewContext);
+
+                    return output.ToString();
+                }
             }
+            catch (Exception ex)
+            {
+                await Console.Out.WriteLineAsync(ex.Message);
+                throw;
+            }
+          
         }
 
         private ActionContext GetActionContext(HttpContext httpContext)

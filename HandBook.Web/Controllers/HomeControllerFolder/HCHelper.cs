@@ -55,8 +55,8 @@ namespace HandBook.Web.Controllers.HomeControllerFolder
         {
             try
             {
-                var cards =  _postService.IQueryableGetAllAsync().OrderByDescending(x => x.Time).Take(20).ToList();
-                var comments =  _commentService.IQueryableGetAllAsync().ToList();
+                var cards = _postService.IQueryableGetAllAsync().Where(x => !String.IsNullOrEmpty(x.CreatorUserName)).OrderByDescending(x => x.Time).Take(20).ToList();
+                var comments = _commentService.IQueryableGetAllAsync().ToList();
 
                 var posts = cards.Select(post => new CardDTO
                 {
@@ -109,7 +109,7 @@ namespace HandBook.Web.Controllers.HomeControllerFolder
 
         #endregion
 
-        #region  DesiredPostHelper
+        #region DesiredPostHelper
 
         public async Task<CardDTO> DesiredPostHelper(Guid desiredPostId, AppUser user)
         {
@@ -183,9 +183,9 @@ namespace HandBook.Web.Controllers.HomeControllerFolder
 
         #region  HelperMethodsHelper
 
-            #region CommentsHelper
+        #region CommentsHelper
 
-            public async Task<string> AddOrRemoveACommentHelper(CommentsDTO commentsDTO, AppUser user)
+        public async Task<string> AddOrRemoveACommentHelper(CommentsDTO commentsDTO, AppUser user)
         {
             var item = await _postService.GetByIdAsync(commentsDTO.PostId);
 
@@ -208,6 +208,7 @@ namespace HandBook.Web.Controllers.HomeControllerFolder
             {
                 var comment = new Comment
                 {
+                    Id= randomGuid,
                     DateOfCreation = DateTime.Now,
                     Post = item,
                     AppUser = user,
@@ -247,36 +248,36 @@ namespace HandBook.Web.Controllers.HomeControllerFolder
             return jsonResult;
         }
 
-            public IQueryable<CommentJSON> LoadMoreCommentsHelper(int offset, Guid derivingFrom, Guid postId)
+        public IQueryable<CommentJSON> LoadMoreCommentsHelper(int offset, Guid derivingFrom, Guid postId)
+        {
+            var allComments = _commentService.IQueryableGetAllAsync();
+
+            var neededComs = allComments.OrderByDescending(x => x.DateOfCreation)
+                        .Where(x => x.Post.Id == postId && x.CommentDeriveFromId == derivingFrom)
+                        .Skip(offset)
+                        .Take(20);
+
+            var commentsJSON = neededComs.Select(com => new CommentJSON
             {
-                var allComments = _commentService.IQueryableGetAllAsync();
+                Id = com.Id,
+                DateOfCreation = com.DateOfCreation,
+                CommentContent = com.CommentContent,
+                AmountOfLikes = com.AmountOfLikes,
+                AppUser = com.AppUser,
+                Post = com.Post,
+                CommentDeriveFromId = com.CommentDeriveFromId,
+                AmountOfReplies = allComments.Where(x => x.CommentDeriveFromId == com.Id).Count()
+            });
 
-                var neededComs = allComments.OrderByDescending(x => x.DateOfCreation)
-                            .Where(x => x.Post.Id == postId && x.CommentDeriveFromId == derivingFrom)
-                            .Skip(offset)
-                            .Take(20);
-
-                var commentsJSON = neededComs.Select(com => new CommentJSON
-                {
-                    Id = com.Id,
-                    DateOfCreation = com.DateOfCreation,
-                    CommentContent = com.CommentContent,
-                    AmountOfLikes = com.AmountOfLikes,
-                    AppUser = com.AppUser,
-                    Post = com.Post,
-                    CommentDeriveFromId = com.CommentDeriveFromId,
-                    AmountOfReplies = allComments.Where(x => x.CommentDeriveFromId == com.Id).Count()
-                });
-
-                return commentsJSON;
-            }
+            return commentsJSON;
+        }
 
 
-            #endregion
+        #endregion
 
-            #region LikesHelper
+        #region LikesHelper
 
-            public async Task<int> IncrementOrDecrementLikeCountHelper(Guid itemId, AppUser user)
+        public async Task<int> IncrementOrDecrementLikeCountHelper(Guid itemId, AppUser user)
         {
             var item = await _postService.GetByIdAsync(itemId);
             item.AmountOfLikes = _likeService.IQueryableGetAllAsync().Where(x => x.PostId == item.Id).Count();
@@ -322,7 +323,7 @@ namespace HandBook.Web.Controllers.HomeControllerFolder
             return item.AmountOfLikes;
         }
 
-            public async Task<int> IncrementOrDecrementCommentLikeCountHelper(Guid itemId, AppUser user)
+        public async Task<int> IncrementOrDecrementCommentLikeCountHelper(Guid itemId, AppUser user)
         {
             var item = await _commentService.GetByIdAsync(itemId);
             item.AmountOfLikes = _likeService.IQueryableGetAllAsync().Where(x => x.PostId == item.Id).Count();
@@ -371,61 +372,61 @@ namespace HandBook.Web.Controllers.HomeControllerFolder
             return item.AmountOfLikes;
         }
 
-            #endregion
+        #endregion
 
-            #region FollowersHelper
+        #region FollowersHelper
 
-            public async Task AddFollowerRelationshipHelper(string username, string usernamefollower)
+        public async Task AddFollowerRelationshipHelper(string username, string usernamefollower)
+        {
+            var follow = await _userManager.FindByNameAsync(username);
+            var follower = await _userManager.FindByNameAsync(usernamefollower);
+
+            if (follow != null && follower != null && usernamefollower != username)
             {
-                var follow = await _userManager.FindByNameAsync(username);
-                var follower = await _userManager.FindByNameAsync(usernamefollower);
+                var followerrelation = new Followers();
 
-                if (follow != null && follower != null && usernamefollower != username)
+                followerrelation.Follower = follower;
+                followerrelation.Followed = follow;
+
+                await _followerService.AddAsync(followerrelation);
+
+                Notification ntf = new Notification
                 {
-                    var followerrelation = new Followers();
+                    AppUser = follow!,
+                    CreatorUserName = follow!.UserName!,
+                    Time = DateTime.Now,
+                    MainText = "started followed you"
+                };
 
-                    followerrelation.Follower = follower;
-                    followerrelation.Followed = follow;
+                await _notificationService.AddAsync(ntf);
+            }
+        }
 
-                    await _followerService.AddAsync(followerrelation);
+        public async Task RemoveFollowerRelationshipHelper(string username, string usernamefollower)
+        {
+            var follow = await _userManager.FindByNameAsync(username);
+            var follower = await _userManager.FindByNameAsync(usernamefollower);
 
-                    Notification ntf = new Notification
-                    {
-                        AppUser = follow!,
-                        CreatorUserName = follow!.UserName!,
-                        Time = DateTime.Now,
-                        MainText = "started followed you"
-                    };
+            if (follow != null && follower != null && usernamefollower != username)
+            {
+                var followerToRemove = _followerService.IQueryableGetAllAsync().Where(x => x.Followed.Id == follow.Id && x.Follower.Id == follower.Id).FirstOrDefault();
+                if (followerToRemove != null)
+                {
+                    await _followerService.RemoveAsync(followerToRemove.Id);
+                }
 
-                    await _notificationService.AddAsync(ntf);
+                var tempGuid = Guid.Empty;
+                var existingNotif = await _notificationService.GetExistingNotification(follow.Id, tempGuid, "started followed you");
+                if (existingNotif != null)
+                {
+                    await _notificationService.RemoveAsync(existingNotif!.Id);
                 }
             }
+        }
 
-            public async Task RemoveFollowerRelationshipHelper(string username, string usernamefollower)
-            {
-                var follow = await _userManager.FindByNameAsync(username);
-                var follower = await _userManager.FindByNameAsync(usernamefollower);
+        #endregion
 
-                if (follow != null && follower != null && usernamefollower != username)
-                {
-                    var followerToRemove = _followerService.IQueryableGetAllAsync().Where(x => x.Followed.Id == follow.Id && x.Follower.Id == follower.Id).FirstOrDefault();
-                    if (followerToRemove!=null)
-                    {
-                        await _followerService.RemoveAsync(followerToRemove.Id);
-                    }
-
-                    var tempGuid = Guid.Empty;
-                    var existingNotif = await _notificationService.GetExistingNotification(follow.Id, tempGuid, "started followed you");
-                    if (existingNotif != null)
-                    {
-                        await _notificationService.RemoveAsync(existingNotif!.Id);
-                    }
-                }
-            }
-
-            #endregion
-
-            #region PostsHelper
+        #region PostsHelper
 
         public async Task<List<CardDTO>> LoadMorePostsHelper(int offset)
         {
@@ -448,7 +449,7 @@ namespace HandBook.Web.Controllers.HomeControllerFolder
 
         #endregion
 
-            #region Others
+        #region Others
 
         static string GenerateRandomId(int length, Random random)
         {
@@ -486,7 +487,7 @@ namespace HandBook.Web.Controllers.HomeControllerFolder
 
         #endregion
 
-        #region  Account
+        #region Account
         public async Task<UserAccountDTO> AccountHelper(AppUser user, AppUser currUser)
         {
             var useraccdto = new UserAccountDTO();
@@ -524,19 +525,19 @@ namespace HandBook.Web.Controllers.HomeControllerFolder
             return useraccdto;
         }
 
-        public IQueryable<string?> LoadFollowsBasedOnOffset(AppUser currUser,bool isFollower, int offset)
+        public IQueryable<string?> LoadFollowsBasedOnOffset(AppUser currUser, bool isFollower, int offset)
         {
             if (isFollower)
             {
                 return _followerService.IQueryableGetAllAsync()
                     .Where(x => x.Followed.Id == currUser.Id)
                     .Select(x => x.Follower.UserName)
-                    .Skip(offset*30);
+                    .Skip(offset * 30);
             }
             else
             {
                 return _followerService.IQueryableGetAllAsync()
-                    .Where(x => x.Follower.Id== currUser.Id)
+                    .Where(x => x.Follower.Id == currUser.Id)
                     .Select(x => x.Followed.UserName)
                     .Skip(offset * 30);
             }
@@ -546,27 +547,14 @@ namespace HandBook.Web.Controllers.HomeControllerFolder
         {
             try
             {
-                await DeleteImage($"https://res.cloudinary.com/dzaicqbce/image/upload/v1695818842/profile-image-for-{user.UserName}");
                 await _cloudinary.UploadAsync(new ImageUploadParams()
                 {
                     File = new FileDescription(imageSrc),
                     DisplayName = $"profile-image-for-{user.UserName}",
                     PublicId = $"profile-image-for-{user.UserName}",
-                    Overwrite = false,
+                    Overwrite = true,
+                    Invalidate = true,
                 });
-                return true;
-            }
-            catch (Exception)
-            {
-                return false;
-            }
-        }
-        private async Task<bool> DeleteImage(string imageId)
-        {
-            try
-            {
-                var deletionParams = new DeletionParams(imageId);
-                var res = await _cloudinary.DestroyAsync(deletionParams);
                 return true;
             }
             catch (Exception)
@@ -577,7 +565,7 @@ namespace HandBook.Web.Controllers.HomeControllerFolder
 
         #endregion
 
-        #region  ExlporePageHelper
+        #region ExlporePageHelper
 
         public async Task<ExplorePageViewModel> GetExplorePageAttributes(AppUser user)
         {
@@ -590,7 +578,7 @@ namespace HandBook.Web.Controllers.HomeControllerFolder
 
         public IQueryable<CardDTO> GetSpecificExplorePageItemsByProvidedItemHelper(Guid itemId)
         {
-            var items = _postService.IQueryableGetAllAsync();
+            var items = _postService.IQueryableGetAllAsync().Where(x => !String.IsNullOrEmpty(x.CreatorUserName));
             var comments = _commentService.IQueryableGetAllAsync();
             var posts = items.Select(post => new CardDTO
             {
@@ -606,7 +594,7 @@ namespace HandBook.Web.Controllers.HomeControllerFolder
             return posts;
         }
 
-       
+
 
         #endregion
 

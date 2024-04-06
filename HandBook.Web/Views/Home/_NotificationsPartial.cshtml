@@ -2,7 +2,7 @@
 @model Notification
 
 @{
-    string link = $"https://res.cloudinary.com/dzaicqbce/image/upload/v1695818842/profile-image-for-{ViewBag.CurrentUserUsername}.png";
+    string link = $"https://res.cloudinary.com/dzaicqbce/image/upload/v1695818842/profile-image-for-{ViewBag.CurrentUserUsername}?timestamp={DateTime.Now}";
     string alternativeLink = $"https://res.cloudinary.com/dzaicqbce/image/upload/v1700160046/azgysbpf8xpcxpfclb9i.jpg";
     string GetTimeDisplay(DateTime postDate)
     {

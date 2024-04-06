@@ -394,7 +394,8 @@ $(document).ready(function () {
                                 icon: 'success',
                                 title: 'Changes made',
                                 text: data.message
-                            })
+                            });
+                            location.reload();
                         }
                         else {
                             Swal.fire({

@@ -22,7 +22,7 @@
                 <div class="row justify-content-around align-items-center">
                     <div class="col-md-1">
                         @{
-                            string link = $"https://res.cloudinary.com/dzaicqbce/image/upload/v1695818842/profile-image-for-{Model.UserTempUsername!}";
+                            string link = $"https://res.cloudinary.com/dzaicqbce/image/upload/v1695818842/profile-image-for-{Model.UserTempUsername!}?timestamp={DateTime.Now}";
                             string alternativeLink = $"https://res.cloudinary.com/dzaicqbce/image/upload/v1700160046/azgysbpf8xpcxpfclb9i.jpg";
                             @if (User!.Identity!.Name == Model.UserTempUsername)
                             {

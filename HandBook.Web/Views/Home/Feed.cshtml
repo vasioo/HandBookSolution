@@ -30,7 +30,10 @@
             TempData.Keep();
             @foreach (var item in Model)
             {
-                @await Html.PartialAsync("_PostsPartial", item)
+                if (!String.IsNullOrEmpty(item.CreatorUserName))
+                {
+                    @await Html.PartialAsync("_PostsPartial", item)
+                }
             }
         }
     </div>

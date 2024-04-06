@@ -114,7 +114,7 @@ $(document).on('click', '.toggle-replies-btn', function () {
 
 $(document).on('click', '.submit-btn', function () {
     var $commentContainer = $(this).closest('.comment-section');
-    var $commentTextarea = $commentContainer.find('.comments-text');
+    var $commentTextarea = $commentContainer.find('.comment-text');
 
     var commentContent = $commentTextarea.val();
     var postId = $commentContainer.data('post-id');
@@ -132,38 +132,51 @@ $(document).on('click', '.submit-btn', function () {
         dataType: 'json',
         success: function (response) {
             var commentDto = JSON.parse(response);
+            var timestamp = new Date().getTime();
 
-            var usernameLink = 'https://res.cloudinary.com/dzaicqbce/image/upload/v1695818842/profile-image-for-' + commentDto.UserUsername + '.png';
+            var usernameLink = `https://res.cloudinary.com/dzaicqbce/image/upload/v1695818842/profile-image-for-${commentDto.UserUsername}?timestamp=${timestamp}`;
             var alternativeLink = "/handbook/images/anonymousUser.png";
-            var imgTag = '<img src="' + usernameLink + '" alt="Image not found" onerror="this.onerror=null;this.src=\'' + alternativeLink + '\';" style="border-radius:30px; width:60px;height:60px; margin-right:10px;" />';
+            var imgTag = '<img src="' + usernameLink + '" class="profile-image-class" alt="Image not found" onerror="this.onerror=null;this.src=\'' + alternativeLink + '\';" style="border-radius:30px; width:50px;height:50px; margin-right:10px;" />';
+
+            var commentTextWrapper = `
+                <div class="d-flex pb-3 pt-2"> ${commentDto.CommentContent}</div>
+                <div class="row">
+                    <span class="commentlikeCount" data-item-id="${commentDto.Id}">
+                    </span>
+                </div>
+            `;
 
             var commentHtml = `
-            <div class="comment-container row pt-2">
-                <div class="profile-column">
+            <div class="comment-container row pt-2" data-comment-id="${commentDto.Id}" data-deriving-from="0">
+                <div class="profile-column col-1 mx-2 p-0">
                    `+ imgTag + `
                 </div>
-                <div class="comment-column">
-                    <div class="comment">
-                        <div class="comment-header">
-                            <div class="comment-username">${commentDto.userUsername}</div>
-                            <div class="comment-time">Now</div>
+                <div class="comment-column col-10 mx-2 p-0">
+                    <div class="comment" data-comment-id="${commentDto.Id}" data-comment-username="${commentDto.UserUsername}">
+                        <div class="comment-header rounded-top">
+                            <div class="comment-username font-weight-bold">${commentDto.UserUsername}</div>
+                            <div class="comment-time text-muted">Now</div>
                         </div>
-                        <div class="comment-content">${commentDto.commentContent}</div>
-                        <div class="comment-actions">
-                            <a href="#" class="comment-action">Like</a>
-                            <a href="#" class="comment-action">Reply</a>
+                        <div class="comment-content rounded-bottom">
+                           ${commentTextWrapper}
+                        </div>
+                        <div class="comment-actions mt-2">
+                            <a class="comment-like-button btn text-decoration-none text-primary" data-count="1">
+                                <i class="fa-regular fa-heart fa-xl com-btn" style="color: #000;" aria-hidden="true"></i>
+                            </a>
+                            <button class="append-reply-textbox btn" data-comment-id="${commentDto.Id}">
+                                <i class="fa-solid fa-reply fa-xl" aria-hidden="true"></i>
+                            </button>
                         </div>
                     </div>
-                    <div class="replies-container">
-                        <!-- Add replies here if available -->
+                    <div class="sub-replies-container" id="sub-replies-container-${commentDto.Id}" style="display: none;">
                     </div>
-                    <div class="view-replies">View Replies</div>
                 </div>
             </div>
         `;
 
-            var neededId = `#comment-container-${commentDto.postId}`;
-            $('neededId').prepend(commentHtml);
+            var neededId = `#comment-container-${commentDto.PostId}`;
+            $(neededId).prepend(commentHtml);
 
 
         },

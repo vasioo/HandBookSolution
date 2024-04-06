@@ -8,6 +8,8 @@ using HandBook.Web.Controllers.HomeControllerFolder;
 using HandBook.Web.Controllers.MessagesControllerFolder;
 using HandBook.Web.Models;
 using Messenger.Models;
+using static ServiceStack.Diagnostics.Events;
+
 namespace HandBook.Web.Extensions
 {
     public static class ServiceExtensions
@@ -41,7 +43,6 @@ namespace HandBook.Web.Extensions
             service.AddScoped<IMCHelper, MCHelper>();
 
             service.AddScoped<ViewRenderer>();
-
         }
     }
 }

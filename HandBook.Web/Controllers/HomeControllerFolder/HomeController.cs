@@ -143,7 +143,6 @@ namespace HandBook.Web.Controllers.HomeControllerFolder
             }
             catch (Exception ex)
             {
-                // Add logging
                 Console.WriteLine($"Error occurred: {ex.Message}");
 
                 return Json("Error occurred while processing the like/unlike action.");
@@ -363,7 +362,10 @@ namespace HandBook.Web.Controllers.HomeControllerFolder
 
                 foreach (var item in itemsQuery)
                 {
-                    var htmlContent = await _viewRenderer.RenderViewToStringAsync("_PostsPartial.cshtml", item, new[] { "Views/Home" }, HttpContext);
+                    List<string> additionalLocationsList = new List<string>();
+                    additionalLocationsList.Add("~/Views/Home");
+
+                    var htmlContent = await _viewRenderer.RenderViewToStringAsync("_PostsPartial.cshtml", item, additionalLocationsList.ToArray(), HttpContext);
                     responseBuilder.AppendLine(htmlContent);
                 }
 

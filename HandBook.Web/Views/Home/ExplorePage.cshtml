@@ -19,7 +19,7 @@
             <div class="row justify-content-center position-relative">
                 <div class="col-7 position-relative p-0">
                     <input class="form-control h5 pt-1 py-2 pr-5 mb-0" type="text" placeholder="Search" name="SearchString" autocomplete="off" id="searchInput" value="@ViewData["CurrentFilter"]" />
-                    <i id="hidden-icon-for-canceling" class="fa-solid fa-xmark position-absolute end-0 top-50 translate-middle-y p-4 user-select-none" ></i>
+                    <i id="hidden-icon-for-canceling" class="fa-solid fa-xmark position-absolute end-0 top-50 translate-middle-y p-4 user-select-none"></i>
                 </div>
                 <div id="clearSearchMainClass" class="pt-1 col-1 text-center">
                     <a id="clearSearch" class="btn-link btn pt-0 col">Cancel</a>
@@ -34,11 +34,14 @@
             <div class="col-8 p-0 m-0">
                 @foreach (var item in Model.Posts)
                 {
-                    <div class="col-sm-6 col-md-4 col-lg-4">
-                        <div class="explore-item">
-                            @await Html.PartialAsync("~/Views/Home/_ExplorePagePartial.cshtml", item)
+                    if (!String.IsNullOrEmpty(item.CreatorUserName))
+                    {
+                        <div class="col-sm-6 col-md-4 col-lg-4">
+                            <div class="explore-item">
+                                @await Html.PartialAsync("~/Views/Home/_ExplorePagePartial.cshtml", item)
+                            </div>
                         </div>
-                    </div>
+                    }
                 }
             </div>
         </div>
