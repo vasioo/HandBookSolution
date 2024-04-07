@@ -85,7 +85,7 @@ $(document).on('click', '.toggle-replies-btn', function () {
         loadMoreComments(commentReplyId, postId, $(this));
         subRepliesContainer.addClass('comments-loaded');
     }
-    
+
     if (repliesContainer != null && repliesContainer != undefined) {
         $(repliesContainer).toggle();
         if ($(repliesContainer).is(':visible')) {
@@ -187,15 +187,13 @@ $(document).on('click', '.submit-btn', function () {
 });
 
 $(document).on('click', '.submit-reply-btn', function () {
-    var $commentContainer = $(this).closest('.replies-group');
-
-    var $repliesContainer = $(this).closest('.comment-container').find('.commentlikeCount');
-
+    var $submitButton = $(this); 
+    var $commentContainer = $submitButton.closest('.replies-group');
+    var $repliesContainer = $submitButton.closest('.comment-container').find('.commentlikeCount');
     var commentDeriveFromId = $repliesContainer.data('item-id');
-
     var $commentTextarea = $commentContainer.find('.reply-text');
     var commentContent = $commentTextarea.val();
-    var postId = $(this).closest('.comment-section').data('post-id');
+    var postId = $submitButton.closest('.comment-section').data('post-id');
 
     var comment = {
         CommentContent: commentContent,
@@ -203,7 +201,6 @@ $(document).on('click', '.submit-reply-btn', function () {
         PostId: postId,
         CommentDeriveFromId: commentDeriveFromId
     };
-
 
     $.ajax({
         url: "/Home/AddOrRemoveAComment",
@@ -216,32 +213,57 @@ $(document).on('click', '.submit-reply-btn', function () {
             var usernameLink = 'https://res.cloudinary.com/dzaicqbce/image/upload/v1695818842/profile-image-for-' + commentDto.UserUsername + '.png';
             var alternativeLink = "/handbook/images/anonymousUser.png";
             var imgTag = '<img src="' + usernameLink + '" alt="Image not found" onerror="this.onerror=null;this.src=\'' + alternativeLink + '\';" style="border-radius:30px; width:60px;height:60px; margin-right:10px;" />';
-
+            var commentTextWrapper = `
+                <div class="d-flex pb-3 pt-2">
+                    <a class="custom-username-link" href="Home/Account?username=${commentDto.UserUsername}">
+                        @${commentDto.UserUsername} &#160
+                    </a>
+                    ${commentDto.CommentContent}
+                </div>
+                <div class="row">
+                    <span class="commentlikeCount" data-item-id="${commentDto.Id}">
+                    </span>
+                </div>
+            `;
             var commentHtml = `
-                <div class="comment-container row pt-2">
-                    <div class="profile-column">
+                <div class="comment-container row pt-2" data-comment-id="${commentDto.Id}" data-deriving-from="0">
+                    <div class="profile-column col-1 mx-2 p-0">
                     `+ imgTag + `
                     </div>
-                    <div class="profile-column">
-                        <div class="comment">
-                            <div class="comment-header">
-                                <div class="comment-username">${commentDto.UserUsername}</div>
-                                <div class="comment-time">Now</div>
-                            </div>
-                            <div class="comment-content">${commentDto.CommentContent}</div>
-                            <div class="comment-actions">
-                                <a href="#" class="comment-action">Like</a>
-                                <a href="#" class="comment-action">Reply</a>
-                            </div>
-                        </div>
-                     </div>
+                    <div class="comment-column col-10 mx-2 p-0">
+                       <div class="comment" data-comment-id="${commentDto.Id}" data-comment-username="${commentDto.UserUsername}">
+                           <div class="comment-header rounded-top">
+                               <div class="comment-username font-weight-bold">${commentDto.UserUsername}</div>
+                               <div class="comment-time text-muted">Now</div>
+                           </div>
+                           <div class="comment-content rounded-bottom">
+                              ${commentTextWrapper}
+                           </div>
+                           <div class="comment-actions mt-2">
+                               <a class="comment-like-button btn text-decoration-none text-primary" data-count="1">
+                                   <i class="fa-regular fa-heart fa-xl com-btn" style="color: #000;" aria-hidden="true"></i>
+                               </a>
+                               <button class="append-reply-textbox btn" data-comment-id="${commentDto.Id}">
+                                   <i class="fa-solid fa-reply fa-xl" aria-hidden="true"></i>
+                               </button>
+                           </div>
+                       </div>
                     </div>
                     `;
 
-            var replyContainerId = "container-" + commentDto.CommentDeriveFromId;
-            var $repliesContainer = $('#' + replyContainerId);
+            var predictedId = `#sub-replies-container-${commentDto.CommentDeriveFromId}`;
 
-            $repliesContainer.prepend(commentHtml);
+            if ($(predictedId).length) {
+                $(predictedId).append(commentHtml);
+                $(predictedId).css('display', 'block');
+            } else {
+                var parentContainer = $submitButton.closest('.sub-replies-container'); 
+                parentContainer.prepend(commentHtml);
+                $('html, body').animate({
+                    scrollTop: parentContainer.offset().top
+                }, 'fast');
+            }
+
         },
         error: function (error) {
             console.error('Error submitting comment:', error);
@@ -280,7 +302,7 @@ $(document).ready(function () {
     });
 });
 
-$(document).on('textarea','input', function () {
+$(document).on('textarea', 'input', function () {
     this.style.height = 'auto';
 
     this.style.height =
