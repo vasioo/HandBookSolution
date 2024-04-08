@@ -28,11 +28,11 @@ $(document).on('click', '.append-reply-textbox', function (event) {
     var $replyButton = $(this);
     var $inputBoxContainer = $replyButton.closest('.comment-actions').next('.reply-input-box');
 
-    if (!$nextSibling.hasClass('row')) {
+    if (!$nextSibling.hasClass('ibht')) {
         var neededId = $(this).attr('data-comment-id');
         var derivingFromUsername = $('.comment[data-comment-id="' + neededId + '"]').data('comment-username')
         var inputBoxHtml = `
-            <div class="row py-3" style="padding-left: 1.2em;">
+            <div class="row ibht py-3" style="padding-left: 1.2em;">
                 <div class="col-11" style="background:lightgray;border-radius: 15px;">
                     <div class="col reply-input-box">
                         <div class="replies-group d-flex justify-content-between">
@@ -61,9 +61,9 @@ $(document).on('click', '.commentButton', function (event) {
     toggleComments(this, itemId, event);
 });
 
-$(document).on('click', '.likeButton', function () {
+$(document).on('click', '.likeButton', function (event) {
     var itemId = this.id;
-    like(this, itemId);
+    like(event,this, itemId);
 });
 
 $(document).on('click', '.toggle-replies-btn', function () {
@@ -302,7 +302,8 @@ $(document).ready(function () {
     });
 });
 
-$(document).on('textarea', 'input', function () {
+$(document).on
+    ('textarea', 'input', function () {
     this.style.height = 'auto';
 
     this.style.height =

@@ -356,7 +356,16 @@ namespace HandBook.Web.Controllers.HomeControllerFolder
         {
             try
             {
-                var itemsQuery = _helper.GetSpecificExplorePageItemsByProvidedItemHelper(itemId);
+                var username = HttpContext.User?.Identity?.Name ?? "";
+                var user = await _userManager.FindByNameAsync(username);
+
+                var itemsQuery = _helper.GetSpecificExplorePageItemsByProvidedItemHelper(itemId, user);
+
+                if (itemsQuery.Count() > 0)
+                {
+                    TempData["UserLikedCards"] = itemsQuery.First().UserLikedCards;
+                    TempData["UserLikedComments"] = itemsQuery.First().UserLikedComments;
+                }
 
                 StringBuilder responseBuilder = new StringBuilder();
 

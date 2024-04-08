@@ -475,7 +475,6 @@ namespace HandBook.Web.Controllers.HomeControllerFolder
                     DisplayName = imageName,
                     PublicId = publicId,
                     Overwrite = false,
-                    // You can add more parameters as needed
                 };
 
                 var uploadResult = await _cloudinary.UploadAsync(uploadParams);
@@ -576,7 +575,7 @@ namespace HandBook.Web.Controllers.HomeControllerFolder
             return viewModel;
         }
 
-        public IQueryable<CardDTO> GetSpecificExplorePageItemsByProvidedItemHelper(Guid itemId)
+        public IQueryable<CardDTO> GetSpecificExplorePageItemsByProvidedItemHelper(Guid itemId,AppUser user)
         {
             var items = _postService.IQueryableGetAllAsync().Where(x => !String.IsNullOrEmpty(x.CreatorUserName));
             var comments = _commentService.IQueryableGetAllAsync();
@@ -591,10 +590,26 @@ namespace HandBook.Web.Controllers.HomeControllerFolder
                 Description = post.Description
             });
 
+            if (user != null)
+            {
+                var userLikedCards = _likeService.GetUserLikedPosts(user.Id);
+                var userLikedComments = _likeService.GetUserLikedComments(user.Id);
+
+                if (userLikedCards != null && userLikedCards.Any())
+                {
+                    var crds = userLikedCards.Select(x => x.PostId.ToString().ToLower()).ToList();
+                    posts.First().UserLikedCards = crds;
+                }
+
+                if (userLikedComments != null && userLikedComments.Any())
+                {
+                    string commentIdsString = string.Join(",", userLikedComments.Select(x => x.CommentId.ToString().ToLower()));
+                    posts.First().UserLikedComments = commentIdsString;
+                }
+            }
+
             return posts;
         }
-
-
 
         #endregion
 

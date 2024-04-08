@@ -13,11 +13,13 @@
                 if (!$(event.target).closest('.card').length) {
                     overlay.remove();
                     $(document).off('click');
+                    sessionStorage.removeItem("likedCards"); 
                 }
             });
         });
         return false;
     });
+
 
     $(document).ready(function () {
         var searchInput = $('#searchInput');

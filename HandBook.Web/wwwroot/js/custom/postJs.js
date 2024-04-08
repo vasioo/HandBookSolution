@@ -14,7 +14,7 @@
         });
     }
 
-    function like(button, Id) {
+    function like(event,button, Id) {
         var card = button.closest(".card");
         var cardId = card.dataset.id;
         var count = parseInt(button.dataset.count) || 0;
@@ -38,6 +38,8 @@
         }
 
         sessionStorage.setItem("likedCards", JSON.stringify(likedCards));
+        event.stopPropagation();
+
     }
 
     var offsetPost = 0;
