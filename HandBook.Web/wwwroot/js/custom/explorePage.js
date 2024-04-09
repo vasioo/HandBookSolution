@@ -3,44 +3,52 @@
         e.preventDefault();
         var itemId = $(this).data('explore-id');
 
-        $.get('/Home/GetSpecificExplorePageItems', { itemId: itemId }, function (response) {
+        function openOverlay(response) {
             var overlay = $('<div class="overlay"></div>');
             var container = $('<div class="container-explorer"></div>').append(response);
             overlay.append(container);
             $('body').append(overlay);
 
-            $(document).on('click', function (event) {
+            $(document).on('click.overlay', function (event) {
                 if (!$(event.target).closest('.card').length) {
-                    overlay.remove();
-                    $(document).off('click');
-                    sessionStorage.removeItem("likedCards"); 
+                    closeOverlay();
                 }
             });
+        }
+
+        function closeOverlay() {
+            $('.overlay').remove();
+            $(document).off('click.overlay');
+            sessionStorage.removeItem("likedCards");
+        }
+
+        $.get('/Home/GetSpecificExplorePageItems', { itemId: itemId }, function (response) {
+            openOverlay(response);
         });
+
         return false;
     });
 
 
-    $(document).ready(function () {
-        var searchInput = $('#searchInput');
-        var explorePage = $("#explore-page");
 
-        searchInput.on('input', function () {
-            var searchString = searchInput.val();
-            searchUsers(searchString);
-        });
+    var searchInput = $('#searchInput');
+    var explorePage = $("#explore-page");
 
-        searchInput.on("input", function () {
-            if (searchInput.val().trim() !== "") {
-                explorePage.css('display', 'none');
-                $('#clearSearch').css('display', 'block');
-                $('#hidden-icon-for-canceling').css('display', 'block');
-            } else {
-                $('#clearSearch').css('display', 'none');
-                $('#hidden-icon-for-canceling').css('display', 'none');
-                explorePage.css('display', 'block');
-            }
-        });
+    searchInput.on('input', function () {
+        var searchString = searchInput.val();
+        searchUsers(searchString);
+    });
+
+    searchInput.on("input", function () {
+        if (searchInput.val().trim() !== "") {
+            explorePage.css('display', 'none');
+            $('#clearSearch').css('display', 'block');
+            $('#hidden-icon-for-canceling').css('display', 'block');
+        } else {
+            $('#clearSearch').css('display', 'none');
+            $('#hidden-icon-for-canceling').css('display', 'none');
+            explorePage.css('display', 'block');
+        }
     });
 
     $(window).on('load', function () {

@@ -126,7 +126,7 @@
             <div class="row">
                 <div class="col-12 d-flex justify-content-around">
                     <div class="col-1 pt-2 text-center pb-3">
-                        <button class="likeButton" data-count="@item.AmountOfLikes" id="@item.Id">
+                        <a class="likeButton btn" data-count="@item.AmountOfLikes" id="@item.Id">
                             @if (userLikedCards != null)
                             {
                                 @if (userLikedCards.Contains(item.Id.ToString().ToLower()))
@@ -144,7 +144,7 @@
 
                                 <i class="fa-regular fa-heart fa-xl" style="color: #000;"></i>
                             }
-                        </button>
+                        </a>
                         <br>
                     </div>
                     <div class="col-1 pt-2 text-center pb-3">
